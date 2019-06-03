@@ -1,12 +1,4 @@
 <resources>
     <string name="app_name">SmartWlanConf</string>
-    <string name="title_activity_register_wlan">Wlan Credentials</string>
-    <string name="prompt_email">SSID</string>
-    <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Mit Wlan verbinden</string>
-    <string name="action_sign_in_short">Mit Wlan verbinden</string>
-    <string name="welcome">"Wlan verbunden"</string>
-    <string name="invalid_username">Ungültige SSID</string>
-    <string name="invalid_password">Ungültiges Passwort</string>
-    <string name="login_failed">"Nicht verbunden"</string>
+    <string name="wlanssid">Wlan SSID</string>
 </resources>

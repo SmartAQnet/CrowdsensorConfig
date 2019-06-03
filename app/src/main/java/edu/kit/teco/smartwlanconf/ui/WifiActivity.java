@@ -1,27 +1,26 @@
 package edu.kit.teco.smartwlanconf.ui;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
-import android.content.Context;
+import androidx.fragment.app.FragmentTransaction;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.util.Log;
+import android.widget.Toast;
 
 import com.thanosfisherman.wifiutils.WifiUtils;
 
-import java.util.List;
 
 import edu.kit.teco.smartwlanconf.R;
+import edu.kit.teco.smartwlanconf.ui.fragments.WifiConnectFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment;
 
-import static androidx.constraintlayout.widget.Constraints.TAG;
 
-public class WifiActivity extends AppCompatActivity implements WifiFragment.OnListFragmentInteractionListener{
+public class WifiActivity extends AppCompatActivity implements WifiFragment.OnListFragmentInteractionListener, WifiConnectFragment.OnWifiConnectInteractionListener{
+
+    private Fragment myFragment;
 
     private boolean enabled = false;
     @Override
@@ -49,13 +48,30 @@ public class WifiActivity extends AppCompatActivity implements WifiFragment.OnLi
     public void onAttachFragment(Fragment fragment) {
         if (fragment instanceof WifiFragment) {
             WifiFragment wifiFragment = (WifiFragment) fragment;
-            wifiFragment.setOnHeadlineSelectedListener(this);
+            wifiFragment.setOnWifiSelectedListener(this);
+            myFragment = fragment;
+        }
+        if (fragment instanceof WifiConnectFragment) {
+            WifiConnectFragment wificonnectFragment = (WifiConnectFragment) fragment;
+            wificonnectFragment.setOnButtonPressedListener(this);
+            myFragment = fragment;
         }
     }
 
 
     public void onListFragmentInteraction(ScanResult scanResult){
-
+        Fragment newfragment = WifiConnectFragment.newInstance(scanResult.SSID);
+        replaceFragment(newfragment);
     }
 
+    public void onWifiConnectButtonPressedInteraction(String ssid){
+        Toast.makeText(getApplicationContext(), "Bin hier", Toast.LENGTH_LONG);
+    }
+
+    public void replaceFragment(Fragment fragment) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.container, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
 }

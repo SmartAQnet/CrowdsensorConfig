@@ -10,6 +10,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,6 +24,7 @@ import com.thanosfisherman.wifiutils.WifiUtils;
 
 import edu.kit.teco.smartwlanconf.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static androidx.constraintlayout.widget.Constraints.TAG;
@@ -38,10 +40,11 @@ public class WifiFragment extends Fragment{
     private static final String ARG_COLUMN_COUNT = "Verfügbare Wlan";
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
-    private List<ScanResult> wifiList;
+    private List<ScanResult> wifiList = new ArrayList<>();
 
     private OnListFragmentInteractionListener callback;
     private BroadcastReceiver wifiReceiver;
+    private WifiItemRecyclerViewAdapter wifiAdapter;
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -57,7 +60,7 @@ public class WifiFragment extends Fragment{
         return fragment;
     }
 
-    public void setOnHeadlineSelectedListener(OnListFragmentInteractionListener callback) {
+    public void setOnWifiSelectedListener(OnListFragmentInteractionListener callback) {
         this.callback = callback;
     }
 
@@ -73,21 +76,7 @@ public class WifiFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.wifi_fragment_item_list, container, false);
-
-        // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-            }
-            WifiUtils.withContext(getActivity().getApplicationContext()).scanWifi(this::getScanResults).start();
-            //recyclerView.setAdapter(new WifiItemRecyclerViewAdapter(wifiList, mListener));
-        }
-        return view;
+        return setAdapter(inflater.inflate(R.layout.wifi_fragment_item_list, container, false));
     }
 
 
@@ -104,7 +93,7 @@ public class WifiFragment extends Fragment{
 
     @Override
     public void onDetach() {
-        if (wifiReceiver!=null){
+        if (wifiReceiver != null){
             getActivity().unregisterReceiver(wifiReceiver);
             wifiReceiver = null;
         }
@@ -125,6 +114,28 @@ public class WifiFragment extends Fragment{
     public interface OnListFragmentInteractionListener {
         void onListFragmentInteraction(ScanResult scanResult);
     }
+
+
+    private View setAdapter(View view){
+        // Set the adapter
+        if (view instanceof RecyclerView) {
+            Context context = view.getContext();
+            RecyclerView recyclerView = (RecyclerView) view;
+            if (mColumnCount <= 1) {
+                recyclerView.setLayoutManager(new LinearLayoutManager(context));
+            } else {
+                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
+            }
+            DividerItemDecoration dividerItemDecoration= new DividerItemDecoration(context,
+                    LinearLayoutManager.VERTICAL);
+            recyclerView.addItemDecoration(dividerItemDecoration);
+            WifiUtils.withContext(getActivity().getApplicationContext()).scanWifi(this::getScanResults).start();
+            wifiAdapter = new WifiItemRecyclerViewAdapter(wifiList, mListener);
+            recyclerView.setAdapter(wifiAdapter);
+        }
+        return view;
+    }
+
     private void getScanResults(@NonNull final List<ScanResult> results){
         if (results.isEmpty())
         {
@@ -132,6 +143,13 @@ public class WifiFragment extends Fragment{
             Log.i(TAG, "SCAN RESULTS IS EMPTY");
             return;
         }
-        wifiList = results;
+        wifiList.clear();
+        int netCount = results.size() - 1;
+        while (netCount >= 0){
+            wifiList.add(results.get(netCount));
+            wifiAdapter.notifyDataSetChanged();
+            --netCount;
+        }
     }
+
 }
