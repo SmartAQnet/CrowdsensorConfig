@@ -1,7 +1,6 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -11,16 +10,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import com.thanosfisherman.wifiutils.WifiUtils;
-
-import org.w3c.dom.Text;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
-import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
 
 
 /**
@@ -34,7 +27,6 @@ import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
 public class WifiConnectFragment extends Fragment {
     private static final String ARG_SSID = "SSID";
 
-    private View myView;
     private String mSSID;
     private OnWifiConnectInteractionListener callback;
     private OnWifiConnectInteractionListener mListener;
@@ -77,7 +69,6 @@ public class WifiConnectFragment extends Fragment {
         View wifi_connect_view = inflater.inflate(R.layout.wifi_fragment_connect, container, false);
         ((EditText) wifi_connect_view.findViewById(R.id.ssid)).setText(mSSID);
         setConnectButtonListener(wifi_connect_view);
-        myView = wifi_connect_view;
         return wifi_connect_view;
     }
 
@@ -105,15 +96,20 @@ public class WifiConnectFragment extends Fragment {
 
     private void setConnectButtonListener(View view){
         final Button connectButton = view.findViewById(R.id.btnConnect);
+        String pwd = ((EditText) view.findViewById(R.id.pwd)).getText().toString();
         connectButton.setOnClickListener((View v)-> {
-            if(SmartWlanConfApplication.getWifi(view.getContext().getApplicationContext()).connectWithWifi(v)){
+            if(((SmartWlanConfApplication) view.getContext().getApplicationContext()).getWifi().connectWithWifi(mSSID, pwd)){
                 if (mListener != null) {
+                    Toast.makeText(view.getContext().getApplicationContext()
+                            ,"Verbunden mit " + ((EditText) view.findViewById(R.id.ssid)).getText().toString()
+                            ,Toast.LENGTH_LONG).show();
                     mListener.onWifiConnectButtonPressedInteraction(mSSID);
                 } else {
                     //TODO: Fehlerbehandlung wenn kein Listener vorhanden
                 }
             } else {
-                //Todo: Fehlerbehandlung keine Wifi Verbindung
+                Toast.makeText(view.getContext().getApplicationContext(),"Falsches Passwort",Toast.LENGTH_LONG).show();
+                ((EditText) view.findViewById(R.id.pwd)).setText("");
             }
         });
     }

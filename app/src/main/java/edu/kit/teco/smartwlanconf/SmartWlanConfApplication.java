@@ -32,10 +32,10 @@ public class SmartWlanConfApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        mRxDnssd = createDnssd();
-        mRegistrationManager = new RegistrationManager();
-        mRegTypeManager = new RegTypeManager(this);
-        mWifi = WifiConnectionUtils.getInstance("");
+        //mRxDnssd = createDnssd();
+        //mRegistrationManager = new RegistrationManager();
+        //mRegTypeManager = new RegTypeManager(this);
+        mWifi = WifiConnectionUtils.getInstance(getApplicationContext());
     }
 
     public static Rx2Dnssd getRxDnssd(@NonNull Context context){
@@ -48,6 +48,10 @@ public class SmartWlanConfApplication extends Application {
 
     public static RegTypeManager getRegTypeManager(@NonNull Context context){
         return ((SmartWlanConfApplication) context.getApplicationContext()).mRegTypeManager;
+    }
+
+    public WifiConnectionUtils getWifi(){
+        return mWifi;
     }
 
     public static WifiConnectionUtils getWifi(@NonNull Context context){
