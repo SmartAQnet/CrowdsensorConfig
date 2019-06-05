@@ -1,14 +1,11 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -32,35 +29,35 @@ import static androidx.constraintlayout.widget.Constraints.TAG;
 /**
  * A fragment representing a list of Items.
  * <p/>
- * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
+ * Activities containing this fragment MUST implement the {@link OnWifiListFragmentInteractionListener}
  * interface.
  */
-public class WifiFragment extends Fragment{
+public class WifiListFragment extends Fragment{
 
     private static final String ARG_COLUMN_COUNT = "Verfügbare Wlan";
     private int mColumnCount = 1;
-    private OnListFragmentInteractionListener mListener;
+    private OnWifiListFragmentInteractionListener mListener;
     private List<ScanResult> wifiList = new ArrayList<>();
 
-    private OnListFragmentInteractionListener callback;
+    private OnWifiListFragmentInteractionListener callback;
     private BroadcastReceiver wifiReceiver;
-    private WifiItemRecyclerViewAdapter wifiAdapter;
+    private WifiListItemRecyclerViewAdapter wifiAdapter;
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public WifiFragment() {
+    public WifiListFragment() {
     }
 
-    public static WifiFragment newInstance(int columnCount) {
-        WifiFragment fragment = new WifiFragment();
+    public static WifiListFragment newInstance(int columnCount) {
+        WifiListFragment fragment = new WifiListFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
         return fragment;
     }
 
-    public void setOnWifiSelectedListener(OnListFragmentInteractionListener callback) {
+    public void setOnWifiSelectedListener(OnWifiListFragmentInteractionListener callback) {
         this.callback = callback;
     }
 
@@ -83,8 +80,8 @@ public class WifiFragment extends Fragment{
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
-            mListener = (OnListFragmentInteractionListener) context;
+        if (context instanceof OnWifiListFragmentInteractionListener) {
+            mListener = (OnWifiListFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
@@ -111,8 +108,8 @@ public class WifiFragment extends Fragment{
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(ScanResult scanResult);
+    public interface OnWifiListFragmentInteractionListener {
+        void onWifiListFragmentInteraction(ScanResult scanResult);
     }
 
 
@@ -130,7 +127,7 @@ public class WifiFragment extends Fragment{
                     LinearLayoutManager.VERTICAL);
             recyclerView.addItemDecoration(dividerItemDecoration);
             WifiUtils.withContext(getActivity().getApplicationContext()).scanWifi(this::getScanResults).start();
-            wifiAdapter = new WifiItemRecyclerViewAdapter(wifiList, mListener);
+            wifiAdapter = new WifiListItemRecyclerViewAdapter(wifiList, mListener);
             recyclerView.setAdapter(wifiAdapter);
         }
         return view;

@@ -18,12 +18,15 @@ import androidx.annotation.NonNull;
 import com.github.druk.rx2dnssd.Rx2Dnssd;
 import com.github.druk.rx2dnssd.Rx2DnssdEmbedded;
 
+import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
+
 public class SmartWlanConfApplication extends Application {
 
     private static final String TAG = "SmartWlanConfApplication";
     private Rx2Dnssd mRxDnssd;
     private RegistrationManager mRegistrationManager;
     private RegTypeManager mRegTypeManager;
+    private WifiConnectionUtils mWifi;
 
     @Override
     public void onCreate() {
@@ -32,6 +35,7 @@ public class SmartWlanConfApplication extends Application {
         mRxDnssd = createDnssd();
         mRegistrationManager = new RegistrationManager();
         mRegTypeManager = new RegTypeManager(this);
+        mWifi = WifiConnectionUtils.getInstance("");
     }
 
     public static Rx2Dnssd getRxDnssd(@NonNull Context context){
@@ -46,12 +50,15 @@ public class SmartWlanConfApplication extends Application {
         return ((SmartWlanConfApplication) context.getApplicationContext()).mRegTypeManager;
     }
 
+    public static WifiConnectionUtils getWifi(@NonNull Context context){
+        return ((SmartWlanConfApplication) context.getApplicationContext()).mWifi;
+    }
+
     private static final String DEVICE = "device";
     private static final String ARCH = "arch";
     private static final String DNSSD = "dnssd";
 
     private Rx2Dnssd createDnssd() {
-
         return new Rx2DnssdEmbedded(this);
     }
 }

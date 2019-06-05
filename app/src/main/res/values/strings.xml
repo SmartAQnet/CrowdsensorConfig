@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">SmartWlanConf</string>
     <string name="wlanssid">Wlan SSID</string>
+
+    <string name="street_adress">Strassenname</string>
+    <string name="house_number_adress">Hausnummer</string>
+    <string name="postal_code_adress">Postleitzahl</string>
+    <string name="city_adress">Ort</string>
+
+    <string name="btn_connect">Verbinden</string>
+    <string name="btn_get_adress">Suche Geokoordinaten</string>
+
 </resources>

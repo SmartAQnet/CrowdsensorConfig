@@ -10,56 +10,46 @@ import android.net.wifi.ScanResult;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import com.thanosfisherman.wifiutils.WifiUtils;
-
-
 import edu.kit.teco.smartwlanconf.R;
+import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.fragments.WifiConnectFragment;
-import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment;
+import edu.kit.teco.smartwlanconf.ui.fragments.WifiListFragment;
+import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
 
 
-public class WifiActivity extends AppCompatActivity implements WifiFragment.OnListFragmentInteractionListener, WifiConnectFragment.OnWifiConnectInteractionListener{
+public class WifiActivity extends AppCompatActivity implements WifiListFragment.OnWifiListFragmentInteractionListener, WifiConnectFragment.OnWifiConnectInteractionListener{
 
-    private Fragment myFragment;
-
-    private boolean enabled = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.wifi_activity);
         //Check Wifi
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 555);
-        WifiUtils.withContext(getApplicationContext()).enableWifi(this::checkResult);
-        if(!enabled){
-            //TODO: Throw Error
+
+        if(!(SmartWlanConfApplication.getWifi(this.getApplicationContext()).enableWifi(this.getApplicationContext()))) {
+            //TODO: Kein Wifi Fehler
         }
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, WifiFragment.newInstance(1))
+                    .replace(R.id.container, WifiListFragment.newInstance(1))
                     .commitNow();
         }
     }
 
-    private void checkResult(boolean isSuccess){
-        enabled = isSuccess;
-    }
-
     @Override
     public void onAttachFragment(Fragment fragment) {
-        if (fragment instanceof WifiFragment) {
-            WifiFragment wifiFragment = (WifiFragment) fragment;
-            wifiFragment.setOnWifiSelectedListener(this);
-            myFragment = fragment;
+        if (fragment instanceof WifiListFragment) {
+            WifiListFragment wifiListFragment = (WifiListFragment) fragment;
+            wifiListFragment.setOnWifiSelectedListener(this);
         }
         if (fragment instanceof WifiConnectFragment) {
             WifiConnectFragment wificonnectFragment = (WifiConnectFragment) fragment;
             wificonnectFragment.setOnButtonPressedListener(this);
-            myFragment = fragment;
         }
     }
 
 
-    public void onListFragmentInteraction(ScanResult scanResult){
+    public void onWifiListFragmentInteraction(ScanResult scanResult){
         Fragment newfragment = WifiConnectFragment.newInstance(scanResult.SSID);
         replaceFragment(newfragment);
     }

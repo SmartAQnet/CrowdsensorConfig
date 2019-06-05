@@ -19,6 +19,9 @@ import com.thanosfisherman.wifiutils.WifiUtils;
 import org.w3c.dom.Text;
 
 import edu.kit.teco.smartwlanconf.R;
+import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
+import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -35,7 +38,6 @@ public class WifiConnectFragment extends Fragment {
     private String mSSID;
     private OnWifiConnectInteractionListener callback;
     private OnWifiConnectInteractionListener mListener;
-    private Boolean connectedToWifi = false;
 
     public WifiConnectFragment() {
         // Required empty public constructor
@@ -79,12 +81,6 @@ public class WifiConnectFragment extends Fragment {
         return wifi_connect_view;
     }
 
-    public void onButtonPressed() {
-        if (mListener != null) {
-            mListener.onWifiConnectButtonPressedInteraction(mSSID);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -110,33 +106,15 @@ public class WifiConnectFragment extends Fragment {
     private void setConnectButtonListener(View view){
         final Button connectButton = view.findViewById(R.id.btnConnect);
         connectButton.setOnClickListener((View v)-> {
-                connectWithWifi(v);
-        });
-    }
-
-    private void connectWithWifi(View v){
-        View parentView = (View) v.getParent();
-        String mSSID = ((EditText) parentView.findViewById(R.id.ssid)).getText().toString();
-        String mPassword = ((EditText) parentView.findViewById(R.id.pwd)).getText().toString();
-        WifiUtils.withContext(getActivity().getApplicationContext())
-                .connectWith(mSSID, mPassword)
-                .onConnectionResult(this::checkConnection)
-                .start();
-    }
-
-    private void checkConnection(boolean isSuccess){
-        if(isSuccess){
-            Toast.makeText(getView().getContext()
-                    ,"Verbunden mit " + ((EditText) getView().findViewById(R.id.ssid)).getText().toString()
-                    ,Toast.LENGTH_LONG).show();
-            if (mListener != null) {
-                mListener.onWifiConnectButtonPressedInteraction(mSSID);
+            if(SmartWlanConfApplication.getWifi(view.getContext().getApplicationContext()).connectWithWifi(v)){
+                if (mListener != null) {
+                    mListener.onWifiConnectButtonPressedInteraction(mSSID);
+                } else {
+                    //TODO: Fehlerbehandlung wenn kein Listener vorhanden
+                }
             } else {
-                //TODO: Fehlerbehandlung wenn kein Listener vorhanden
+                //Todo: Fehlerbehandlung keine Wifi Verbindung
             }
-        } else {
-            Toast.makeText(getView().getContext(),"Falsches Passwort",Toast.LENGTH_LONG).show();
-            ((EditText) getView().findViewById(R.id.pwd)).setText("");
-        }
+        });
     }
 }

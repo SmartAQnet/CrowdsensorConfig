@@ -9,21 +9,21 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import edu.kit.teco.smartwlanconf.R;
-import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment.OnListFragmentInteractionListener;;
+import edu.kit.teco.smartwlanconf.ui.fragments.WifiListFragment.OnWifiListFragmentInteractionListener;;
 
 import java.util.List;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link android.net.wifi.ScanResult} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
+ * specified {@link OnWifiListFragmentInteractionListener}.
  * TODO: Replace the implementation with code for your data type.
  */
-public class WifiItemRecyclerViewAdapter extends RecyclerView.Adapter<WifiItemRecyclerViewAdapter.ViewHolder> {
+public class WifiListItemRecyclerViewAdapter extends RecyclerView.Adapter<WifiListItemRecyclerViewAdapter.ViewHolder> {
 
     private final List<ScanResult> mValues;
-    private final OnListFragmentInteractionListener mListener;
+    private final OnWifiListFragmentInteractionListener mListener;
 
-    public WifiItemRecyclerViewAdapter(List<ScanResult> items, OnListFragmentInteractionListener listener) {
+    public WifiListItemRecyclerViewAdapter(List<ScanResult> items, OnWifiListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -46,7 +46,7 @@ public class WifiItemRecyclerViewAdapter extends RecyclerView.Adapter<WifiItemRe
                 if (null != mListener) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
+                    mListener.onWifiListFragmentInteraction(holder.mItem);
                 }
             }
         });
