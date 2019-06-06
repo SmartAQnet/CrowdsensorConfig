@@ -1,6 +1,8 @@
 package edu.kit.teco.smartwlanconf.ui.utils;
 
+import android.content.Context;
 import android.os.AsyncTask;
+import android.app.ProgressDialog;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -12,6 +14,21 @@ public class HttpGetRequest extends AsyncTask<String, Void, String> {
     public static final String REQUEST_METHOD = "GET";
     public static final int READ_TIMEOUT = 15000;
     public static final int CONNECTION_TIMEOUT = 15000;
+    private ProgressDialog dialog;
+    private Context mContext;
+
+    public HttpGetRequest(Context context){
+        mContext = context;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        dialog = new ProgressDialog(mContext);
+        dialog.setMessage("Please wait....");
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.show();
+    }
 
     @Override
     protected String doInBackground(String[] params){
@@ -51,7 +68,11 @@ public class HttpGetRequest extends AsyncTask<String, Void, String> {
     }
 
     @Override
-    protected void onPostExecute(String result){
-        super.onPostExecute(result);
+    protected void onPostExecute(String s) {
+
+        if(dialog.isShowing())
+            dialog.dismiss();
+
     }
+
 }

@@ -1,12 +1,9 @@
 package edu.kit.teco.smartwlanconf.ui.utils;
 
-import android.app.Application;
 import android.content.Context;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.Toast;
 import com.thanosfisherman.wifiutils.WifiUtils;
-import edu.kit.teco.smartwlanconf.R;
+
 
 public class WifiConnectionUtils {
 
@@ -50,11 +47,6 @@ public class WifiConnectionUtils {
 
     private void checkConnection(boolean isSuccess){
         connected = isSuccess;
-        if(isSuccess){
-
-        } else {
-
-        }
     }
 
 }

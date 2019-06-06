@@ -1,7 +1,7 @@
 package edu.kit.teco.smartwlanconf;
 /**
- * 1. Nach WLan credentials fragen -> Als Login Seite
- * 2. Verbinden -> Fehler Toast und zurück
+ * 1. Wlan Liste anzeigen
+ * 2. Verbinden mit gewähltem Wlan-> Fehler Toast und zurück
  * 3. Eingabeformular Adresse -> Nicht gefunden Toast
  * 4. Anzeigen in Webview und Punkt auswählen
  * 5. Wlan des Sensors suchen und verbinden -> Fehler Toast

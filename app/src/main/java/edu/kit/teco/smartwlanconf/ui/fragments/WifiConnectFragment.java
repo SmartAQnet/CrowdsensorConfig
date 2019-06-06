@@ -89,21 +89,16 @@ public class WifiConnectFragment extends Fragment {
         mListener = null;
     }
 
-    public interface OnWifiConnectInteractionListener {
-        // TODO: Update argument type and name
-        void onWifiConnectButtonPressedInteraction(String ssid);
-    }
-
     private void setConnectButtonListener(View view){
         final Button connectButton = view.findViewById(R.id.btnConnect);
-        String pwd = ((EditText) view.findViewById(R.id.pwd)).getText().toString();
         connectButton.setOnClickListener((View v)-> {
+            String pwd = ((EditText) view.findViewById(R.id.pwd)).getText().toString();
             if(((SmartWlanConfApplication) view.getContext().getApplicationContext()).getWifi().connectWithWifi(mSSID, pwd)){
                 if (mListener != null) {
                     Toast.makeText(view.getContext().getApplicationContext()
                             ,"Verbunden mit " + ((EditText) view.findViewById(R.id.ssid)).getText().toString()
                             ,Toast.LENGTH_LONG).show();
-                    mListener.onWifiConnectButtonPressedInteraction(mSSID);
+                    mListener.onWifiConnectButtonPressedInteraction();
                 } else {
                     //TODO: Fehlerbehandlung wenn kein Listener vorhanden
                 }
@@ -112,5 +107,9 @@ public class WifiConnectFragment extends Fragment {
                 ((EditText) view.findViewById(R.id.pwd)).setText("");
             }
         });
+    }
+
+    public interface OnWifiConnectInteractionListener {
+        void onWifiConnectButtonPressedInteraction();
     }
 }

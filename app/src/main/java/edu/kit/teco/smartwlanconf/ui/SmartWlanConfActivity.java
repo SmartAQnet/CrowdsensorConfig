@@ -13,6 +13,9 @@ import android.net.wifi.ScanResult;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -24,6 +27,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
+import edu.kit.teco.smartwlanconf.ui.fragments.GetAdressFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.WifiConnectFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.WifiListFragment;
 import edu.kit.teco.smartwlanconf.ui.utils.HttpGetRequest;
@@ -35,16 +39,15 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.wifi_activity);
-        //Check Wifi
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 555);
 
+        //Although permission is set in Manifest, it is necessary to request permission here TODO: Check if this could be set in SmartWlanConfApplication
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 555);
+        //Check Wifi
         if(!((SmartWlanConfApplication) this.getApplicationContext()).getWifi().enableWifi(this)) {
             //TODO: Kein Wifi Fehler
         }
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, WifiListFragment.newInstance(1))
-                    .commitNow();
+            setInitialFragment();
         }
     }
 
@@ -60,27 +63,28 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
         }
     }
 
+    //The different fragments are managed here
 
+    //This shows the fragment with the list of available Wifis
+    private void setInitialFragment(){
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.container, WifiListFragment.newInstance(1))
+                .commitNow();
+    }
+
+    //This shows the fragment that connects to a selected Wifi
     public void onWifiListFragmentInteraction(ScanResult scanResult){
         Fragment newfragment = WifiConnectFragment.newInstance(scanResult.SSID);
         replaceFragment(newfragment);
     }
 
-    public void onWifiConnectButtonPressedInteraction(String ssid){
-        HttpGetRequest request = new HttpGetRequest();
-        String result;
-        try {
-            result = request.execute("https://nominatim.openstreetmap.org/search.php?q=11+Bachstr+76287+Rheinstetten&format=geojson").get().toString();
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(new InputSource(new StringReader(result)));
-            Element rootElement = document.getDocumentElement();
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        Toast.makeText(getApplicationContext(), "Bin hier", Toast.LENGTH_LONG).show();
+    //This shows the fragment that gets the geolocation of an address
+    public void onWifiConnectButtonPressedInteraction(){
+        Fragment newfragment = new GetAdressFragment();
+        replaceFragment(newfragment);
     }
 
+    //Actual fragment is replaced
     public void replaceFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.container, fragment);
