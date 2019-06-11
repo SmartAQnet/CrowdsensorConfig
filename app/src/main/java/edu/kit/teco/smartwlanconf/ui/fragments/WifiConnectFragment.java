@@ -24,12 +24,13 @@ import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
  * Use the {@link WifiConnectFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class WifiConnectFragment extends Fragment {
+public class WifiConnectFragment extends WifiFragment {
     private static final String ARG_SSID = "SSID";
 
     private String mSSID;
     private OnWifiConnectInteractionListener callback;
     private OnWifiConnectInteractionListener mListener;
+    private View view_for_callback;
 
     public WifiConnectFragment() {
         // Required empty public constructor
@@ -66,10 +67,10 @@ public class WifiConnectFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View wifi_connect_view = inflater.inflate(R.layout.wifi_fragment_connect, container, false);
-        ((EditText) wifi_connect_view.findViewById(R.id.ssid)).setText(mSSID);
-        setConnectButtonListener(wifi_connect_view);
-        return wifi_connect_view;
+        View this_view = inflater.inflate(R.layout.wifi_fragment_connect, container, false);
+        ((EditText) this_view.findViewById(R.id.ssid)).setText(mSSID);
+        setConnectButtonListener(this_view);
+        return this_view;
     }
 
     @Override
@@ -90,23 +91,29 @@ public class WifiConnectFragment extends Fragment {
     }
 
     private void setConnectButtonListener(View view){
+        view_for_callback = view;
         final Button connectButton = view.findViewById(R.id.btnConnect);
         connectButton.setOnClickListener((View v)-> {
             String pwd = ((EditText) view.findViewById(R.id.pwd)).getText().toString();
-            if(((SmartWlanConfApplication) view.getContext().getApplicationContext()).getWifi().connectWithWifi(mSSID, pwd)){
-                if (mListener != null) {
-                    Toast.makeText(view.getContext().getApplicationContext()
-                            ,"Verbunden mit " + ((EditText) view.findViewById(R.id.ssid)).getText().toString()
-                            ,Toast.LENGTH_LONG).show();
-                    mListener.onWifiConnectButtonPressedInteraction();
-                } else {
-                    //TODO: Fehlerbehandlung wenn kein Listener vorhanden
-                }
-            } else {
-                Toast.makeText(view.getContext().getApplicationContext(),"Falsches Passwort",Toast.LENGTH_LONG).show();
-                ((EditText) view.findViewById(R.id.pwd)).setText("");
-            }
+            //TODO: Change Back to pwd
+            ((SmartWlanConfApplication) view.getContext().getApplicationContext()).getWifi().connectWithWifi(mSSID, "13027537", this);
         });
+    }
+
+    @Override
+    public void onWaitForWifiConnection (){
+
+    }
+
+    public void callSmartWlanConfActivity(){
+        if (mListener != null) {
+            Toast.makeText(view_for_callback.getContext().getApplicationContext()
+                    ,"Verbunden mit " + ((EditText) view_for_callback.findViewById(R.id.ssid)).getText().toString()
+                    ,Toast.LENGTH_LONG).show();
+            mListener.onWifiConnectButtonPressedInteraction();
+        } else {
+            //TODO: Fehlerbehandlung wenn kein Listener vorhanden
+        }
     }
 
     public interface OnWifiConnectInteractionListener {

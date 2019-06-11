@@ -1,7 +1,6 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -9,6 +8,9 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,8 +41,9 @@ public class GetAdressFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.get_adress_fragment, container, false);
+        View this_view = inflater.inflate(R.layout.get_adress_fragment, container, false);
+        setGetAddressButtonListener(this_view);
+        return this_view;
     }
 
     @Override
@@ -60,18 +63,33 @@ public class GetAdressFragment extends Fragment {
         mListener = null;
     }
 
-    private void getLocation(){
+    private void setGetAddressButtonListener(View view){
+        final Button connectButton = view.findViewById(R.id.btn_get_address);
+        connectButton.setOnClickListener((View v)-> {
+            String address = ((EditText) view.findViewById(R.id.house_number)).getText().toString()+ " ";
+            address += ((EditText) view.findViewById(R.id.street)).getText().toString() + ", ";
+            address += ((EditText) view.findViewById(R.id.postal_code)).getText().toString() + " ";
+            address += ((EditText) view.findViewById(R.id.city)).getText().toString();
+            getLocation(address);
+        });
+    }
+
+
+    private void getLocation(String address){
         HttpGetRequest request = new HttpGetRequest(getContext().getApplicationContext());
-        String result;
+        String get_geocode;
+        String geolocation = "";
         try {
-            result = request.execute("https://nominatim.openstreetmap.org/search.php?q=11+Bachstr+76287+Rheinstetten&format=json&polygon=1&addressdetails=1").get();
+            String url = String.format("https://nominatim.openstreetmap.org/search?q=%s&format=json&polygon=1&addressdetails=1",address);
+            get_geocode = request.execute(url).get();
             try {
-                JSONArray array = new JSONArray(result);
+                JSONArray array = new JSONArray(get_geocode);
                 if (array.length() > 0) {
                     JSONObject jsonObject = (JSONObject) array.get(0);
 
                     String mLon = (String) jsonObject.get("lon");
                     String mLat = (String) jsonObject.get("lat");
+                    geolocation = String.format("Longitude: %s, Latitude: %s", mLon, mLat);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -79,6 +97,7 @@ public class GetAdressFragment extends Fragment {
         } catch (Exception e){
             e.printStackTrace();
         }
+        Toast.makeText(getContext().getApplicationContext(), geolocation, Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -93,6 +112,6 @@ public class GetAdressFragment extends Fragment {
      */
     public interface OnGetLocationPressedListener {
         // TODO: Update argument type and name
-        void onGetLocationPressedInteraction(Uri uri);
+        void onGetLocationPressedInteraction();
     }
 }

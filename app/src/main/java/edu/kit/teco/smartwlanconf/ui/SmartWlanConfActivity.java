@@ -33,7 +33,9 @@ import edu.kit.teco.smartwlanconf.ui.fragments.WifiListFragment;
 import edu.kit.teco.smartwlanconf.ui.utils.HttpGetRequest;
 
 
-public class SmartWlanConfActivity extends AppCompatActivity implements WifiListFragment.OnWifiListFragmentInteractionListener, WifiConnectFragment.OnWifiConnectInteractionListener{
+public class SmartWlanConfActivity extends AppCompatActivity implements WifiListFragment.OnWifiListFragmentInteractionListener,
+                                                                        WifiConnectFragment.OnWifiConnectInteractionListener,
+                                                                        GetAdressFragment.OnGetLocationPressedListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +84,10 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
     public void onWifiConnectButtonPressedInteraction(){
         Fragment newfragment = new GetAdressFragment();
         replaceFragment(newfragment);
+    }
+
+    public void onGetLocationPressedInteraction(){
+
     }
 
     //Actual fragment is replaced

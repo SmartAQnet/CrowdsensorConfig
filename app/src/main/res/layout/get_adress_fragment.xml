@@ -15,30 +15,30 @@
             android:layout_height="70dp"
             android:ems="10"
             android:inputType="text"
-            android:text="@string/street_adress" />
+            android:hint="@string/street_adress" />
         <EditText
             android:id="@+id/house_number"
             android:layout_width="match_parent"
             android:layout_height="70dp"
             android:ems="10"
             android:inputType="text"
-            android:text="@string/house_number_adress" />
+            android:hint="@string/house_number_adress" />
         <EditText
             android:id="@+id/postal_code"
             android:layout_width="match_parent"
             android:layout_height="70dp"
             android:ems="10"
             android:inputType="text"
-            android:text="@string/postal_code_adress" />
+            android:hint="@string/postal_code_adress" />
         <EditText
             android:id="@+id/city"
             android:layout_width="match_parent"
             android:layout_height="70dp"
             android:ems="10"
             android:inputType="text"
-            android:text="@string/city_adress" />
+            android:hint="@string/city_adress" />
         <Button
-            android:id="@+id/btnConnect"
+            android:id="@+id/btn_get_address"
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

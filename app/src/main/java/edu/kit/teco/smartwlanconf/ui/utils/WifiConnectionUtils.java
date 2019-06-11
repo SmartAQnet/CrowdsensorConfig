@@ -2,8 +2,13 @@ package edu.kit.teco.smartwlanconf.ui.utils;
 
 import android.content.Context;
 import android.view.View;
+
+import androidx.fragment.app.Fragment;
+
 import com.thanosfisherman.wifiutils.WifiUtils;
 
+import edu.kit.teco.smartwlanconf.ui.fragments.WifiConnectFragment;
+import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment;
 
 public class WifiConnectionUtils {
 
@@ -15,6 +20,7 @@ public class WifiConnectionUtils {
     private String mSSID;
     private String mpwd;
     private Context context;
+    private WifiFragment calling_fragment;
 
     public static WifiConnectionUtils getInstance(Context context) {
         ourInstance.initWifi(context);
@@ -37,16 +43,19 @@ public class WifiConnectionUtils {
         enabled = isSuccess;
     }
 
-    public boolean connectWithWifi(String ssid, String pwd){
+    public void connectWithWifi(String ssid, String pwd, WifiFragment fragment){
+        calling_fragment = fragment;
         WifiUtils.withContext(context.getApplicationContext())
                 .connectWith(ssid, pwd)
                 .onConnectionResult(this::checkConnection)
                 .start();
-        return connected;
     }
 
     private void checkConnection(boolean isSuccess){
         connected = isSuccess;
+        calling_fragment.onWaitForWifiConnection();
+        //TODO: Wrong way for Callback, find better one
+        ((WifiConnectFragment) calling_fragment).callSmartWlanConfActivity();
     }
 
 }
