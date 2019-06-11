@@ -20,7 +20,7 @@ public class WifiConnectionUtils {
     private String mSSID;
     private String mpwd;
     private Context context;
-    private WifiFragment calling_fragment;
+    private Fragment calling_fragment;
 
     public static WifiConnectionUtils getInstance(Context context) {
         ourInstance.initWifi(context);
@@ -43,7 +43,7 @@ public class WifiConnectionUtils {
         enabled = isSuccess;
     }
 
-    public void connectWithWifi(String ssid, String pwd, WifiFragment fragment){
+    public void connectWithWifi(String ssid, String pwd, Fragment fragment){
         calling_fragment = fragment;
         WifiUtils.withContext(context.getApplicationContext())
                 .connectWith(ssid, pwd)
@@ -53,7 +53,7 @@ public class WifiConnectionUtils {
 
     private void checkConnection(boolean isSuccess){
         connected = isSuccess;
-        calling_fragment.onWaitForWifiConnection();
+        ((WifiFragment) calling_fragment).onWaitForWifiConnection();
         //TODO: Wrong way for Callback, find better one
         ((WifiConnectFragment) calling_fragment).callSmartWlanConfActivity();
     }
