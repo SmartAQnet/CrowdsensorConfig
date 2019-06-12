@@ -32,7 +32,6 @@ public class HttpGetRequest extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String[] params){
 
-        String result = "";
         String inputLine;
 
         try {
@@ -43,27 +42,30 @@ public class HttpGetRequest extends AsyncTask<String, Void, String> {
             connection.setConnectTimeout(CONNECTION_TIMEOUT);
 
             connection.connect();
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
 
-            //Create a new InputStreamReader
-            InputStreamReader streamReader = new
-                    InputStreamReader(connection.getInputStream());
-            //Create a new buffered reader and String Builder
-            BufferedReader reader = new BufferedReader(streamReader);
-            StringBuilder stringBuilder = new StringBuilder();
-            //Check if the line we are reading is not null
-            while((inputLine = reader.readLine()) != null){
-                stringBuilder.append(inputLine);
+                //Create a new InputStreamReader
+                InputStreamReader streamReader = new
+                        InputStreamReader(connection.getInputStream());
+                //Create a new buffered reader and String Builder
+                BufferedReader reader = new BufferedReader(streamReader);
+                StringBuilder stringBuilder = new StringBuilder();
+                //Check if the line we are reading is not null
+                while ((inputLine = reader.readLine()) != null) {
+                    stringBuilder.append(inputLine);
+                }
+                //Close our InputStream and Buffered reader
+                reader.close();
+                streamReader.close();
+                //Set our result equal to our stringBuilder
+                return stringBuilder.toString();
+            } else {
+                return null;
             }
-            //Close our InputStream and Buffered reader
-            reader.close();
-            streamReader.close();
-            //Set our result equal to our stringBuilder
-            result = stringBuilder.toString();
-
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
-        return result;
     }
 
     @Override

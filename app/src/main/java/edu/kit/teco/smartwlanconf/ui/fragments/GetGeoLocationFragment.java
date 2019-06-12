@@ -12,25 +12,22 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import edu.kit.teco.smartwlanconf.R;
+import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 import edu.kit.teco.smartwlanconf.ui.utils.HttpGetRequest;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link GetAdressFragment.OnGetLocationPressedListener} interface
+ * {@link GetGeoLocationFragment.OnGetLocationPressedListener} interface
  * to handle interaction events.
  */
-public class GetAdressFragment extends Fragment {
+public class GetGeoLocationFragment extends Fragment {
 
     private OnGetLocationPressedListener mListener;
     private OnGetLocationPressedListener callback;
 
-    public GetAdressFragment() {
+    public GetGeoLocationFragment() {
         // Required empty public constructor
     }
 
@@ -70,34 +67,38 @@ public class GetAdressFragment extends Fragment {
             address += ((EditText) view.findViewById(R.id.street)).getText().toString() + ", ";
             address += ((EditText) view.findViewById(R.id.postal_code)).getText().toString() + " ";
             address += ((EditText) view.findViewById(R.id.city)).getText().toString();
-            getLocation(address);
+            onGetLocationSuccess(address);
         });
     }
 
+    private void onGetLocationSuccess(String address){
+        if(getLocation(address)){
+            //Show geolocation
+            if (mListener != null) {
+                mListener.onGetLocationPressedInteraction();
+            } else {
+                //TODO: Fehlerbehandlung wenn kein Listener vorhanden
+            }
+        } else {
+            Toast.makeText(getContext().getApplicationContext(), "Adresse nicht gefunden", Toast.LENGTH_LONG).show();
+        }
+    }
 
-    private void getLocation(String address){
+    private boolean getLocation(String address){
         HttpGetRequest request = new HttpGetRequest(getContext().getApplicationContext());
-        String get_geocode;
-        String geolocation = "";
+        String geolocation;
         try {
             String url = String.format("https://nominatim.openstreetmap.org/search?q=%s&format=json&polygon=1&addressdetails=1",address);
-            get_geocode = request.execute(url).get();
-            try {
-                JSONArray array = new JSONArray(get_geocode);
-                if (array.length() > 0) {
-                    JSONObject jsonObject = (JSONObject) array.get(0);
-
-                    String mLon = (String) jsonObject.get("lon");
-                    String mLat = (String) jsonObject.get("lat");
-                    geolocation = String.format("Longitude: %s, Latitude: %s", mLon, mLat);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+            geolocation = request.execute(url).get();
+            if (geolocation != null) {
+                //Set Geolocation in Parent
+                ((SmartWlanConfActivity) getActivity()).setmGeoLocation(geolocation);
+                return true;
             }
         } catch (Exception e){
             e.printStackTrace();
         }
-        Toast.makeText(getContext().getApplicationContext(), geolocation, Toast.LENGTH_LONG).show();
+        return false;
     }
 
     /**

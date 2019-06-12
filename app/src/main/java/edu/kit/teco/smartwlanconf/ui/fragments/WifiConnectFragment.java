@@ -1,5 +1,6 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
+import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 
 
 /**
@@ -27,10 +29,9 @@ import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 public class WifiConnectFragment extends WifiFragment {
     private static final String ARG_SSID = "SSID";
 
-    private String mSSID;
     private OnWifiConnectInteractionListener callback;
     private OnWifiConnectInteractionListener mListener;
-    private View view_for_callback;
+    private View my_view;
 
     public WifiConnectFragment() {
         // Required empty public constructor
@@ -59,7 +60,8 @@ public class WifiConnectFragment extends WifiFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mSSID = getArguments().getString(ARG_SSID);
+            //Set SSID for Wlan in parent
+            ((SmartWlanConfActivity) getActivity()).setmWlanSSID(getArguments().getString(ARG_SSID));
         }
     }
 
@@ -68,7 +70,7 @@ public class WifiConnectFragment extends WifiFragment {
                              Bundle savedInstanceState) {
 
         View this_view = inflater.inflate(R.layout.wifi_fragment_connect, container, false);
-        ((EditText) this_view.findViewById(R.id.ssid)).setText(mSSID);
+        ((EditText) this_view.findViewById(R.id.ssid)).setText(((SmartWlanConfActivity) getActivity()).getmWlanSSID());
         setConnectButtonListener(this_view);
         return this_view;
     }
@@ -91,24 +93,28 @@ public class WifiConnectFragment extends WifiFragment {
     }
 
     private void setConnectButtonListener(View view){
-        view_for_callback = view;
+        my_view = view;
+
         final Button connectButton = view.findViewById(R.id.btnConnect);
         connectButton.setOnClickListener((View v)-> {
             String pwd = ((EditText) view.findViewById(R.id.pwd)).getText().toString();
+            //Set pwd for Wlan in parent
+            ((SmartWlanConfActivity) getActivity()).setmWlanPwd(pwd);
+            Context context = view.getContext().getApplicationContext();
             //TODO: Change Back to pwd
-            ((SmartWlanConfApplication) view.getContext().getApplicationContext()).getWifi().connectWithWifi(mSSID, "13027537", this);
+            ((SmartWlanConfApplication) context).
+                    getWifi().
+                    connectWithWifi_withContext(context, ((SmartWlanConfActivity) getActivity()).getmWlanSSID(), pwd, this);
         });
     }
 
     @Override
     public void onWaitForWifiConnection (){
-
-    }
-
-    public void callSmartWlanConfActivity(){
+        //Set Wlan credentials in Parent
+        String pwd = ((SmartWlanConfActivity) getActivity()).getmWlanPwd();
         if (mListener != null) {
-            Toast.makeText(view_for_callback.getContext().getApplicationContext()
-                    ,"Verbunden mit " + ((EditText) view_for_callback.findViewById(R.id.ssid)).getText().toString()
+            Toast.makeText(my_view.getContext().getApplicationContext()
+                    ,"Verbunden mit " + ((EditText) my_view.findViewById(R.id.ssid)).getText().toString()
                     ,Toast.LENGTH_LONG).show();
             mListener.onWifiConnectButtonPressedInteraction();
         } else {
@@ -116,6 +122,16 @@ public class WifiConnectFragment extends WifiFragment {
         }
     }
 
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
     public interface OnWifiConnectInteractionListener {
         void onWifiConnectButtonPressedInteraction();
     }

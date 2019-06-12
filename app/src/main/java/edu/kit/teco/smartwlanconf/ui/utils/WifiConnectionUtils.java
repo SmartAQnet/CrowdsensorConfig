@@ -1,38 +1,22 @@
 package edu.kit.teco.smartwlanconf.ui.utils;
 
 import android.content.Context;
-import android.view.View;
-
-import androidx.fragment.app.Fragment;
 
 import com.thanosfisherman.wifiutils.WifiUtils;
-
-import edu.kit.teco.smartwlanconf.ui.fragments.WifiConnectFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment;
 
 public class WifiConnectionUtils {
 
     private static final WifiConnectionUtils ourInstance = new WifiConnectionUtils();
 
-    private View thisView;
-    private boolean connected = false;
     private boolean enabled = false;
-    private String mSSID;
-    private String mpwd;
-    private Context context;
-    private Fragment calling_fragment;
+    private WifiFragment calling_fragment;
 
-    public static WifiConnectionUtils getInstance(Context context) {
-        ourInstance.initWifi(context);
+    public static WifiConnectionUtils getInstance() {
         return ourInstance;
     }
 
-    private WifiConnectionUtils() {
-    }
-
-    private void initWifi(Context context){
-        this.context = context;
-    }
+    private WifiConnectionUtils() { }
 
     public boolean enableWifi(Context context){
         WifiUtils.withContext(context).enableWifi(this::checkResult);
@@ -43,19 +27,20 @@ public class WifiConnectionUtils {
         enabled = isSuccess;
     }
 
-    public void connectWithWifi(String ssid, String pwd, Fragment fragment){
+    public void connectWithWifi_withContext(Context context, String ssid, String pwd, WifiFragment fragment){
         calling_fragment = fragment;
-        WifiUtils.withContext(context.getApplicationContext())
+        WifiUtils.withContext(context)
                 .connectWith(ssid, pwd)
                 .onConnectionResult(this::checkConnection)
                 .start();
     }
 
     private void checkConnection(boolean isSuccess){
-        connected = isSuccess;
-        ((WifiFragment) calling_fragment).onWaitForWifiConnection();
-        //TODO: Wrong way for Callback, find better one
-        ((WifiConnectFragment) calling_fragment).callSmartWlanConfActivity();
+        if(isSuccess){
+            calling_fragment.onWaitForWifiConnection();
+        } else {
+            //Todo: Verbindung nicht hergestellt Fehler
+        }
     }
 
 }
