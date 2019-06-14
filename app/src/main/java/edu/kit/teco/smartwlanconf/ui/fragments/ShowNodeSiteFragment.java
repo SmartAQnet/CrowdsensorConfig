@@ -5,14 +5,11 @@ import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
-import androidx.core.content.res.TypedArrayUtils;
 import androidx.fragment.app.Fragment;
 
-import android.text.format.Formatter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,13 +17,15 @@ import org.json.JSONObject;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
+import java.util.Enumeration;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 import edu.kit.teco.smartwlanconf.ui.utils.HttpPostRequest;
+
 
 import static android.content.Context.WIFI_SERVICE;
 
@@ -44,9 +43,11 @@ public class ShowNodeSiteFragment extends WifiFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        setNodedata();
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.show_node_site_fragment, container, false);
     }
+
     @Override
     public void onWaitForWifiConnection(){
         //Connection established now set Data on Node
@@ -61,18 +62,35 @@ public class ShowNodeSiteFragment extends WifiFragment {
 
         final String locationUrl = "http://" + ip;
         final String locationData = getLocationData();
-        //Send location to Node
-        if(HttpPostRequest.sendData(locationUrl, locationData)){
-            //Send Wlan credentials to Node
-            final String wlanUrl = locationUrl + "/_ac/connect";
-            final String wlanData = getWlanData();
-            if(HttpPostRequest.sendData(wlanUrl, wlanData)){
-                //Todo: 2 Minuten warten mit Spinner
-            } else {
-                //Todo: Wlan Credentials nicht gesendet
+
+        try{
+            Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+
+            for (NetworkInterface nif: Collections.list(nets)) {
+                //do something with the network interface
+                String name = nif.getName();
             }
-        } else {
-            //Todo: Geolocation nicht gesendet
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        //Send location to Node
+        HttpPostRequest request = new HttpPostRequest(getContext().getApplicationContext());
+        try {
+            if (request.execute(locationUrl, locationData).get()) {
+                //Send Wlan credentials to Node
+                final String wlanUrl = locationUrl + "/_ac/connect";
+                final String wlanData = getWlanData();
+                if (request.execute(locationUrl, locationData).get()) {
+                    //Todo: 2 Minuten warten mit Spinner
+                } else {
+                    //Todo: Wlan Credentials nicht gesendet
+                }
+            } else {
+                //Todo: Geolocation nicht gesendet
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
         }
     }
 

@@ -68,6 +68,7 @@ public class GetGeoLocationFragment extends Fragment {
             address += ((EditText) view.findViewById(R.id.postal_code)).getText().toString() + " ";
             address += ((EditText) view.findViewById(R.id.city)).getText().toString();
             onGetLocationSuccess(address);
+
         });
     }
 
@@ -92,7 +93,7 @@ public class GetGeoLocationFragment extends Fragment {
             geolocation = request.execute(url).get();
             if (geolocation != null) {
                 //Set Geolocation in Parent
-                ((SmartWlanConfActivity) getActivity()).setmGeoLocation(geolocation);
+                ((SmartWlanConfActivity) getActivity()).setmGeoLocation(geolocation, address);
                 return true;
             }
         } catch (Exception e){

@@ -1,41 +1,79 @@
 package edu.kit.teco.smartwlanconf.ui.utils;
 
+import android.content.Context;
+
+import android.os.AsyncTask;
+
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 
-public class HttpPostRequest {
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
-    public static boolean sendData(String urlData, String postData){
-        HttpURLConnection connection = null;
-        boolean ret = false;
+public class HttpPostRequest extends AsyncTask<String, Void, Boolean> {
+
+    public static final String REQUEST_METHOD = "POST";
+    public static final int READ_TIMEOUT = 15000;
+    public static final int CONNECTION_TIMEOUT = 15000;
+    private Context mContext;
+    private String mData;
+    private String mURL;
+
+    public HttpPostRequest(){ }
+
+    public HttpPostRequest(Context context){
+        mContext = context;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        //TODO: Make Progressdialog
+        //dialog = new ProgressDialog(mContext);
+        //dialog.setMessage("Please wait....");
+        //dialog.setCanceledOnTouchOutside(false);
+        //dialog.show();
+    }
+
+    @Override
+    protected Boolean doInBackground(String... params){
         try {
-            URL url = new URL(urlData);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            connection.setRequestProperty("charset", "utf-8");
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Key","Value");
-            connection.setDoOutput(true);
-
-            OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
-            wr.write(postData);
-            wr.flush();
-            wr.close();
-            if(connection.getResponseCode() == HttpURLConnection.HTTP_OK) ret = true;
-        } catch(MalformedURLException e){
+            sendData();
+            return true;
+        } catch (Exception e){
             e.printStackTrace();
-        } catch (IOException e){
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if(connection != null){
-                connection.disconnect();
-            }
+            return false;
         }
-        return ret;
+    }
+
+
+    @Override
+    protected void onPostExecute(Boolean s) {
+        //TODO: Stop showing Processdialog
+        //if(dialog.isShowing())
+        //    dialog.dismiss();
+
+    }
+
+    private void sendData() throws Exception{
+        final OkHttpClient client = new OkHttpClient().newBuilder()
+                .followRedirects(false)
+                .build();
+        RequestBody requestBody = new FormBody.Builder()
+                .add("latitude", "10")
+                .build();
+        Request request = new Request.Builder()
+                .url("http://192.168.12.73:80/config")
+                //.get()
+                .post(requestBody)
+                .build();
+        Response response = client.newCall(request).execute();
+        String responseString = response.body().string();
+        response.body().close();
+        if(!response.isSuccessful()){
+            throw new IOException("Unexpected code" + responseString);
+        }
     }
 }

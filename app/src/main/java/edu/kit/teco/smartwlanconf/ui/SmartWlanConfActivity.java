@@ -28,6 +28,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
     private String mWlanSSID = "";
     private String mWlanPwd = "";
     private String mGeoLocation = "";
+    private String mAddress ="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +51,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
 
     @Override
     public void onAttachFragment(Fragment fragment) {
+        //TODO: Achtung alle eintragen
         if (fragment instanceof WifiListFragment) {
             WifiListFragment wifiListFragment = (WifiListFragment) fragment;
             wifiListFragment.setOnWifiSelectedListener(this);
@@ -65,7 +67,9 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
     //This shows the fragment with the list of available Wifis
     private void setInitialFragment(){
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, WifiListFragment.newInstance(1))
+                .replace(R.id.container, new ShowNodeSiteFragment())
+                //TODO: Zurück ändern
+                //.replace(R.id.container, WifiListFragment.newInstance(1))
                 .commitNow();
     }
 
@@ -118,8 +122,9 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
     public void setmWlanPwd(String pwd){
         mWlanPwd = pwd;
     }
-    public void setmGeoLocation(String geolocation){
+    public void setmGeoLocation(String geolocation, String address){
         mGeoLocation = geolocation;
+        mAddress = address;
     }
 
     public String getmNodeSSID(){
