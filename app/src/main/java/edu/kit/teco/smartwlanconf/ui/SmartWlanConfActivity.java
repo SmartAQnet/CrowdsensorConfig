@@ -13,7 +13,7 @@ import android.os.Bundle;
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.fragments.GetGeoLocationFragment;
-import edu.kit.teco.smartwlanconf.ui.fragments.ShowNodeSiteFragment;
+import edu.kit.teco.smartwlanconf.ui.fragments.PreparingNodeFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.WifiConnectFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.WifiListFragment;
@@ -67,7 +67,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
     //This shows the fragment with the list of available Wifis
     private void setInitialFragment(){
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, new ShowNodeSiteFragment())
+                .replace(R.id.container, new PreparingNodeFragment())
                 //TODO: Zurück ändern
                 //.replace(R.id.container, WifiListFragment.newInstance(1))
                 .commitNow();
@@ -87,7 +87,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
 
     public void onGetLocationPressedInteraction(){
         WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(this);
-        WifiFragment newFragment = new ShowNodeSiteFragment();
+        WifiFragment newFragment = new PreparingNodeFragment();
         replaceFragment(newFragment);
         wifi.connectWithWifi_withContext(this, mNodeSSID, mNodePwd, newFragment);
         //Todo: WLan in WifiConnectFragment, (in Parent?) speichern --> Done

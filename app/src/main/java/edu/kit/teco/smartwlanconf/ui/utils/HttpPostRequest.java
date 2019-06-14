@@ -40,7 +40,7 @@ public class HttpPostRequest extends AsyncTask<String, Void, Boolean> {
     @Override
     protected Boolean doInBackground(String... params){
         try {
-            sendData();
+            sendData(params[0],params[1],params[2]);
             return true;
         } catch (Exception e){
             e.printStackTrace();
@@ -57,15 +57,15 @@ public class HttpPostRequest extends AsyncTask<String, Void, Boolean> {
 
     }
 
-    private void sendData() throws Exception{
+    private void sendData(String url, String ssid, String pwd) throws Exception{
         final OkHttpClient client = new OkHttpClient().newBuilder()
                 .followRedirects(false)
                 .build();
         RequestBody requestBody = new FormBody.Builder()
-                .add("latitude", "10")
+                .add(ssid, pwd)
                 .build();
         Request request = new Request.Builder()
-                .url("http://192.168.12.73:80/config")
+                .url(url)
                 //.get()
                 .post(requestBody)
                 .build();
