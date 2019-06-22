@@ -66,11 +66,11 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
 
     //This shows the fragment with the list of available Wifis
     private void setInitialFragment(){
-        getSupportFragmentManager().beginTransaction()
+        /*getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, new ShowNodeSiteFragment())
                 //TODO: Zurück ändern
                 //.replace(R.id.container, WifiListFragment.newInstance(1))
-                .commitNow();
+                .commitNow();*/
     }
 
     //This shows the fragment that connects to a selected Wifi
@@ -143,5 +143,8 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
         return mGeoLocation;
     }
 
+    private void testBonjour(){
+
+    }
 
 }
