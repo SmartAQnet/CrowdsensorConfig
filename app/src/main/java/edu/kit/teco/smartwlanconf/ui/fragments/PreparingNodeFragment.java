@@ -32,10 +32,10 @@ import static android.content.Context.WIFI_SERVICE;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ShowNodeSiteFragment extends WifiFragment {
+public class PreparingNodeFragment extends WifiFragment {
 
 
-    public ShowNodeSiteFragment() {
+    public PreparingNodeFragment() {
         // Required empty public constructor
     }
 
@@ -43,7 +43,9 @@ public class ShowNodeSiteFragment extends WifiFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        setNodedata();
+        //TODO: Remove from here
+        //setNodedata();
+        getNodeWlanIP();
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.show_node_site_fragment, container, false);
     }
@@ -51,59 +53,45 @@ public class ShowNodeSiteFragment extends WifiFragment {
     @Override
     public void onWaitForWifiConnection(){
         //Connection established now set Data on Node
-        setNodedata();
+        //TODO: activate here
+        //setNodedata();
+        getNodeWlanIP();
     }
 
     //First: send geolacation to node
     //Second: send Wlan credentials to node
     //Third: wait 2 Minutes for Node to establish connection
     private void setNodedata(){
+        //TODO: getData() anlegen Daten in Hashmap speichern
+        //IP of Gateway is HTTP-Server of Node
         final String ip = lookupGateway();
 
-        final String locationUrl = "http://" + ip;
-        final String locationData = getLocationData();
-
-        try{
-            Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-
-            for (NetworkInterface nif: Collections.list(nets)) {
-                //do something with the network interface
-                String name = nif.getName();
-            }
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-
-        //Send location to Node
+        //Todo: first send location
+        //Todo: second send wlan credentials -> connect node with wlan
         HttpPostRequest request = new HttpPostRequest(getContext().getApplicationContext());
         try {
-            if (request.execute(locationUrl, locationData).get()) {
-                //Send Wlan credentials to Node
-                final String wlanUrl = locationUrl + "/_ac/connect";
-                final String wlanData = getWlanData();
-                if (request.execute(locationUrl, locationData).get()) {
-                    //Todo: 2 Minuten warten mit Spinner
-                } else {
-                    //Todo: Wlan Credentials nicht gesendet
-                }
-            } else {
-                //Todo: Geolocation nicht gesendet
-            }
+            final String wlanUrl = "http://172.20.251.95/_ac/connect";
+            final String ssid = "TP-Link_84FC";
+            final String pass = "13027537";
+            request.execute(wlanUrl, ssid, pass).get();
         } catch(Exception e) {
             e.printStackTrace();
         }
     }
 
+    //Gets Gateway IP, which is the url for the Node
     private String lookupGateway(){
         final WifiManager manager = (WifiManager) getActivity().getApplicationContext().getSystemService(WIFI_SERVICE);
         final DhcpInfo dhcp = manager.getDhcpInfo();
         byte[] ipAdress = BigInteger.valueOf(dhcp.gateway).toByteArray();
+        //IpAdress has to be reversed
         for(int i=0; i<ipAdress.length/2; i++){
             Byte temp = ipAdress[i];
             ipAdress[i] = ipAdress[ipAdress.length -i -1];
             ipAdress[ipAdress.length -i -1] = temp;
         }
         try {
+            //ipAdress to String
             final String hostAdress = (InetAddress.getByAddress(ipAdress)).getHostAddress();
             return hostAdress;
         } catch (UnknownHostException e){
@@ -112,6 +100,7 @@ public class ShowNodeSiteFragment extends WifiFragment {
         return null;
     }
 
+    //Read Longitude and Latitude from Json and prepare for HTTP Post
     private String getLocationData(){
         final String location = ((SmartWlanConfActivity) getActivity()).getmGeoLocation();
         try {
@@ -128,9 +117,14 @@ public class ShowNodeSiteFragment extends WifiFragment {
         return null;
     }
 
+    //Read SSID and Password and prepare for HTTP Post
     private String getWlanData(){
         final String ssid = ((SmartWlanConfActivity) getActivity()).getmWlanSSID();
         final String pwd = ((SmartWlanConfActivity) getActivity()).getmWlanPwd();
         return "SSID=" + ssid + "&Passphrase=" + pwd;
+    }
+
+    public void getNodeWlanIP(){
+
     }
 }
