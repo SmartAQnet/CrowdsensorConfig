@@ -1,6 +1,5 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
@@ -33,7 +32,7 @@ import static androidx.constraintlayout.widget.Constraints.TAG;
  * Activities containing this fragment MUST implement the {@link OnWifiListFragmentInteractionListener}
  * interface.
  */
-public class WifiListFragment extends Fragment{
+public class ListOfWifisFragment extends Fragment{
 
     private static final String ARG_COLUMN_COUNT = "Verfügbare Wlan";
     private int mColumnCount = 1;
@@ -46,12 +45,12 @@ public class WifiListFragment extends Fragment{
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public WifiListFragment() {
+    public ListOfWifisFragment() {
 
     }
 
-    public static WifiListFragment newInstance(int columnCount) {
-        WifiListFragment fragment = new WifiListFragment();
+    public static ListOfWifisFragment newInstance(int columnCount) {
+        ListOfWifisFragment fragment = new ListOfWifisFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);

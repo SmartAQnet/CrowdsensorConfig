@@ -20,18 +20,18 @@ import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link WifiCheckCredentialsFragment.OnWifiConnectInteractionListener} interface
+ * {@link OnCheckUserWifiCredentialsSuccessListener} interface
  * to handle interaction events.
- * Use the {@link WifiCheckCredentialsFragment#newInstance} factory method to
+ * Use the {@link CheckUserWifiCredentialsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class WifiCheckCredentialsFragment extends WifiFragment {
+public class CheckUserWifiCredentialsFragment extends AbstractWaitForWifiConnectionFragment {
 
     private static final String ARG_SSID = "SSID";
-    private OnWifiConnectInteractionListener mListener;
+    private OnCheckUserWifiCredentialsSuccessListener mListener;
     private View my_view;
 
-    public WifiCheckCredentialsFragment() {
+    public CheckUserWifiCredentialsFragment() {
         // Required empty public constructor
     }
 
@@ -40,10 +40,10 @@ public class WifiCheckCredentialsFragment extends WifiFragment {
      * this fragment using the provided parameters.
      *
      * @param ssid SSID.
-     * @return A new instance of fragment WifiCheckCredentialsFragment.
+     * @return A new instance of fragment CheckUserWifiCredentialsFragment.
      */
-    public static WifiCheckCredentialsFragment newInstance(String ssid) {
-        WifiCheckCredentialsFragment fragment = new WifiCheckCredentialsFragment();
+    public static CheckUserWifiCredentialsFragment newInstance(String ssid) {
+        CheckUserWifiCredentialsFragment fragment = new CheckUserWifiCredentialsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_SSID, ssid);
         fragment.setArguments(args);
@@ -63,7 +63,7 @@ public class WifiCheckCredentialsFragment extends WifiFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View this_view = inflater.inflate(R.layout.wifi_fragment_connect, container, false);
+        View this_view = inflater.inflate(R.layout.wifi_check_credentials_fragment, container, false);
         ((EditText) this_view.findViewById(R.id.ssid)).setText(((SmartWlanConfActivity) getActivity()).getmWlanSSID());
         setConnectButtonListener(this_view);
         return this_view;
@@ -72,8 +72,8 @@ public class WifiCheckCredentialsFragment extends WifiFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnWifiConnectInteractionListener) {
-            mListener = (OnWifiConnectInteractionListener) context;
+        if (context instanceof OnCheckUserWifiCredentialsSuccessListener) {
+            mListener = (OnCheckUserWifiCredentialsSuccessListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -92,24 +92,27 @@ public class WifiCheckCredentialsFragment extends WifiFragment {
         final Button connectButton = view.findViewById(R.id.btnConnect);
         connectButton.setOnClickListener((View v)-> {
             String pwd = ((EditText) view.findViewById(R.id.pwd)).getText().toString();
-            //Set pwd for Wlan in parent
+            //Set  Wlan Passwod in Parent Activity
             ((SmartWlanConfActivity) getActivity()).setmWlanPwd(pwd);
             Context context = view.getContext().getApplicationContext();
-            //TODO: Change Back to pwd
             ((SmartWlanConfApplication) context).
                     getWifi().
                     connectWithWifi_withContext(context, ((SmartWlanConfActivity) getActivity()).getmWlanSSID(), pwd, this);
         });
     }
 
-    public void onWaitForWifiConnection (){
-        if (mListener != null) {
-            Toast.makeText(my_view.getContext().getApplicationContext()
-                    ,"Verbunden mit " + ((EditText) my_view.findViewById(R.id.ssid)).getText().toString()
-                    ,Toast.LENGTH_LONG).show();
-            mListener.onWifiConnectButtonPressedInteraction();
+    public void onWaitForWifiConnection (Boolean success){
+        if(success){
+            if (mListener != null) {
+                Toast.makeText(my_view.getContext().getApplicationContext()
+                        ,"Verbunden mit " + ((EditText) my_view.findViewById(R.id.ssid)).getText().toString()
+                        ,Toast.LENGTH_LONG).show();
+                mListener.onCheckUserWifiCredentialsSuccess();
+            } else {
+                //TODO: Fehlerbehandlung wenn kein Listener vorhanden
+            }
         } else {
-            //TODO: Fehlerbehandlung wenn kein Listener vorhanden
+            //Todo: Wrong Password -> Snackbar try again or error textmessage for input field
         }
     }
 
@@ -123,7 +126,7 @@ public class WifiCheckCredentialsFragment extends WifiFragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnWifiConnectInteractionListener {
-        void onWifiConnectButtonPressedInteraction();
+    public interface OnCheckUserWifiCredentialsSuccessListener {
+        void onCheckUserWifiCredentialsSuccess();
     }
 }

@@ -28,7 +28,7 @@ import io.reactivex.schedulers.Schedulers;
  * {@link //ShowNodeWebsiteFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
  */
-public class ShowNodeWebsiteFragment extends WifiFragment {
+public class ShowNodeWebsiteFragment extends Fragment {
 
     //private OnFragmentInteractionListener mListener;
     private WebView webview;
@@ -54,6 +54,7 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        startDiscovery();
     }
 
     @Override
@@ -61,9 +62,6 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View layout = inflater.inflate(R.layout.show_node_website_fragment, container, false);
-        webview = layout.findViewById(R.id.webView);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
-        continueAfterDiscovery();
         return layout;
     }
 
@@ -88,12 +86,6 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
     public void onDetach() {
         super.onDetach();
         //mListener = null;
-    }
-
-    // Node is now connected to user wifi
-    // Start looking for node bonjour servide
-    public void onWaitForWifiConnection(){
-        startDiscovery();
     }
 
     private void startDiscovery() {

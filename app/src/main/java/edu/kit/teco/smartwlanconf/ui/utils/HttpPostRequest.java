@@ -30,18 +30,12 @@ public class HttpPostRequest extends AsyncTask<String, Void, Boolean> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        //TODO: Make Progressdialog
-        //dialog = new ProgressDialog(mContext);
-        //dialog.setMessage("Please wait....");
-        //dialog.setCanceledOnTouchOutside(false);
-        //dialog.show();
     }
 
     @Override
     protected Boolean doInBackground(String... params){
         try {
-            sendData(params[0],params[1],params[2]);
-            return true;
+            return sendData(params[0],params[1],params[2]);
         } catch (Exception e){
             e.printStackTrace();
             return false;
@@ -51,13 +45,9 @@ public class HttpPostRequest extends AsyncTask<String, Void, Boolean> {
 
     @Override
     protected void onPostExecute(Boolean s) {
-        //TODO: Stop showing Processdialog
-        //if(dialog.isShowing())
-        //    dialog.dismiss();
-
     }
 
-    private void sendData(String url, String ssid, String pwd) throws Exception{
+    private Boolean sendData(String url, String ssid, String pwd) throws Exception{
         final OkHttpClient client = new OkHttpClient().newBuilder()
                 .followRedirects(false)
                 .build();
@@ -72,8 +62,10 @@ public class HttpPostRequest extends AsyncTask<String, Void, Boolean> {
         Response response = client.newCall(request).execute();
         String responseString = response.body().string();
         response.body().close();
-        if(!response.isSuccessful()){
+        if(response.isSuccessful()){
             throw new IOException("Unexpected code" + responseString);
+
         }
+        return response.isSuccessful();
     }
 }

@@ -3,35 +3,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragments.WifiCheckCredentialsFragment">
+    tools:context=".ui.fragments.CheckNodeWifiFragment">
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <EditText
-            android:id="@+id/ssid"
+            android:id="@+id/node_id"
             android:layout_width="match_parent"
             android:layout_height="70dp"
             android:ems="10"
             android:inputType="text"
-            android:text="@string/wlanssid" />
-
-        <EditText
-            android:id="@+id/pwd"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:hint="Passwort"
-            android:ems="10"
-            android:inputType="textPassword" />
-
+            android:hint="@string/node_id" />
         <Button
-            android:id="@+id/btnConnect"
+            android:id="@+id/btn_check_node"
             style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/btn_connect" />
-
+            android:text="@string/btn_check_node" />
     </LinearLayout>
 
 </FrameLayout>

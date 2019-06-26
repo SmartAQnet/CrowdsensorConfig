@@ -1,16 +1,10 @@
 <resources>
     <string name="app_name">SmartWlanConf</string>
-    <string name="wlanssid">Wlan SSID</string>
+    <string name="wlanssid">Wifi SSID</string>
 
-    <string name="street_adress">Strassenname</string>
-    <string name="house_number_adress">Hausnummer</string>
-    <string name="postal_code_adress">Postleitzahl</string>
-    <string name="city_adress">Ort</string>
+    <string name="node_id">Node ID</string>
+    <string name="btn_check_wifi">Prüfe Wlanverbindung</string>
 
-    <string name="btn_connect">Verbinden</string>
-    <string name="btn_get_adress">Suche Geokoordinaten</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="btn_check_node">Prüfe Sensorverbindung</string>
 
 </resources>

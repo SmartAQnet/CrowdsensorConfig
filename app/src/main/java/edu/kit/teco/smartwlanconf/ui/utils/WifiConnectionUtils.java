@@ -3,14 +3,14 @@ package edu.kit.teco.smartwlanconf.ui.utils;
 import android.content.Context;
 
 import com.thanosfisherman.wifiutils.WifiUtils;
-import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment;
+import edu.kit.teco.smartwlanconf.ui.fragments.AbstractWaitForWifiConnectionFragment;
 
 public class WifiConnectionUtils {
 
     private static final WifiConnectionUtils ourInstance = new WifiConnectionUtils();
 
     private boolean enabled = false;
-    private WifiFragment calling_fragment;
+    private AbstractWaitForWifiConnectionFragment calling_fragment;
 
     public static WifiConnectionUtils getInstance() {
         return ourInstance;
@@ -27,7 +27,7 @@ public class WifiConnectionUtils {
         enabled = isSuccess;
     }
 
-    public void connectWithWifi_withContext(Context context, String ssid, String pwd, WifiFragment fragment){
+    public void connectWithWifi_withContext(Context context, String ssid, String pwd, AbstractWaitForWifiConnectionFragment fragment){
         calling_fragment = fragment;
         WifiUtils.withContext(context)
                 .connectWith(ssid, pwd)
@@ -36,11 +36,7 @@ public class WifiConnectionUtils {
     }
 
     private void checkConnection(boolean isSuccess){
-        if(isSuccess){
-            calling_fragment.onWaitForWifiConnection();
-        } else {
-            //Todo: Verbindung nicht hergestellt Fehler
-        }
+        calling_fragment.onWaitForWifiConnection(isSuccess);
     }
 
 }

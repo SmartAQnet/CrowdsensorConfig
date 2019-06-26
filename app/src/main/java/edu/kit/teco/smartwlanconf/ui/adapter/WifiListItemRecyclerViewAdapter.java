@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import edu.kit.teco.smartwlanconf.R;
-import edu.kit.teco.smartwlanconf.ui.fragments.WifiListFragment.OnWifiListFragmentInteractionListener;;
+import edu.kit.teco.smartwlanconf.ui.fragments.ListOfWifisFragment.OnWifiListFragmentInteractionListener;;
 
 import java.util.List;
 
