@@ -1,6 +1,5 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -21,19 +20,18 @@ import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link WifiConnectFragment.OnWifiConnectInteractionListener} interface
+ * {@link WifiCheckCredentialsFragment.OnWifiConnectInteractionListener} interface
  * to handle interaction events.
- * Use the {@link WifiConnectFragment#newInstance} factory method to
+ * Use the {@link WifiCheckCredentialsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class WifiConnectFragment extends WifiFragment {
-    private static final String ARG_SSID = "SSID";
+public class WifiCheckCredentialsFragment extends WifiFragment {
 
-    private OnWifiConnectInteractionListener callback;
+    private static final String ARG_SSID = "SSID";
     private OnWifiConnectInteractionListener mListener;
     private View my_view;
 
-    public WifiConnectFragment() {
+    public WifiCheckCredentialsFragment() {
         // Required empty public constructor
     }
 
@@ -42,18 +40,14 @@ public class WifiConnectFragment extends WifiFragment {
      * this fragment using the provided parameters.
      *
      * @param ssid SSID.
-     * @return A new instance of fragment WifiConnectFragment.
+     * @return A new instance of fragment WifiCheckCredentialsFragment.
      */
-    public static WifiConnectFragment newInstance(String ssid) {
-        WifiConnectFragment fragment = new WifiConnectFragment();
+    public static WifiCheckCredentialsFragment newInstance(String ssid) {
+        WifiCheckCredentialsFragment fragment = new WifiCheckCredentialsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_SSID, ssid);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    public void setOnButtonPressedListener(OnWifiConnectInteractionListener callback) {
-        this.callback = callback;
     }
 
     @Override
@@ -108,10 +102,7 @@ public class WifiConnectFragment extends WifiFragment {
         });
     }
 
-    @Override
     public void onWaitForWifiConnection (){
-        //Set Wlan credentials in Parent
-        String pwd = ((SmartWlanConfActivity) getActivity()).getmWlanPwd();
         if (mListener != null) {
             Toast.makeText(my_view.getContext().getApplicationContext()
                     ,"Verbunden mit " + ((EditText) my_view.findViewById(R.id.ssid)).getText().toString()

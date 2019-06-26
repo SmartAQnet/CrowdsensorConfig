@@ -1,15 +1,16 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
 
+import android.content.Context;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.util.Log;
+
+import com.github.druk.rx2dnssd.Rx2Dnssd;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,14 +18,15 @@ import org.json.JSONObject;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.UnknownHostException;
-import java.util.Collections;
-import java.util.Enumeration;
 
-import edu.kit.teco.smartwlanconf.R;
+import java.net.UnknownHostException;
+
+import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 import edu.kit.teco.smartwlanconf.ui.utils.HttpPostRequest;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 
 import static android.content.Context.WIFI_SERVICE;
@@ -34,30 +36,40 @@ import static android.content.Context.WIFI_SERVICE;
  */
 public class PreparingNodeFragment extends WifiFragment {
 
+    private OnConnectToUserWifiListener mListener;
 
     public PreparingNodeFragment() {
         // Required empty public constructor
     }
 
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        //TODO: Remove from here
-        //setNodedata();
-        getNodeWlanIP();
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.show_node_site_fragment, container, false);
+    public void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+        setNodedata();
+        //Data on Node are set and node is restarted to connect with wifi
+        //Now app has to connect to wifi
+        mListener.onConnectToUserWifiSuccess();
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnConnectToUserWifiListener) {
+            mListener = (OnConnectToUserWifiListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+
     public void onWaitForWifiConnection(){
-        //Connection established now set Data on Node
+        //Connection to local node wifi established now set Wlan and Geolocation Data on Node
         //TODO: activate here
         //setNodedata();
-        getNodeWlanIP();
     }
 
+    //Smartphone is now connected with wifi of node
     //First: send geolacation to node
     //Second: send Wlan credentials to node
     //Third: wait 2 Minutes for Node to establish connection
@@ -66,14 +78,25 @@ public class PreparingNodeFragment extends WifiFragment {
         //IP of Gateway is HTTP-Server of Node
         final String ip = lookupGateway();
 
-        //Todo: first send location
-        //Todo: second send wlan credentials -> connect node with wlan
         HttpPostRequest request = new HttpPostRequest(getContext().getApplicationContext());
+        //Todo: first send location
+        request.execute();
         try {
+            //Todo: replace with variables
+            final String wlanUrl = "http://172.20.251.95/config";
+            request.execute(wlanUrl,getLocationData()).get();
+            //TODO: Wait 30 seconds for node restart
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        //Todo: second send wlan credentials -> connect node with wlan
+        try {
+            //Todo: use getWlanData()
             final String wlanUrl = "http://172.20.251.95/_ac/connect";
             final String ssid = "TP-Link_84FC";
             final String pass = "13027537";
             request.execute(wlanUrl, ssid, pass).get();
+            //TODO: Wait 30 seconds for restart
         } catch(Exception e) {
             e.printStackTrace();
         }
@@ -124,7 +147,18 @@ public class PreparingNodeFragment extends WifiFragment {
         return "SSID=" + ssid + "&Passphrase=" + pwd;
     }
 
-    public void getNodeWlanIP(){
-
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnConnectToUserWifiListener {
+        // TODO: Update argument type and name
+        void onConnectToUserWifiSuccess();
     }
 }

@@ -32,7 +32,7 @@ public class SmartWlanConfApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        //mRxDnssd = createDnssd();
+        mRxDnssd = createDnssd();
         //mRegistrationManager = new RegistrationManager();
         //mRegTypeManager = new RegTypeManager(this);
         mWifi = WifiConnectionUtils.getInstance();

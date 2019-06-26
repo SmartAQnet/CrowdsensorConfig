@@ -19,20 +19,15 @@ import edu.kit.teco.smartwlanconf.ui.utils.HttpGetRequest;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link GetGeoLocationFragment.OnGetLocationPressedListener} interface
+ * {@link OnGetLocationSuccessListener} interface
  * to handle interaction events.
  */
 public class GetGeoLocationFragment extends Fragment {
 
-    private OnGetLocationPressedListener mListener;
-    private OnGetLocationPressedListener callback;
+    private OnGetLocationSuccessListener mListener;
 
     public GetGeoLocationFragment() {
         // Required empty public constructor
-    }
-
-    public void setOnGetLocationPressedListener(OnGetLocationPressedListener callback) {
-        this.callback = callback;
     }
 
     @Override
@@ -46,8 +41,8 @@ public class GetGeoLocationFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnGetLocationPressedListener) {
-            mListener = (OnGetLocationPressedListener) context;
+        if (context instanceof OnGetLocationSuccessListener) {
+            mListener = (OnGetLocationSuccessListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -61,22 +56,22 @@ public class GetGeoLocationFragment extends Fragment {
     }
 
     private void setGetAddressButtonListener(View view){
-        final Button connectButton = view.findViewById(R.id.btn_get_address);
-        connectButton.setOnClickListener((View v)-> {
+        final Button findAddressButton = view.findViewById(R.id.btn_get_address);
+        findAddressButton.setOnClickListener((View v)-> {
             String address = ((EditText) view.findViewById(R.id.house_number)).getText().toString()+ " ";
             address += ((EditText) view.findViewById(R.id.street)).getText().toString() + ", ";
             address += ((EditText) view.findViewById(R.id.postal_code)).getText().toString() + " ";
             address += ((EditText) view.findViewById(R.id.city)).getText().toString();
-            onGetLocationSuccess(address);
+            onGetLocation(address);
 
         });
     }
 
-    private void onGetLocationSuccess(String address){
+    private void onGetLocation(String address){
         if(getLocation(address)){
             //Show geolocation
             if (mListener != null) {
-                mListener.onGetLocationPressedInteraction();
+                mListener.onGetLocationSuccess();
             } else {
                 //TODO: Fehlerbehandlung wenn kein Listener vorhanden
             }
@@ -112,8 +107,8 @@ public class GetGeoLocationFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnGetLocationPressedListener {
+    public interface OnGetLocationSuccessListener {
         // TODO: Update argument type and name
-        void onGetLocationPressedInteraction();
+        void onGetLocationSuccess();
     }
 }

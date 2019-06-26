@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import com.thanosfisherman.wifiutils.WifiUtils;
 
 import edu.kit.teco.smartwlanconf.R;
+import edu.kit.teco.smartwlanconf.ui.adapter.WifiListItemRecyclerViewAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,14 +40,14 @@ public class WifiListFragment extends Fragment{
     private OnWifiListFragmentInteractionListener mListener;
     private List<ScanResult> wifiList = new ArrayList<>();
 
-    private OnWifiListFragmentInteractionListener callback;
-    private BroadcastReceiver wifiReceiver;
     private WifiListItemRecyclerViewAdapter wifiAdapter;
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
     public WifiListFragment() {
+
     }
 
     public static WifiListFragment newInstance(int columnCount) {
@@ -55,10 +56,6 @@ public class WifiListFragment extends Fragment{
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    public void setOnWifiSelectedListener(OnWifiListFragmentInteractionListener callback) {
-        this.callback = callback;
     }
 
     @Override
@@ -90,10 +87,6 @@ public class WifiListFragment extends Fragment{
 
     @Override
     public void onDetach() {
-        if (wifiReceiver != null){
-            getActivity().unregisterReceiver(wifiReceiver);
-            wifiReceiver = null;
-        }
         super.onDetach();
         mListener = null;
     }
@@ -122,7 +115,7 @@ public class WifiListFragment extends Fragment{
         if (results.isEmpty())
         {
             //Todo: Throw Error
-            Log.i(TAG, "SCAN RESULTS IS EMPTY");
+            Log.i(TAG, "No Wifi found");
             return;
         }
         wifiList.clear();

@@ -14,21 +14,32 @@ import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.fragments.GetGeoLocationFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.PreparingNodeFragment;
-import edu.kit.teco.smartwlanconf.ui.fragments.WifiConnectFragment;
+import edu.kit.teco.smartwlanconf.ui.fragments.ShowNodeWebsiteFragment;
+import edu.kit.teco.smartwlanconf.ui.fragments.WifiCheckCredentialsFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.WifiListFragment;
 import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
 
+
 //MainActivity that implements the listeners of its fragments
 public class SmartWlanConfActivity extends AppCompatActivity implements WifiListFragment.OnWifiListFragmentInteractionListener,
-                                                                        WifiConnectFragment.OnWifiConnectInteractionListener,
-                                                                        GetGeoLocationFragment.OnGetLocationPressedListener{
+                                                                        WifiCheckCredentialsFragment.OnWifiConnectInteractionListener,
+                                                                        GetGeoLocationFragment.OnGetLocationSuccessListener,
+                                                                        PreparingNodeFragment.OnConnectToUserWifiListener{
+
+
+
+    //Data to connect with wifi network of node
     private String mNodeSSID = "179216";
-    private String mNodePwd = "12345678";
+    private String mNodePwd = "12345678"; //TODO: Das ist eine Konstante
+    private String mNodeWlanIP = "";
+    //Data to connect with wifi network of user
     private String mWlanSSID = "";
     private String mWlanPwd = "";
+    //Geo location data
     private String mGeoLocation = "";
     private String mAddress ="";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,25 +51,12 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 555);
         //Check Wifi
         //TODO: Prüfe ob das geht
-        //if(!((SmartWlanConfApplication) this.getApplicationContext()).getWifi().enableWifi(this)) {
-        if(!SmartWlanConfApplication.getWifi(this).enableWifi(this)) {
-            //TODO: Fehler kein Wifi
+        if(!((SmartWlanConfApplication) this.getApplicationContext()).getWifi().enableWifi(this)) {
+        //if(!SmartWlanConfApplication.getWifi(this).enableWifi(this)) {
+            //TODO: Fehler Wifi ausgeschaltet? -> Snackbar mit retry
         }
         if (savedInstanceState == null) {
             setInitialFragment();
-        }
-    }
-
-    @Override
-    public void onAttachFragment(Fragment fragment) {
-        //TODO: Achtung alle eintragen
-        if (fragment instanceof WifiListFragment) {
-            WifiListFragment wifiListFragment = (WifiListFragment) fragment;
-            wifiListFragment.setOnWifiSelectedListener(this);
-        }
-        if (fragment instanceof WifiConnectFragment) {
-            WifiConnectFragment wificonnectFragment = (WifiConnectFragment) fragment;
-            wificonnectFragment.setOnButtonPressedListener(this);
         }
     }
 
@@ -66,16 +64,15 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
 
     //This shows the fragment with the list of available Wifis
     private void setInitialFragment(){
-        /*getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, new PreparingNodeFragment())
-                //TODO: Zurück ändern
-                //.replace(R.id.container, WifiListFragment.newInstance(1))
-                .commitNow();*/
+        getSupportFragmentManager().beginTransaction()
+                //Open with one column
+                .replace(R.id.container, WifiListFragment.newInstance(1))
+                .commitNow();
     }
 
-    //This shows the fragment that connects to a selected Wifi
+    //This shows the fragment that checks credentials of selected Wifi
     public void onWifiListFragmentInteraction(ScanResult scanResult){
-        Fragment newfragment = WifiConnectFragment.newInstance(scanResult.SSID);
+        Fragment newfragment = WifiCheckCredentialsFragment.newInstance(scanResult.SSID);
         replaceFragment(newfragment);
     }
 
@@ -85,12 +82,14 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
         replaceFragment(newfragment);
     }
 
-    public void onGetLocationPressedInteraction(){
+    //This starts the PreparingNodeFragment that initializes the node for wifi connection
+    public void onGetLocationSuccess(){
         WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(this);
         WifiFragment newFragment = new PreparingNodeFragment();
         replaceFragment(newFragment);
+        //Connect with node wifi
         wifi.connectWithWifi_withContext(this, mNodeSSID, mNodePwd, newFragment);
-        //Todo: WLan in WifiConnectFragment, (in Parent?) speichern --> Done
+        //Todo: WLan in WifiCheckCredentialsFragment, (in Parent?) speichern --> Done
         //Todo: Behandeln, wenn keine Location gefunden wird
         //Todo: Geolocation in GetAdressfragment (in Parent?) speichern --> Done
         //Todo: Mit Knoten verbinden
@@ -98,6 +97,15 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
         //Todo: per Bonjour mit Knoten verbinden
         //Todo: Webseite des Knoten anzeigen
         //Todo: interaktive Karte für Geolocation anzeigen
+    }
+
+    //This starts the PreparingNodeFragment that initializes the node for wifi connection
+    public void onConnectToUserWifiSuccess(){
+        WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(this);
+        WifiFragment newFragment = new ShowNodeWebsiteFragment();
+        replaceFragment(newFragment);
+        //Connect with user wifi
+        wifi.connectWithWifi_withContext(this, mWlanSSID, mWlanPwd, newFragment);
     }
 
     //Actual fragment is replaced
@@ -126,6 +134,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
         mGeoLocation = geolocation;
         mAddress = address;
     }
+    public void setmNodeWlanIP(String nodeWlanIP){ mNodeWlanIP = nodeWlanIP; }
 
     public String getmNodeSSID(){
         return mNodeSSID;
@@ -142,9 +151,6 @@ public class SmartWlanConfActivity extends AppCompatActivity implements WifiList
     public String getmGeoLocation(){
         return mGeoLocation;
     }
-
-    private void testBonjour(){
-
-    }
-
+    public String getmAddress() { return mAddress; }
+    public String getmNodeWlanIP() {return mNodeWlanIP;}
 }

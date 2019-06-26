@@ -1,4 +1,4 @@
-package edu.kit.teco.smartwlanconf.ui.fragments;
+package edu.kit.teco.smartwlanconf.ui.adapter;
 
 import androidx.recyclerview.widget.RecyclerView;
 
