@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 
-import com.github.druk.rx2dnssd.Rx2Dnssd;
+import com.github.druk.rx2dnssd.Rx2DnssdBindable;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
@@ -88,17 +88,17 @@ public class ShowNodeWebsiteFragment extends Fragment {
     }
 
     private void startDiscovery() {
-        Rx2Dnssd mRxDnssd = SmartWlanConfApplication.getRxDnssd(getActivity());
+        Rx2DnssdBindable mRxDnssd = (Rx2DnssdBindable) SmartWlanConfApplication.getRxDnssd(getActivity());
         mSystemTime = System.currentTimeMillis();
         mDisposable = mRxDnssd.browse(mNodeReqType, mNodeDomain)
                 .compose(mRxDnssd.resolve())
                 .compose(mRxDnssd.queryIPRecords())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(bonjourService -> {
+                .subscribe(mDNSService -> {
                     if(System.currentTimeMillis() - mSystemTime < MAX_SEARCH_TIME ) {
-                        if(bonjourService.getServiceName().equals(mNodeServiceName)){
-                            mNodeIP = bonjourService.getInet4Address().toString();
+                        if(mDNSService.getServiceName().equals(mNodeServiceName)){
+                            mNodeIP = mDNSService.getInet4Address().toString();
                             continueAfterDiscovery();
                         }
                     } else {
