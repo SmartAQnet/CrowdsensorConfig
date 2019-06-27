@@ -65,8 +65,10 @@ public class SmartWlanConfActivity extends AppCompatActivity implements ListOfWi
     //This shows the fragment with the list of available Wifis
     private void setInitialFragment(){
         getSupportFragmentManager().beginTransaction()
+                //TODO: zurück ändern
+                .replace(R.id.container, new ShowNodeWebsiteFragment())
                 //Open with one column
-                .replace(R.id.container, ListOfWifisFragment.newInstance(1))
+                //.replace(R.id.container, ListOfWifisFragment.newInstance(1))
                 .commitNow();
     }
 

@@ -59,6 +59,8 @@ public class CheckNodeWifiFragment extends AbstractWaitForWifiConnectionFragment
         Context context = view.getContext().getApplicationContext();
         findAddressButton.setOnClickListener((View v)-> {
             String ssid = ((EditText) view.findViewById(R.id.node_id)).getText().toString();
+            //Set SSID in parent activity
+            ((SmartWlanConfActivity) getActivity()).setmNodeSSID(ssid);
             ((SmartWlanConfApplication) context).
                     getWifi().
                     connectWithWifi_withContext(context, ssid, ((SmartWlanConfActivity) getActivity()).getmNodePwd(), this);

@@ -15,8 +15,9 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
+import edu.kit.teco.smartwlanconf.ui.Config;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
-import edu.kit.teco.smartwlanconf.ui.utils.HttpPostRequest;
+import edu.kit.teco.smartwlanconf.ui.utils.HttpNodePost;
 
 
 import static android.content.Context.WIFI_SERVICE;
@@ -70,13 +71,16 @@ public class RestartNodeFragment extends AbstractWaitForWifiConnectionFragment {
         //IP of Gateway is HTTP-Server address of Node
         final String ip = lookupGateway();
 
-        HttpPostRequest request = new HttpPostRequest(getContext().getApplicationContext());
+        HttpNodePost request = new HttpNodePost(getContext().getApplicationContext());
         //Todo: second send wlan credentials -> connect node with wlan
         try {
-            //Todo: use getWlanData()
+            //Todo: use getNodeWifiCredentials()
             final String wlanUrl = "http://" + ip + "/_ac/connect";
-            HashMap<String, String> credentials = getWlanData();
-            request.execute(wlanUrl, credentials.get("SSID"), credentials.get("PWD")).get();
+            HashMap<String, String> credentials = getNodeWifiCredentials();
+            boolean result = request.execute(wlanUrl,
+                    credentials.get("SSID"),
+                    credentials.get("PWD")).get();
+            result = false;
         } catch(Exception e) {
             e.printStackTrace();
         }
@@ -104,7 +108,7 @@ public class RestartNodeFragment extends AbstractWaitForWifiConnectionFragment {
     }
 
     //Read SSID and Password and prepare for HTTP Post
-    private HashMap<String, String> getWlanData(){
+    private HashMap<String, String> getNodeWifiCredentials(){
         HashMap<String, String> credentials = new HashMap<>();
         credentials.put("SSID", ((SmartWlanConfActivity) getActivity()).getmWlanSSID());
         credentials.put("PWD",((SmartWlanConfActivity) getActivity()).getmWlanPwd());
