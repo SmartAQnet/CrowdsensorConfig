@@ -16,6 +16,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import com.github.druk.rx2dnssd.Rx2Dnssd;
+import com.github.druk.rx2dnssd.Rx2DnssdBindable;
 import com.github.druk.rx2dnssd.Rx2DnssdEmbedded;
 
 import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
@@ -63,6 +64,6 @@ public class SmartWlanConfApplication extends Application {
     private static final String DNSSD = "dnssd";
 
     private Rx2Dnssd createDnssd() {
-        return new Rx2DnssdEmbedded(this);
+        return new Rx2DnssdBindable(this);
     }
 }
