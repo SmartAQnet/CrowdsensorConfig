@@ -43,14 +43,6 @@ public class SmartWlanConfApplication extends Application {
         return ((SmartWlanConfApplication)context.getApplicationContext()).mRxDnssd;
     }
 
-    public static RegistrationManager getRegistrationManager(@NonNull Context context){
-        return ((SmartWlanConfApplication) context.getApplicationContext()).mRegistrationManager;
-    }
-
-    public static RegTypeManager getRegTypeManager(@NonNull Context context){
-        return ((SmartWlanConfApplication) context.getApplicationContext()).mRegTypeManager;
-    }
-
     public WifiConnectionUtils getWifi(){
         return mWifi;
     }

@@ -18,11 +18,11 @@ import edu.kit.teco.smartwlanconf.ui.fragments.ShowNodeWebsiteFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.CheckUserWifiCredentialsFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.AbstractWaitForWifiConnectionFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.ListOfWifisFragment;
-import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
 
 
 //MainActivity that implements the listeners of its fragments
-public class SmartWlanConfActivity extends AppCompatActivity implements ListOfWifisFragment.OnWifiListFragmentInteractionListener,
+public class SmartWlanConfActivity extends AppCompatActivity implements
+        ListOfWifisFragment.OnWifiListFragmentInteractionListener,
         CheckUserWifiCredentialsFragment.OnCheckUserWifiCredentialsSuccessListener,
         CheckNodeWifiFragment.OnCheckNodeWifiSuccessListener,
         RestartNodeFragment.OnNodeRestartedListener {
@@ -30,15 +30,13 @@ public class SmartWlanConfActivity extends AppCompatActivity implements ListOfWi
 
 
     //Data to connect with wifi network of node
-    private String mNodeSSID = "179216";
+    private String mNodeSSID = "179992";
     private String mNodePwd = "12345678"; //TODO: Das ist eine Konstante
     private String mNodeWlanIP = "";
     //Data to connect with wifi network of user
     private String mWlanSSID = "";
     private String mWlanPwd = "";
-    //Geo location data
-    private String mGeoLocation = "";
-    private String mAddress ="";
+
 
 
     @Override
@@ -51,8 +49,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements ListOfWi
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 555);
         //Check Wifi
         //TODO: Prüfe ob das geht
-        if(!((SmartWlanConfApplication) this.getApplicationContext()).getWifi().enableWifi(this)) {
-        //if(!SmartWlanConfApplication.getWifi(this).enableWifi(this)) {
+        if(!SmartWlanConfApplication.getWifi(this).enableWifi(this)) {
             //TODO: Fehler Wifi ausgeschaltet? -> Snackbar mit retry
         }
         if (savedInstanceState == null) {
@@ -65,10 +62,8 @@ public class SmartWlanConfActivity extends AppCompatActivity implements ListOfWi
     //This shows the fragment with the list of available Wifis
     private void setInitialFragment(){
         getSupportFragmentManager().beginTransaction()
-                //TODO: zurück ändern
-                .replace(R.id.container, new ShowNodeWebsiteFragment())
                 //Open with one column
-                //.replace(R.id.container, ListOfWifisFragment.newInstance(1))
+                .replace(R.id.container, ListOfWifisFragment.newInstance(1))
                 .commitNow();
     }
 
@@ -118,10 +113,6 @@ public class SmartWlanConfActivity extends AppCompatActivity implements ListOfWi
     public void setmWlanPwd(String pwd){
         mWlanPwd = pwd;
     }
-    public void setmGeoLocation(String geolocation, String address){
-        mGeoLocation = geolocation;
-        mAddress = address;
-    }
     public void setmNodeWlanIP(String nodeWlanIP){ mNodeWlanIP = nodeWlanIP; }
 
     public String getmNodeSSID(){
@@ -136,9 +127,6 @@ public class SmartWlanConfActivity extends AppCompatActivity implements ListOfWi
     public String getmWlanPwd(){
         return mWlanPwd;
     }
-    public String getmGeoLocation(){
-        return mGeoLocation;
-    }
-    public String getmAddress() { return mAddress; }
+
     public String getmNodeWlanIP() {return mNodeWlanIP;}
 }

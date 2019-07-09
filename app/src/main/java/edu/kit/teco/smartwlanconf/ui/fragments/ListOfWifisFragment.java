@@ -1,6 +1,7 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
 
@@ -15,7 +16,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.thanosfisherman.wifiutils.WifiUtils;
 
 import edu.kit.teco.smartwlanconf.R;
@@ -92,9 +97,9 @@ public class ListOfWifisFragment extends Fragment{
 
     private View setAdapter(View view){
         // Set the adapter
-        if (view instanceof RecyclerView) {
+        if (view instanceof FrameLayout) {
             Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
+            RecyclerView recyclerView = view.findViewById(R.id.list);
             if (mColumnCount <= 1) {
                 recyclerView.setLayoutManager(new LinearLayoutManager(context));
             } else {
@@ -113,15 +118,31 @@ public class ListOfWifisFragment extends Fragment{
     private void getScanResults(@NonNull final List<ScanResult> results){
         if (results.isEmpty())
         {
-            //Todo: Throw Error
-            Log.i(TAG, "No Wifi found");
+            Snackbar snackbar = Snackbar
+                    .make(getView(), "Try again!", Snackbar.LENGTH_LONG)
+                    .setAction("RETRY", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                        }
+                    });
+            snackbar.setActionTextColor(Color.RED);
+            snackbar.show();
             return;
         }
+        //Scan results not empty hide splash scree
+        View view = getView();
+        LinearLayout splash = (LinearLayout) view.findViewById(R.id.splash);
+        RecyclerView list = (RecyclerView) view.findViewById(R.id.list);
+        splash.setVisibility(View.GONE);
+        list.setVisibility(View.VISIBLE);
         wifiList.clear();
         int netCount = results.size() - 1;
         while (netCount >= 0){
-            wifiList.add(results.get(netCount));
-            wifiAdapter.notifyDataSetChanged();
+            ScanResult result = results.get(netCount);
+            if(!result.SSID.isEmpty()) {
+                wifiList.add(results.get(netCount));
+                wifiAdapter.notifyDataSetChanged();
+            }
             --netCount;
         }
     }

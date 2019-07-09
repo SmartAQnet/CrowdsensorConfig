@@ -40,9 +40,9 @@ public class RestartNodeFragment extends AbstractWaitForWifiConnectionFragment {
         connectNodeWithUserWifi();
         //Node is now restarting, connect to user wifi and look for node with ShowNodeWebsiteFragment
         Context context = getContext().getApplicationContext();
-        ((SmartWlanConfApplication) context).
-                getWifi().
-                connectWithWifi_withContext(context, ((SmartWlanConfActivity) getActivity()).getmWlanSSID(), ((SmartWlanConfActivity) getActivity()).getmWlanPwd(), this);
+        SmartWlanConfApplication
+                .getWifi(getActivity())
+                .connectWithWifi_withContext(context, ((SmartWlanConfActivity) getActivity()).getmWlanSSID(), ((SmartWlanConfActivity) getActivity()).getmWlanPwd(), this);
     }
 
     @Override

@@ -95,9 +95,9 @@ public class CheckUserWifiCredentialsFragment extends AbstractWaitForWifiConnect
             //Set  Wlan Passwod in Parent Activity
             ((SmartWlanConfActivity) getActivity()).setmWlanPwd(pwd);
             Context context = view.getContext().getApplicationContext();
-            ((SmartWlanConfApplication) context).
-                    getWifi().
-                    connectWithWifi_withContext(context, ((SmartWlanConfActivity) getActivity()).getmWlanSSID(), pwd, this);
+            SmartWlanConfApplication
+                    .getWifi(getActivity())
+                    .connectWithWifi_withContext(context, ((SmartWlanConfActivity) getActivity()).getmWlanSSID(), pwd, this);
         });
     }
 

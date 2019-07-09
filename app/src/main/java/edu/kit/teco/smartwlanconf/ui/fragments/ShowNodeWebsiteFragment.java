@@ -78,7 +78,6 @@ public class ShowNodeWebsiteFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        stopDiscovery();
     }
 
     @Override
@@ -90,17 +89,17 @@ public class ShowNodeWebsiteFragment extends Fragment {
     private void startDiscovery() {
         Rx2DnssdBindable mRxDnssd = (Rx2DnssdBindable) SmartWlanConfApplication.getRxDnssd(getActivity());
         mSystemTime = System.currentTimeMillis();
-        mDisposable = mRxDnssd.browse(mNodeReqType, mNodeDomain)
+        mDisposable = mRxDnssd.browse(mNodeReqType,mNodeDomain)
                 .compose(mRxDnssd.resolve())
                 .compose(mRxDnssd.queryIPRecords())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(mDNSService -> {
                     if(System.currentTimeMillis() - mSystemTime < MAX_SEARCH_TIME ) {
-                        if(mDNSService.getServiceName().equals(mNodeServiceName)){
-                            mNodeIP = mDNSService.getInet4Address().toString();
-                            continueAfterDiscovery();
-                        }
+                    if(mDNSService.getServiceName().equals(mNodeServiceName)){
+                        mNodeIP = mDNSService.getInet4Address().toString();
+                        continueAfterDiscovery();
+                    }
                     } else {
                         //TODO: Service not found after MAX_SEARCH_TIME seconds;
                     }
