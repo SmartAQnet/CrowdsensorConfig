@@ -43,6 +43,7 @@ public class ListOfWifisFragment extends Fragment{
     private int mColumnCount = 1;
     private OnWifiListFragmentInteractionListener mListener;
     private List<ScanResult> wifiList = new ArrayList<>();
+    private Fragment this_fragment;
 
     private WifiListItemRecyclerViewAdapter wifiAdapter;
 
@@ -74,6 +75,7 @@ public class ListOfWifisFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        this_fragment = this;
         return setAdapter(inflater.inflate(R.layout.wifi_fragment_item_list, container, false));
     }
 
@@ -118,18 +120,20 @@ public class ListOfWifisFragment extends Fragment{
     private void getScanResults(@NonNull final List<ScanResult> results){
         if (results.isEmpty())
         {
+            final Context context = getActivity().getApplicationContext();
             Snackbar snackbar = Snackbar
-                    .make(getView(), "Try again!", Snackbar.LENGTH_LONG)
-                    .setAction("RETRY", new View.OnClickListener() {
+                    .make(getView(), "Keine Wifi Netze gefunden", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("Nochmal versuchen!", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
+                            WifiUtils.withContext(context).scanWifi(ListOfWifisFragment.this::getScanResults).start();
                         }
                     });
             snackbar.setActionTextColor(Color.RED);
             snackbar.show();
             return;
         }
-        //Scan results not empty hide splash scree
+        //Scan results not empty hide splash screen
         View view = getView();
         LinearLayout splash = (LinearLayout) view.findViewById(R.id.splash);
         RecyclerView list = (RecyclerView) view.findViewById(R.id.list);
