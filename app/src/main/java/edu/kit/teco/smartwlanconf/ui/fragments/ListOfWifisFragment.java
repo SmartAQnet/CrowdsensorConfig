@@ -1,24 +1,23 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
 import android.content.Context;
-import android.graphics.Color;
+import android.content.pm.ActivityInfo;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.thanosfisherman.wifiutils.WifiUtils;
@@ -29,7 +28,6 @@ import edu.kit.teco.smartwlanconf.ui.adapter.WifiListItemRecyclerViewAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static androidx.constraintlayout.widget.Constraints.TAG;
 
 /**
  * A fragment representing a list of Items.
@@ -43,7 +41,6 @@ public class ListOfWifisFragment extends Fragment{
     private int mColumnCount = 1;
     private OnWifiListFragmentInteractionListener mListener;
     private List<ScanResult> wifiList = new ArrayList<>();
-    private Fragment this_fragment;
 
     private WifiListItemRecyclerViewAdapter wifiAdapter;
 
@@ -70,13 +67,14 @@ public class ListOfWifisFragment extends Fragment{
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
+        this.setRetainInstance(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        this_fragment = this;
-        return setAdapter(inflater.inflate(R.layout.wifi_fragment_item_list, container, false));
+        View view = inflater.inflate(R.layout.wifi_fragment_item_list, container, false);
+        return setAdapter(view);
     }
 
 
@@ -110,7 +108,7 @@ public class ListOfWifisFragment extends Fragment{
             DividerItemDecoration dividerItemDecoration= new DividerItemDecoration(context,
                     LinearLayoutManager.VERTICAL);
             recyclerView.addItemDecoration(dividerItemDecoration);
-            WifiUtils.withContext(getActivity().getApplicationContext()).scanWifi(this::getScanResults).start();
+            WifiUtils.withContext(getActivity()).scanWifi(this::getScanResults).start();
             wifiAdapter = new WifiListItemRecyclerViewAdapter(wifiList, mListener);
             recyclerView.setAdapter(wifiAdapter);
         }
@@ -120,16 +118,17 @@ public class ListOfWifisFragment extends Fragment{
     private void getScanResults(@NonNull final List<ScanResult> results){
         if (results.isEmpty())
         {
-            final Context context = getActivity().getApplicationContext();
+            //final Context context = getActivity().getApplicationContext();
             Snackbar snackbar = Snackbar
                     .make(getView(), "Keine Wifi Netze gefunden", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Nochmal versuchen!", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            WifiUtils.withContext(context).scanWifi(ListOfWifisFragment.this::getScanResults).start();
+                            WifiUtils.withContext(getActivity()).scanWifi(ListOfWifisFragment.this::getScanResults).start();
                         }
                     });
-            snackbar.setActionTextColor(Color.RED);
+            int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
+            snackbar.setActionTextColor(colorSnackRetry);
             snackbar.show();
             return;
         }
@@ -141,14 +140,15 @@ public class ListOfWifisFragment extends Fragment{
         list.setVisibility(View.VISIBLE);
         wifiList.clear();
         int netCount = results.size() - 1;
-        while (netCount >= 0){
+        while (netCount >= 0) {
             ScanResult result = results.get(netCount);
-            if(!result.SSID.isEmpty()) {
+            if (!result.SSID.isEmpty()) {
                 wifiList.add(results.get(netCount));
                 wifiAdapter.notifyDataSetChanged();
             }
             --netCount;
         }
+
     }
 
     /**

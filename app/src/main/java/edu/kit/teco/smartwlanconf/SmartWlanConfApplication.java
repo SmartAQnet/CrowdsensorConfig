@@ -34,17 +34,11 @@ public class SmartWlanConfApplication extends Application {
         super.onCreate();
 
         mRxDnssd = createDnssd();
-        //mRegistrationManager = new RegistrationManager();
-        //mRegTypeManager = new RegTypeManager(this);
         mWifi = WifiConnectionUtils.getInstance();
     }
 
     public static Rx2Dnssd getRxDnssd(@NonNull Context context){
         return ((SmartWlanConfApplication)context.getApplicationContext()).mRxDnssd;
-    }
-
-    public WifiConnectionUtils getWifi(){
-        return mWifi;
     }
 
     public static WifiConnectionUtils getWifi(@NonNull Context context){

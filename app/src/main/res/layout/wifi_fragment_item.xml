@@ -9,6 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
-        android:background="#37CDDC39"
+        android:background="@color/colorWifiItem"
         android:textAppearance="?attr/textAppearanceListItem" />
 </LinearLayout>

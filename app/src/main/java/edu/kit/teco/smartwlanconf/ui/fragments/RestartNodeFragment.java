@@ -69,18 +69,18 @@ public class RestartNodeFragment extends AbstractWaitForWifiConnectionFragment {
     private void connectNodeWithUserWifi(){
 
         //IP of Gateway is HTTP-Server address of Node
-        final String ip = lookupGateway();
+        final String gatewayIP = lookupGateway();
 
         HttpNodePost request = new HttpNodePost(getContext().getApplicationContext());
-        //Todo: second send wlan credentials -> connect node with wlan
         try {
-            //Todo: use getNodeWifiCredentials()
-            final String wlanUrl = "http://" + ip + "/_ac/connect";
+            final String wlanUrl = "http://" + gatewayIP + "/_ac/connect";
             HashMap<String, String> credentials = getNodeWifiCredentials();
             boolean result = request.execute(wlanUrl,
                     credentials.get("SSID"),
                     credentials.get("PWD")).get();
-            result = false;
+            if(!result){
+                //TODO: Couldn't send credentials to Node
+            }
         } catch(Exception e) {
             e.printStackTrace();
         }
