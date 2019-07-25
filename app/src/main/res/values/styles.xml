@@ -11,7 +11,7 @@
         <item name="android:textAppearanceButton">@style/MyButton</item>
     </style>
 
-    <style name="MyButton" parent="TextAppearance.AppCompat.Widget.Button.Colored">
+    <style name="MyButton" parent="TextAppearance.AppCompat.Button">
         <item name="android:color">@color/colorBtnText</item>
     </style>
 
