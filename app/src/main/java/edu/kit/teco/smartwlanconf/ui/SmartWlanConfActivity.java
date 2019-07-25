@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
+import android.widget.EditText;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
@@ -25,12 +26,13 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         ListOfWifisFragment.OnWifiListFragmentInteractionListener,
         CheckUserWifiCredentialsFragment.OnCheckUserWifiCredentialsSuccessListener,
         CheckNodeWifiFragment.OnCheckNodeWifiSuccessListener,
-        RestartNodeFragment.OnNodeRestartedListener {
+        RestartNodeFragment.OnNodeRestartedListener,
+        ShowNodeWebsiteFragment.OnShowNodeSideListener{
 
 
 
     //Data to connect with wifi network of node
-    private String mNodeSSID = "179992";
+    private String mNodeSSID = "";
     private String mNodePwd = "12345678"; //TODO: Das ist eine Konstante
     private String mNodeWlanIP = "";
     //Data to connect with wifi network of user
@@ -55,6 +57,16 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         if (savedInstanceState == null) {
             setInitialFragment();
         }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
     }
 
     //The different fragments are managed here
@@ -88,6 +100,12 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
     //This starts the ShowNodeWebsiteFragment that opens an external Browser with website of the node
     public void onNodeRestartedSuccess(){
         Fragment newFragment = new ShowNodeWebsiteFragment();
+        replaceFragment(newFragment);
+    }
+
+    //This starts the ShowNodeWebsiteFragment that opens an external Browser with website of the node
+    public void onAfterShowNode(){
+        Fragment newFragment = ListOfWifisFragment.newInstance(1);
         replaceFragment(newFragment);
     }
 

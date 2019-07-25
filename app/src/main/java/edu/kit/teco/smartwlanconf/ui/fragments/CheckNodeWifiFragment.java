@@ -3,6 +3,7 @@ package edu.kit.teco.smartwlanconf.ui.fragments;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -49,6 +50,17 @@ public class CheckNodeWifiFragment extends AbstractWaitForWifiConnectionFragment
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        boolean nodeIDError = SmartWlanConfApplication.getnodeIDError(this.getActivity());
+        if (nodeIDError) {
+            EditText node_id = getActivity().findViewById(R.id.node_id);
+            node_id.setError("Node ID ist falsch! Bitte erneut eingeben.");
+        }
+        SmartWlanConfApplication.setnodeIDError(getActivity(), false);
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
@@ -77,10 +89,12 @@ public class CheckNodeWifiFragment extends AbstractWaitForWifiConnectionFragment
             if (mListener != null) {
                 mListener.onCheckNodeWifiSuccess();
             } else {
-                //TODO: Fehlerbehandlung wenn kein Listener vorhanden
+                //Should never happen
             }
         } else {
             //Todo: Keine Verbindung zu Knoten falsche SSID -> Set Error Text für Eingabefeld
+            ((SmartWlanConfActivity) getActivity()).onCheckUserWifiCredentialsSuccess();
+            SmartWlanConfApplication.setnodeIDError(getActivity(), true);
             System.out.println("jjj");
         }
     }
@@ -96,7 +110,6 @@ public class CheckNodeWifiFragment extends AbstractWaitForWifiConnectionFragment
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnCheckNodeWifiSuccessListener {
-        // TODO: Update argument type and name
         void onCheckNodeWifiSuccess();
     }
 }

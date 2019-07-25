@@ -16,7 +16,6 @@ import java.util.List;
 /**
  * {@link RecyclerView.Adapter} that can display a {@link android.net.wifi.ScanResult} and makes a call to the
  * specified {@link OnWifiListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
  */
 public class WifiListItemRecyclerViewAdapter extends RecyclerView.Adapter<WifiListItemRecyclerViewAdapter.ViewHolder> {
 

@@ -28,6 +28,7 @@ public class SmartWlanConfApplication extends Application {
     private RegistrationManager mRegistrationManager;
     private RegTypeManager mRegTypeManager;
     private WifiConnectionUtils mWifi;
+    private boolean nodeIDError;
 
     @Override
     public void onCreate() {
@@ -35,6 +36,15 @@ public class SmartWlanConfApplication extends Application {
 
         mRxDnssd = createDnssd();
         mWifi = WifiConnectionUtils.getInstance();
+        nodeIDError = false;
+    }
+
+    public static boolean getnodeIDError(@NonNull Context context){
+        return ((SmartWlanConfApplication)context.getApplicationContext()).nodeIDError;
+    }
+
+    public static void setnodeIDError(Context context, boolean error){
+        ((SmartWlanConfApplication)context.getApplicationContext()).nodeIDError = error;
     }
 
     public static Rx2Dnssd getRxDnssd(@NonNull Context context){

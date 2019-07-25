@@ -17,6 +17,7 @@ import com.github.druk.rx2dnssd.Rx2DnssdBindable;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
+import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -29,7 +30,7 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class ShowNodeWebsiteFragment extends Fragment {
 
-    //private OnFragmentInteractionListener mListener;
+    private OnShowNodeSideListener mListener;
     private WebView webview;
 
     //Search time for node bnonjour service discovery
@@ -38,9 +39,9 @@ public class ShowNodeWebsiteFragment extends Fragment {
     //Data to find Node in wifi network
     private String mNodeDomain = "local."; //Todo: Globale Konstante -> ändern
     private String mNodeReqType = "_http._tcp";//Todo: Globale Konstante -> ändern
-    private String mNodeServiceName = "Lexmark MX711"; //Todo: Globale Konstante?
+
     //the node's ip adress in wifi network
-    private String mNodeIP="192.168.12.118";
+    private String mNodeIP="";
     //Necessary for stoping discovery of Bonjour services
     private Disposable mDisposable;
     //Used to limit search time for bonjour service of node
@@ -67,12 +68,12 @@ public class ShowNodeWebsiteFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        /*if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+        if (context instanceof OnShowNodeSideListener) {
+            mListener = (OnShowNodeSideListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
-        }*/
+        }
     }
 
     @Override
@@ -87,6 +88,7 @@ public class ShowNodeWebsiteFragment extends Fragment {
     }
 
     private void startDiscovery() {
+        String mNodeServiceName = ((SmartWlanConfActivity) getActivity()).getmNodeSSID();
         Rx2DnssdBindable mRxDnssd = (Rx2DnssdBindable) SmartWlanConfApplication.getRxDnssd(getActivity());
         mSystemTime = System.currentTimeMillis();
         mDisposable = mRxDnssd.browse(mNodeReqType,mNodeDomain)
@@ -114,6 +116,7 @@ public class ShowNodeWebsiteFragment extends Fragment {
         Intent browserIntent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse("http://"  + mNodeIP));
         startActivity(browserIntent);
+        mListener.onAfterShowNode();
     }
 
     private void stopDiscovery() {
@@ -133,8 +136,8 @@ public class ShowNodeWebsiteFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    /*public interface OnFragmentInteractionListener {
+    public interface OnShowNodeSideListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }*/
+        void onAfterShowNode();
+    }
 }
