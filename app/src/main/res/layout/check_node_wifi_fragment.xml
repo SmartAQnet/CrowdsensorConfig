@@ -19,10 +19,11 @@
             android:hint="@string/node_id" />
         <Button
             android:id="@+id/btn_check_node"
-            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/btn_check_node" />
+            android:text="@string/btn_check_node"
+            android:textColor="@color/colorBtnText"
+            android:background="@color/colorAccent"/>
     </LinearLayout>
 
 </FrameLayout>

@@ -8,12 +8,16 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:actionBarStyle">@style/MyActionBar</item>
-        <item name="android:textAppearanceButton">@style/MyButton</item>
+        <!--<item name="android:buttonStyle">@style/MyButton</item>-->
     </style>
-
-    <style name="MyButton" parent="TextAppearance.AppCompat.Button">
+    <!-- Doesn't work as global style for buttons???
+    <style name="MyButton" parent="Widget.AppCompat.Button">
+        <item name="android:color">@color/colorAccent</item>
+        <item name="android:textAppearanceButton">@style/MyButtonText</item>
+    </style>
+    <style name="MyButtonText" parent="TextAppearance.AppCompat.Button">
         <item name="android:color">@color/colorBtnText</item>
-    </style>
+    </style>-->
 
     <style name="MyActionBar" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->

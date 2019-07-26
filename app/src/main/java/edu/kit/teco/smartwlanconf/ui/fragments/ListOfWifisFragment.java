@@ -23,6 +23,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.thanosfisherman.wifiutils.WifiUtils;
 
 import edu.kit.teco.smartwlanconf.R;
+import edu.kit.teco.smartwlanconf.ui.Config;
 import edu.kit.teco.smartwlanconf.ui.adapter.WifiListItemRecyclerViewAdapter;
 
 import java.util.ArrayList;
@@ -142,8 +143,8 @@ public class ListOfWifisFragment extends Fragment{
         int netCount = results.size() - 1;
         while (netCount >= 0) {
             ScanResult result = results.get(netCount);
-            if (!result.SSID.isEmpty()) {
-                wifiList.add(results.get(netCount));
+            if (!result.SSID.isEmpty() && result.frequency <= Config.WIFI_BANDWIDTH) {
+                wifiList.add(result);
                 wifiAdapter.notifyDataSetChanged();
             }
             --netCount;
