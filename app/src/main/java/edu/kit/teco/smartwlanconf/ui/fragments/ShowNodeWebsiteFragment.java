@@ -11,12 +11,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 
 import com.github.druk.rx2dnssd.Rx2DnssdBindable;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
+import edu.kit.teco.smartwlanconf.ui.Config;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -31,21 +31,11 @@ import io.reactivex.schedulers.Schedulers;
 public class ShowNodeWebsiteFragment extends Fragment {
 
     private OnShowNodeSideListener mListener;
-    private WebView webview;
 
-    //Search time for node bnonjour service discovery
-    private long MAX_SEARCH_TIME = 20000;
-
-    //Data to find Node in wifi network
-    private String mNodeDomain = "local."; //Todo: Globale Konstante -> ändern
-    private String mNodeReqType = "_http._tcp";//Todo: Globale Konstante -> ändern
-
-    //the node's ip adress in wifi network
+    //the node's ip adress in user wifi network
     private String mNodeIP="";
     //Necessary for stoping discovery of Bonjour services
     private Disposable mDisposable;
-    //Used to limit search time for bonjour service of node
-    private long mSystemTime;
 
     public ShowNodeWebsiteFragment() {
         // Required empty public constructor
@@ -90,20 +80,17 @@ public class ShowNodeWebsiteFragment extends Fragment {
     private void startDiscovery() {
         String mNodeServiceName = ((SmartWlanConfActivity) getActivity()).getmNodeSSID();
         Rx2DnssdBindable mRxDnssd = (Rx2DnssdBindable) SmartWlanConfApplication.getRxDnssd(getActivity());
-        mSystemTime = System.currentTimeMillis();
-        mDisposable = mRxDnssd.browse(mNodeReqType,mNodeDomain)
+
+        //Searching for Bounjour Services from https://github.com/andriydruk/RxDNSSD
+        mDisposable = mRxDnssd.browse(Config.NODE_REQ_TYPE, Config.NODE_DOMAIN)
                 .compose(mRxDnssd.resolve())
                 .compose(mRxDnssd.queryIPRecords())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(mDNSService -> {
-                    if(System.currentTimeMillis() - mSystemTime < MAX_SEARCH_TIME ) {
                     if(mDNSService.getServiceName().equals(mNodeServiceName)){
                         mNodeIP = mDNSService.getInet4Address().toString();
                         continueAfterDiscovery();
-                    }
-                    } else {
-                        //TODO: Service not found after MAX_SEARCH_TIME seconds;
                     }
                 }, throwable -> {
                     Log.e("DNSSD", "Error: ", throwable);
@@ -116,6 +103,7 @@ public class ShowNodeWebsiteFragment extends Fragment {
         Intent browserIntent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse("http://"  + mNodeIP));
         startActivity(browserIntent);
+        //Return to list of wifis
         mListener.onAfterShowNode();
     }
 
@@ -137,7 +125,6 @@ public class ShowNodeWebsiteFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnShowNodeSideListener {
-        // TODO: Update argument type and name
         void onAfterShowNode();
     }
 }

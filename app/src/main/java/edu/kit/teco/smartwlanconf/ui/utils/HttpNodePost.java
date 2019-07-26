@@ -9,10 +9,6 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 
 import java.io.IOException;
-import java.net.NetworkInterface;
-import java.time.Duration;
-import java.util.Collections;
-import java.util.Enumeration;
 
 import edu.kit.teco.smartwlanconf.ui.Config;
 import okhttp3.FormBody;
@@ -71,12 +67,6 @@ public class HttpNodePost extends AsyncTask<String, Void, Boolean> {
 
 
             }
-            /*Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-
-            for (NetworkInterface nif: Collections.list(nets)) {
-                //do something with the network interface
-                String name = nif.getName();
-            }*/
         } catch (Exception e){
             e.printStackTrace();
         }

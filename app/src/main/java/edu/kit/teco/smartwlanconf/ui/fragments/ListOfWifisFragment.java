@@ -1,7 +1,6 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
 
@@ -119,7 +118,6 @@ public class ListOfWifisFragment extends Fragment{
     private void getScanResults(@NonNull final List<ScanResult> results){
         if (results.isEmpty())
         {
-            //final Context context = getActivity().getApplicationContext();
             Snackbar snackbar = Snackbar
                     .make(getView(), "Keine Wifi Netze gefunden", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Nochmal versuchen!", new View.OnClickListener() {

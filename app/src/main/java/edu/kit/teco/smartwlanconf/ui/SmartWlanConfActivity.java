@@ -7,9 +7,10 @@ import androidx.fragment.app.Fragment;
 import android.Manifest;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Context;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.widget.EditText;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
@@ -33,8 +34,6 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     //Data to connect with wifi network of node
     private String mNodeSSID = "";
-    private String mNodePwd = "12345678"; //TODO: Das ist eine Konstante
-    private String mNodeWlanIP = "";
     //Data to connect with wifi network of user
     private String mWlanSSID = "";
     private String mWlanPwd = "";
@@ -46,14 +45,10 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.wifi_activity);
 
-        //Although permission is set in Manifest, it is necessary to request permission here
-        //TODO: Check if this could be set in SmartWlanConfApplication
+        //Although permission is set in Manifest, it is necessary to request permission here,
+        //can not be set in SmartWlanConfApplication because of context
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 555);
-        //Check Wifi
-        //TODO: Prüfe ob das geht
-        if(!SmartWlanConfApplication.getWifi(this).enableWifi(this)) {
-            //TODO: Fehler Wifi ausgeschaltet? -> Snackbar mit retry
-        }
+
         if (savedInstanceState == null) {
             setInitialFragment();
         }
@@ -122,22 +117,15 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
     public void setmNodeSSID(String ssid){
         mNodeSSID = ssid;
     }
-    public void setmNodePwd(String pwd){
-        mNodePwd  = pwd;
-    }
     public void setmWlanSSID (String ssid){
         mWlanSSID  = ssid;
     }
     public void setmWlanPwd(String pwd){
         mWlanPwd = pwd;
     }
-    public void setmNodeWlanIP(String nodeWlanIP){ mNodeWlanIP = nodeWlanIP; }
 
     public String getmNodeSSID(){
         return mNodeSSID;
-    }
-    public String getmNodePwd(){
-        return mNodePwd;
     }
     public String getmWlanSSID (){
         return mWlanSSID;
@@ -146,5 +134,4 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         return mWlanPwd;
     }
 
-    public String getmNodeWlanIP() {return mNodeWlanIP;}
 }

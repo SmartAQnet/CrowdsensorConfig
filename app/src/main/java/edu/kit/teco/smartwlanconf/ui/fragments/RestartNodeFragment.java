@@ -5,8 +5,15 @@ import android.content.Context;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
+
+import com.google.android.material.snackbar.Snackbar;
+import com.thanosfisherman.wifiutils.WifiUtils;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -14,6 +21,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 
+import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 import edu.kit.teco.smartwlanconf.ui.utils.HttpNodePost;
@@ -35,13 +43,20 @@ public class RestartNodeFragment extends AbstractWaitForWifiConnectionFragment {
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View layout = inflater.inflate(R.layout.restart_node_fragment, container, false);
+
         //Connection to node is established data can be sent to node
         connectNodeWithUserWifi();
         //Node is now restarting, connect to user wifi and look for node with ShowNodeWebsiteFragment
-        Context context = getContext().getApplicationContext();
-        SmartWlanConfApplication
-                .getWifi(getActivity())
-                .connectWithWifi_withContext(context, ((SmartWlanConfActivity) getActivity()).getmWlanSSID(), ((SmartWlanConfActivity) getActivity()).getmWlanPwd(), this);
+        connectToUserWifi();
+
+        return layout;
     }
 
     @Override
@@ -60,8 +75,26 @@ public class RestartNodeFragment extends AbstractWaitForWifiConnectionFragment {
         if (success) {
             mListener.onNodeRestartedSuccess();
         } else {
-            //TODO: Should not happen as credentials for wifi has already been checked
+            final RestartNodeFragment myfrag = this;
+            Snackbar snackbar = Snackbar
+                    .make(getView(), "Wifi Verbindung fehlgeschlagen", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("Nochmal versuchen!", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            myfrag.connectToUserWifi();
+                        }
+                    });
+            int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
+            snackbar.setActionTextColor(colorSnackRetry);
+            snackbar.show();
         }
+    }
+
+    private void connectToUserWifi(){
+        Context context = getActivity();
+        SmartWlanConfApplication
+                .getWifi(context)
+                .connectWithWifi_withContext(context, ((SmartWlanConfActivity) context).getmWlanSSID(), ((SmartWlanConfActivity) context).getmWlanPwd(), this);
     }
 
     //Sending wifi data to node restarts the node
@@ -78,7 +111,18 @@ public class RestartNodeFragment extends AbstractWaitForWifiConnectionFragment {
                     credentials.get("SSID"),
                     credentials.get("PWD")).get();
             if(!result){
-                //TODO: Couldn't send credentials to Node
+                final RestartNodeFragment myfrag = this;
+                Snackbar snackbar = Snackbar
+                        .make(getView(), "Wifi Daten konnten nicht an Knoten geschickt werden!", Snackbar.LENGTH_INDEFINITE)
+                        .setAction("Nochmal versuchen!", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                myfrag.connectNodeWithUserWifi();
+                            }
+                        });
+                int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
+                snackbar.setActionTextColor(colorSnackRetry);
+                snackbar.show();
             }
         } catch(Exception e) {
             e.printStackTrace();

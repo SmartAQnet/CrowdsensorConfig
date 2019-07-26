@@ -3,6 +3,7 @@ package edu.kit.teco.smartwlanconf.ui.fragments;
 import android.content.Context;
 import android.os.Bundle;
 
+
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -11,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
@@ -109,11 +112,13 @@ public class CheckUserWifiCredentialsFragment extends AbstractWaitForWifiConnect
                         ,Toast.LENGTH_LONG).show();
                 mListener.onCheckUserWifiCredentialsSuccess();
             } else {
-                //TODO: Fehlerbehandlung wenn kein Listener vorhanden
+                //Should never happen
             }
         } else {
-            //Todo: Wrong Password -> Snackbar try again or error textmessage for input field
-        }
+            Snackbar snackbar = Snackbar
+                    .make(getView(), "Wifi Verbindung fehlgeschlagen, falsches Passwort?", Snackbar.LENGTH_LONG);
+            snackbar.show();
+            return;        }
     }
 
     /**

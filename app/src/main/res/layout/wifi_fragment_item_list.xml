@@ -10,7 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:background="#CDDC39"
         android:orientation="vertical">
 
 
@@ -31,7 +30,7 @@
             android:background="@null"
             android:gravity="center|top"
             android:inputType="none"
-            android:text="Wifi wird gesucht..."
+            android:text="Wifi wird gesucht...(2.5 GHz)"
             android:textStyle="bold" />
 
         <EditText
