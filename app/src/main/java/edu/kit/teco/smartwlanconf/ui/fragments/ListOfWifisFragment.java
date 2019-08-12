@@ -74,9 +74,15 @@ public class ListOfWifisFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.wifi_fragment_item_list, container, false);
-        return setAdapter(view);
+        return view;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        setAdapter();
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -95,8 +101,9 @@ public class ListOfWifisFragment extends Fragment{
         mListener = null;
     }
 
-    private View setAdapter(View view){
+    private View setAdapter(){
         // Set the adapter
+        View view = getView();
         if (view instanceof FrameLayout) {
             Context context = view.getContext();
             RecyclerView recyclerView = view.findViewById(R.id.list);
@@ -118,8 +125,9 @@ public class ListOfWifisFragment extends Fragment{
     private void getScanResults(@NonNull final List<ScanResult> results){
         if (results.isEmpty())
         {
+            final View thisView  = this.getView();
             Snackbar snackbar = Snackbar
-                    .make(getView(), "Keine Wifi Netze gefunden", Snackbar.LENGTH_INDEFINITE)
+                    .make(thisView, "Keine Wifi Netze gefunden", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Nochmal versuchen!", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
