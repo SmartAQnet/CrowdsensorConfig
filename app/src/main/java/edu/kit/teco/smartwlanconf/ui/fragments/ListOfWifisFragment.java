@@ -76,7 +76,7 @@ public class ListOfWifisFragment extends Fragment{
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.wifi_fragment_item, container, false);
+        return inflater.inflate(R.layout.wifi_fragment_item_list, container, false);
     }
 
     @Override
