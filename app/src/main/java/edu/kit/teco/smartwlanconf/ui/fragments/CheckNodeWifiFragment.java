@@ -1,13 +1,14 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,18 +28,16 @@ import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 public class CheckNodeWifiFragment extends AbstractWaitForWifiConnectionFragment {
 
     private OnCheckNodeWifiSuccessListener mListener;
-    private View this_view;
 
     public CheckNodeWifiFragment() {
         // Required empty public constructor
     }
 
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        this_view = inflater.inflate(R.layout.check_node_wifi_fragment, container, false);
-        setCheckNodeWifiButtonListener(this_view);
-        return this_view;
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setCheckNodeWifiButtonListener(view);
     }
 
     @Override
@@ -54,17 +53,23 @@ public class CheckNodeWifiFragment extends AbstractWaitForWifiConnectionFragment
 
     @Override
     public void onResume() {
+
+        View view = getView();
+        if(view == null){
+            //Has to be tested if a simple return produces no errors
+            return;
+        }
         super.onResume();
-        LinearLayout nodeID =this_view.findViewById(R.id.check_node_wifi);
+        LinearLayout nodeID =view.findViewById(R.id.check_node_wifi);
         nodeID.setVisibility(View.VISIBLE);
-        LinearLayout progress =this_view.findViewById(R.id.progress_check_node_wifi);
+        LinearLayout progress =view.findViewById(R.id.progress_check_node_wifi);
         progress.setVisibility(View.GONE);
-        boolean nodeIDError = SmartWlanConfApplication.getnodeIDError(this.getActivity());
+        boolean nodeIDError = SmartWlanConfApplication.getnodeIDError(view.getContext());
         if (nodeIDError) {
-            EditText node_id = getActivity().findViewById(R.id.node_id);
+            EditText node_id = view.findViewById(R.id.node_id);
             node_id.setError(Config.NODE_ID_ERROR);
         }
-        SmartWlanConfApplication.setnodeIDError(getActivity(), false);
+        SmartWlanConfApplication.setnodeIDError(view.getContext(), false);
     }
 
     @Override
@@ -74,35 +79,52 @@ public class CheckNodeWifiFragment extends AbstractWaitForWifiConnectionFragment
     }
 
     private void setCheckNodeWifiButtonListener(View view){
+        Activity activity = getActivity();
+        if(activity == null){
+            //Has to be tested if a simple return produces no errors
+            return;
+        }
         final Button findAddressButton = view.findViewById(R.id.btn_check_node);
-        Context context = getActivity();
         findAddressButton.setOnClickListener((View v)-> {
             String ssid = ((EditText) view.findViewById(R.id.node_id)).getText().toString();
             //Set SSID in parent activity
-            ((SmartWlanConfActivity) context).setmNodeSSID(ssid);
+            ((SmartWlanConfActivity) activity).setmNodeSSID(ssid);
             SmartWlanConfApplication
-                    .getWifi(context)
-                    .connectWithWifi_withContext(context, ssid, Config.NODE_PWD, this);
+                    .getWifi(activity)
+                    .connectWithWifi_withContext(activity, ssid, Config.NODE_PWD, this);
             //TODO: Does not work
-            InputMethodManager inputManager = (InputMethodManager) getActivity().getApplicationContext().getSystemService(context.INPUT_METHOD_SERVICE);
-            inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-            LinearLayout nodeID =this_view.findViewById(R.id.check_node_wifi);
+            View mFocusView = activity.getCurrentFocus();
+            if(mFocusView != null) {
+                InputMethodManager inputManager = (InputMethodManager) activity.getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                mFocusView.clearFocus();
+                inputManager.hideSoftInputFromWindow(mFocusView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+            LinearLayout nodeID = view.findViewById(R.id.check_node_wifi);
             nodeID.setVisibility(View.GONE);
-            LinearLayout progress =this_view.findViewById(R.id.progress_check_node_wifi);
+            LinearLayout progress = view.findViewById(R.id.progress_check_node_wifi);
             progress.setVisibility(View.VISIBLE);
         });
     }
 
     public void onWaitForWifiConnection(Boolean success){
+        //Returning from Async call, check if view is still active
+        //If not working check if setting a destroyed tag in onDetach() is a solution
+        if(getView() == null){
+            //Has to be tested if a simple return produces no errors
+            return;
+        }
+        SmartWlanConfActivity activity = (SmartWlanConfActivity)getActivity();
+        if(activity == null){
+            //Has to be tested if a simple return produces no errors
+            return;
+        }
+
         if(success){
             //Connection with node wifi successful, open next fragment via callback
             if (mListener != null) mListener.onCheckNodeWifiSuccess();
-            else {
-                //Should never happen
-            }
         } else {
             //Couldn't connect to node wifi, reopen fragment that asks for node id
-            ((SmartWlanConfActivity) getActivity()).onCheckUserWifiCredentialsSuccess();
+            activity.onCheckUserWifiCredentialsSuccess();
             //Set error to show error text with node input field
             SmartWlanConfApplication.setnodeIDError(getActivity(), true);
         }

@@ -1,19 +1,22 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.thanosfisherman.wifiutils.WifiUtils;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -25,7 +28,6 @@ import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 import edu.kit.teco.smartwlanconf.ui.utils.HttpNodePost;
-
 
 import static android.content.Context.WIFI_SERVICE;
 
@@ -46,17 +48,13 @@ public class RestartNodeFragment extends AbstractWaitForWifiConnectionFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View layout = inflater.inflate(R.layout.restart_node_fragment, container, false);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         //Connection to node is established data can be sent to node
         connectNodeWithUserWifi();
         //Node is now restarting, connect to user wifi and look for node with ShowNodeWebsiteFragment
         connectToUserWifi();
-
-        return layout;
     }
 
     @Override
@@ -72,55 +70,84 @@ public class RestartNodeFragment extends AbstractWaitForWifiConnectionFragment {
 
     //Waits for connection with user wifi to be established
     public void onWaitForWifiConnection(Boolean success){
+        //Returning from Async call, check if view is still active
+        //If not working check if setting a destroyed tag in onDetach() is a solution
+        View view = getView();
+        if(view == null){
+            //Has to be tested if a simple return produces no errors, or an Exception has to be thrown
+            return;
+        }
         if (success) {
             mListener.onNodeRestartedSuccess();
         } else {
             final RestartNodeFragment myfrag = this;
             Snackbar snackbar = Snackbar
-                    .make(getView(), "Wifi Verbindung fehlgeschlagen", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Nochmal versuchen!", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            myfrag.connectToUserWifi();
-                        }
-                    });
-            int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
+                    .make(view, "Wifi Verbindung fehlgeschlagen", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("Nochmal versuchen!", (View v) -> myfrag.connectToUserWifi());
+            Activity activity = getActivity();
+            if(activity == null){
+                //Has to be tested if a simple return produces no errors, or if an Exception has to be thrown
+                return;
+            }
+            int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
             snackbar.show();
         }
     }
 
     private void connectToUserWifi(){
-        Context context = getActivity();
+        Activity activity = getActivity();
+        if(activity == null){
+            //Has to be tested if a simple return produces no errors, or if an Exception has to be thrown
+            return;
+        }
+
+        //Some phones seems to loose Permission to Change Wifi state
+        //Check here and see if it helps
+        PackageManager pm = activity.getPackageManager();
+        int hasPerm = pm.checkPermission(
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                activity.getPackageName());
+        if (hasPerm != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CHANGE_WIFI_MULTICAST_STATE}, 556);
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CHANGE_WIFI_STATE}, 557);
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CHANGE_NETWORK_STATE}, 558);
+        }
         SmartWlanConfApplication
-                .getWifi(context)
-                .connectWithWifi_withContext(context, ((SmartWlanConfActivity) context).getmWlanSSID(), ((SmartWlanConfActivity) context).getmWlanPwd(), this);
+                .getWifi(activity)
+                .connectWithWifi_withContext(activity, ((SmartWlanConfActivity) activity).getmWlanSSID(), ((SmartWlanConfActivity) activity).getmWlanPwd(), this);
     }
 
     //Sending wifi data to node restarts the node
     private void connectNodeWithUserWifi(){
 
-        //IP of Gateway is HTTP-Server address of Node
-        final String gatewayIP = lookupGateway();
+        Context context = getContext();
+        if(context == null){
+            //Has to be tested if a simple return produces no errors, or if an Exception has to be thrown
+            return;
+        }
 
-        HttpNodePost request = new HttpNodePost(getContext().getApplicationContext());
+        View view = getView();
+        if(view == null){
+            //Has to be tested if a simple return produces no errors, or if an Exception has to be thrown
+            return;
+        }
+
+        //IP of Gateway is HTTP-Server address of Node
+        final String gatewayIP = lookupGateway((Activity) context);
+
+        HttpNodePost request = new HttpNodePost(context.getApplicationContext());
         try {
             final String wlanUrl = "http://" + gatewayIP + "/_ac/connect";
-            HashMap<String, String> credentials = getNodeWifiCredentials();
+            HashMap<String, String> credentials = getNodeWifiCredentials((Activity)context);
             boolean result = request.execute(wlanUrl,
                     credentials.get("SSID"),
                     credentials.get("PWD")).get();
             if(!result){
-                final RestartNodeFragment myfrag = this;
                 Snackbar snackbar = Snackbar
-                        .make(getView(), "Wifi Daten konnten nicht an Knoten geschickt werden!", Snackbar.LENGTH_INDEFINITE)
-                        .setAction("Nochmal versuchen!", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                myfrag.connectNodeWithUserWifi();
-                            }
-                        });
-                int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
+                        .make(view, "Wifi Daten konnten nicht an Knoten geschickt werden!", Snackbar.LENGTH_INDEFINITE)
+                        .setAction("Nochmal versuchen!", (View v) -> this.connectNodeWithUserWifi());
+                int colorSnackRetry = ResourcesCompat.getColor(context.getResources(), R.color.colorSnackRetry, null);
                 snackbar.setActionTextColor(colorSnackRetry);
                 snackbar.show();
             }
@@ -130,8 +157,8 @@ public class RestartNodeFragment extends AbstractWaitForWifiConnectionFragment {
     }
 
     //Gets Gateway IP, which is the url for the Node
-    private String lookupGateway(){
-        final WifiManager manager = (WifiManager) getActivity().getApplicationContext().getSystemService(WIFI_SERVICE);
+    private String lookupGateway(Activity activity){
+        final WifiManager manager = (WifiManager) activity.getApplicationContext().getSystemService(WIFI_SERVICE);
         final DhcpInfo dhcp = manager.getDhcpInfo();
         byte[] ipAdress = BigInteger.valueOf(dhcp.gateway).toByteArray();
         //IpAdress has to be reversed
@@ -142,8 +169,7 @@ public class RestartNodeFragment extends AbstractWaitForWifiConnectionFragment {
         }
         try {
             //ipAdress to String
-            final String hostAdress = (InetAddress.getByAddress(ipAdress)).getHostAddress();
-            return hostAdress;
+            return (InetAddress.getByAddress(ipAdress)).getHostAddress();
         } catch (UnknownHostException e){
             e.printStackTrace();
         }
@@ -151,10 +177,10 @@ public class RestartNodeFragment extends AbstractWaitForWifiConnectionFragment {
     }
 
     //Read SSID and Password and prepare for HTTP Post
-    private HashMap<String, String> getNodeWifiCredentials(){
+    private HashMap<String, String> getNodeWifiCredentials(Activity activity){
         HashMap<String, String> credentials = new HashMap<>();
-        credentials.put("SSID", ((SmartWlanConfActivity) getActivity()).getmWlanSSID());
-        credentials.put("PWD",((SmartWlanConfActivity) getActivity()).getmWlanPwd());
+        credentials.put("SSID", ((SmartWlanConfActivity) activity).getmWlanSSID());
+        credentials.put("PWD",((SmartWlanConfActivity) activity).getmWlanPwd());
         return credentials;
     }
 

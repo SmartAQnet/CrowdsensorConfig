@@ -8,3 +8,12 @@
     <color name="colorWifiItem">#B4E4F741</color>
     <color name="colorBtnText">#B5FFFFFF</color>
 </resources>
+<!--<resources>
+    <color name="colorPrimary">#B5FFFFFF</color>
+    <color name="colorSnackRetry">#03A9F4</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorText">#000000</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="colorWifiItem">#B4E4F741</color>
+    <color name="colorBtnText">#B5FFFFFF</color>
+</resources>-->

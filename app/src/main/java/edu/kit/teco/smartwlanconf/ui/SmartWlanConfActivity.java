@@ -67,11 +67,9 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
     //The different fragments are managed here
 
     //This shows the fragment with the list of available Wifis
-    private void setInitialFragment(){
-        getSupportFragmentManager().beginTransaction()
-                //Open with one column
-                .replace(R.id.container, ListOfWifisFragment.newInstance(1))
-                .commitNow();
+    public void setInitialFragment(){
+        Fragment newfragment = ListOfWifisFragment.newInstance(1);
+        replaceFragment(newfragment);
     }
 
     //This shows the fragment that checks credentials of selected Wifi

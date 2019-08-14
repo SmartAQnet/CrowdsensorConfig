@@ -3,12 +3,11 @@ package edu.kit.teco.smartwlanconf.ui.fragments;
 import android.content.Context;
 import android.os.Bundle;
 
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -32,7 +31,6 @@ public class CheckUserWifiCredentialsFragment extends AbstractWaitForWifiConnect
 
     private static final String ARG_SSID = "SSID";
     private OnCheckUserWifiCredentialsSuccessListener mListener;
-    private View my_view;
 
     public CheckUserWifiCredentialsFragment() {
         // Required empty public constructor
@@ -57,19 +55,26 @@ public class CheckUserWifiCredentialsFragment extends AbstractWaitForWifiConnect
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
+            SmartWlanConfActivity activity = (SmartWlanConfActivity) getActivity();
+            if(activity == null){
+                //Has to be tested if a simple return produces no errors, or an Exception has to be thrown
+                return;
+            }
             //Set SSID for Wlan in parent
             ((SmartWlanConfActivity) getActivity()).setmWlanSSID(getArguments().getString(ARG_SSID));
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
-        View this_view = inflater.inflate(R.layout.wifi_check_credentials_fragment, container, false);
-        ((EditText) this_view.findViewById(R.id.ssid)).setText(((SmartWlanConfActivity) getActivity()).getmWlanSSID());
-        setConnectButtonListener(this_view);
-        return this_view;
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        SmartWlanConfActivity activity = (SmartWlanConfActivity) getActivity();
+        if(activity == null){
+            //Has to be tested if a simple return produces no errors, or an Exception has to be thrown
+            return;
+        }
+        ((EditText) view.findViewById(R.id.ssid)).setText(activity.getmWlanSSID());
+        setConnectButtonListener(view, activity);
     }
 
     @Override
@@ -89,36 +94,41 @@ public class CheckUserWifiCredentialsFragment extends AbstractWaitForWifiConnect
         mListener = null;
     }
 
-    private void setConnectButtonListener(View view){
-        my_view = view;
+    private void setConnectButtonListener(View view, SmartWlanConfActivity activity){
 
         final Button connectButton = view.findViewById(R.id.btnConnect);
         connectButton.setOnClickListener((View v)-> {
             String pwd = ((EditText) view.findViewById(R.id.pwd)).getText().toString();
             //Set  Wlan Passwod in Parent Activity
-            ((SmartWlanConfActivity) getActivity()).setmWlanPwd(pwd);
+            activity.setmWlanPwd(pwd);
             Context context = view.getContext().getApplicationContext();
             SmartWlanConfApplication
-                    .getWifi(getActivity())
-                    .connectWithWifi_withContext(context, ((SmartWlanConfActivity) getActivity()).getmWlanSSID(), pwd, this);
+                    .getWifi(activity)
+                    .connectWithWifi_withContext(context, activity.getmWlanSSID(), pwd, this);
         });
     }
 
     public void onWaitForWifiConnection (Boolean success){
+        //Returning from Async call, check if view is still active
+        //If not working check if setting a destroyed tag in onDetach() is a solution
+        View view = getView();
+        if(view == null){
+            //Has to be tested if a simple return produces no errors, or an Exception has to be thrown
+            return;
+        }
+
         if(success){
             if (mListener != null) {
-                Toast.makeText(my_view.getContext().getApplicationContext()
-                        ,"Verbunden mit " + ((EditText) my_view.findViewById(R.id.ssid)).getText().toString()
+                Toast.makeText(view.getContext().getApplicationContext()
+                        ,"Verbunden mit " + ((EditText) view.findViewById(R.id.ssid)).getText().toString()
                         ,Toast.LENGTH_LONG).show();
                 mListener.onCheckUserWifiCredentialsSuccess();
-            } else {
-                //Should never happen
             }
         } else {
             Snackbar snackbar = Snackbar
-                    .make(getView(), "Wifi Verbindung fehlgeschlagen, falsches Passwort?", Snackbar.LENGTH_LONG);
+                    .make(view, "Wifi Verbindung fehlgeschlagen, falsches Passwort?", Snackbar.LENGTH_LONG);
             snackbar.show();
-            return;        }
+        }
     }
 
     /**

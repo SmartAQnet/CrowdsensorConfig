@@ -1,5 +1,6 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
@@ -12,9 +13,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
@@ -70,18 +69,14 @@ public class ListOfWifisFragment extends Fragment{
         this.setRetainInstance(true);
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.wifi_fragment_item_list, container, false);
-        return view;
-    }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        setAdapter();
+        if (!setAdapter(view)){
+            //Todo: Muss da was gemacht werden?
+            System.out.println("Adapter für WIFI  Liste nicht gesetzt!");
+        }
     }
 
     @Override
@@ -101,11 +96,13 @@ public class ListOfWifisFragment extends Fragment{
         mListener = null;
     }
 
-    private View setAdapter(){
+    private boolean setAdapter(View view){
+        Context context = getContext();
+        if(context == null){
+            return false;
+        }
         // Set the adapter
-        View view = getView();
         if (view instanceof FrameLayout) {
-            Context context = view.getContext();
             RecyclerView recyclerView = view.findViewById(R.id.list);
             if (mColumnCount <= 1) {
                 recyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -115,34 +112,40 @@ public class ListOfWifisFragment extends Fragment{
             DividerItemDecoration dividerItemDecoration= new DividerItemDecoration(context,
                     LinearLayoutManager.VERTICAL);
             recyclerView.addItemDecoration(dividerItemDecoration);
-            WifiUtils.withContext(getActivity()).scanWifi(this::getScanResults).start();
+            WifiUtils.withContext(context).scanWifi(this::getScanResults).start();
             wifiAdapter = new WifiListItemRecyclerViewAdapter(wifiList, mListener);
             recyclerView.setAdapter(wifiAdapter);
+            return true;
         }
-        return view;
+        return false;
     }
 
     private void getScanResults(@NonNull final List<ScanResult> results){
+        View view = getView();
+        if(view == null){
+            //Has to be tested if a simple return produces no errors
+            return;
+        }
+        Activity activity = getActivity();
+        if(activity == null){
+            //Has to be tested if a simple return produces no errors
+            return;
+        }
+
         if (results.isEmpty())
         {
-            final View thisView  = this.getView();
             Snackbar snackbar = Snackbar
-                    .make(thisView, "Keine Wifi Netze gefunden", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Nochmal versuchen!", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            WifiUtils.withContext(getActivity()).scanWifi(ListOfWifisFragment.this::getScanResults).start();
-                        }
-                    });
-            int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
+                    .make(view, "Keine Wifi Netze gefunden", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("Nochmal versuchen!", (View v)->
+                            WifiUtils.withContext(getActivity()).scanWifi(ListOfWifisFragment.this::getScanResults).start());
+            int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
             snackbar.show();
             return;
         }
         //Scan results not empty hide splash screen
-        View view = getView();
-        LinearLayout splash = (LinearLayout) view.findViewById(R.id.splash);
-        RecyclerView list = (RecyclerView) view.findViewById(R.id.list);
+        LinearLayout splash = view.findViewById(R.id.splash);
+        RecyclerView list = view.findViewById(R.id.list);
         splash.setVisibility(View.GONE);
         list.setVisibility(View.VISIBLE);
         wifiList.clear();

@@ -2,19 +2,16 @@ package edu.kit.teco.smartwlanconf.ui.fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.github.druk.rx2dnssd.Rx2DnssdBindable;
+import java.net.Inet4Address;
 
-import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.Config;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
@@ -42,17 +39,14 @@ public class ShowNodeWebsiteFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        startDiscovery();
+    public void onConfigurationChanged(Configuration config){
+        super.onConfigurationChanged(config);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View layout = inflater.inflate(R.layout.show_node_website_fragment, container, false);
-        return layout;
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        startDiscovery();
     }
 
     @Override
@@ -66,44 +60,55 @@ public class ShowNodeWebsiteFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        //mListener = null;
-    }
-
     private void startDiscovery() {
-        String mNodeServiceName = ((SmartWlanConfActivity) getActivity()).getmNodeSSID();
-        Rx2DnssdBindable mRxDnssd = (Rx2DnssdBindable) SmartWlanConfApplication.getRxDnssd(getActivity());
+        try {
+            SmartWlanConfActivity activity = ((SmartWlanConfActivity) getActivity());
+            if(activity == null){
+                throw new NullPointerException();
+            }
+            String mNodeServiceName = activity.getmNodeSSID();
+            Rx2DnssdBindable mRxDnssd = (Rx2DnssdBindable) SmartWlanConfApplication.getRxDnssd(getActivity());
 
-        //Searching for Bounjour Services from https://github.com/andriydruk/RxDNSSD
-        mDisposable = mRxDnssd.browse(Config.NODE_REQ_TYPE, Config.NODE_DOMAIN)
-                .compose(mRxDnssd.resolve())
-                .compose(mRxDnssd.queryIPRecords())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(mDNSService -> {
-                    if(mDNSService.getServiceName().equals(mNodeServiceName)){
-                        mNodeIP = mDNSService.getInet4Address().toString();
-                        continueAfterDiscovery();
-                    }
-                }, throwable -> {
-                    Log.e("DNSSD", "Error: ", throwable);
-                });
+            //Searching for Bounjour Services from https://github.com/andriydruk/RxDNSSD
+            mDisposable = mRxDnssd.browse(Config.NODE_REQ_TYPE, Config.NODE_DOMAIN)
+                    .compose(mRxDnssd.resolve())
+                    .compose(mRxDnssd.queryIPRecords())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(mDNSService -> {
+                        if(mDNSService.getServiceName().equals(mNodeServiceName)){
+                            Inet4Address ip4 = mDNSService.getInet4Address();
+                            try {
+                                if (ip4 == null) {
+                                    throw new NullPointerException();
+                                }
+                                mNodeIP = mDNSService.getInet4Address().toString();
+                            } catch (NullPointerException e){
+                                Log.e("Activity", "ip4 null in startDiscovery");
+                                //TODO: was machen?
+                            }
+                            continueAfterDiscovery();
+                        }
+                    }, throwable -> Log.e("DNSSD", "Error: ", throwable));
+
+        } catch (NullPointerException e) {
+            Log.e("Activity", "Activity null in startDiscovery");
+            //TODO: Was tun?
+        }
     }
 
     private void continueAfterDiscovery(){
+        //Returning from Async call, check if view is still active
+        //If not working check if setting a destroyed tag in onDetach() is a solution
+        if(getView() == null){
+            //Has to be tested if a simple return produces no errors
+            return;
+        }
         stopDiscovery();
         //open webview with node ip
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                Uri.parse("http://"  + mNodeIP));
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://"  + mNodeIP));
         startActivity(browserIntent);
-        //Return to list of wifis
+        //return to list of wifis
         mListener.onAfterShowNode();
     }
 
