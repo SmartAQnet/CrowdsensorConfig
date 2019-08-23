@@ -8,6 +8,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -16,12 +17,16 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.github.druk.rx2dnssd.Rx2DnssdBindable;
+import com.google.android.material.snackbar.Snackbar;
+
 import java.net.Inet4Address;
+import java.util.concurrent.TimeUnit;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.Config;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
+import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -35,6 +40,8 @@ import io.reactivex.schedulers.Schedulers;
 public class ShowNodeWebsiteFragment extends Fragment {
 
     private OnShowNodeSideListener mListener;
+    //Time in seconds searching for Node
+    private int TIMEOUT = 20;
 
     //the node's ip adress in user wifi network
     private String mNodeIP="";
@@ -89,6 +96,10 @@ public class ShowNodeWebsiteFragment extends Fragment {
                     .compose(mRxDnssd.queryIPRecords())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
+                    .timeout(TIMEOUT, TimeUnit.SECONDS)
+                    .onErrorResumeNext(throwable -> {
+                        return Flowable.error(throwable);
+                    })
                     .subscribe(mDNSService -> {
                         if(mDNSService.getServiceName().equals(mNodeServiceName)){
                             Inet4Address ip4 = mDNSService.getInet4Address();
@@ -98,31 +109,43 @@ public class ShowNodeWebsiteFragment extends Fragment {
                                 }
                                 mNodeIP = mDNSService.getInet4Address().toString();
                             } catch (NullPointerException e){
-                                Log.e("Activity", "ip4 null in startDiscovery");
-                                //TODO: was machen?
+                                Log.e("ShowNodeWebSiteFragment", "ip4 null in startDiscovery");
+                                continueAfterDiscovery(false);
                             }
-                            continueAfterDiscovery();
+                            continueAfterDiscovery(true);
                         }
-                    }, throwable -> Log.e("DNSSD", "Error: ", throwable));
-
-        } catch (NullPointerException e) {
-            Log.e("Activity", "Activity null in startDiscovery");
-            //TODO: Was tun?
+                    }, throwable -> {
+                        Log.e("ShowNodeWebSiteFragment", "DNSSDError: ", throwable);
+                        showNodeDiscoveryError();
+                        continueAfterDiscovery(false);});
+        } catch (Exception e) {
+            //Activity no longer active, do nothing
+            Log.e("ShowNodeWebSiteFragment", "Activity null in startDiscovery");
         }
     }
 
-    private void continueAfterDiscovery(){
-        //Returning from Async call, check if view is still active
-        //If not working check if setting a destroyed tag in onDetach() is a solution
-        if(getView() == null){
-            //Has to be tested if a simple return produces no errors
-            return;
-        }
+    private void showNodeDiscoveryError(){
+        Snackbar snackbar = Snackbar
+                .make(getView(), "Knoten nicht im Wlan gefunden!", Snackbar.LENGTH_LONG);
+        int colorSnackRetry = ResourcesCompat.getColor(getResources(), R.color.colorSnackRetry, null);
+        snackbar.setActionTextColor(colorSnackRetry);
+        snackbar.show();
+    }
+
+    private void continueAfterDiscovery(Boolean success){
         stopDiscovery();
-        //open webview with node ip
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://"  + mNodeIP));
-        startActivity(browserIntent);
-        //return to list of wifis
+        if (success) {
+            //open webview with node ip
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://" + mNodeIP));
+            startActivity(browserIntent);
+            //Returning from Async call, check if view is still active
+            //If not working check if setting a destroyed tag in onDetach() is a solution
+            if (getView() == null) {
+                //Has to be tested if a simple return produces no errors
+                return;
+            }
+        }
+        //Todo: Just restart or show something else?
         mListener.onAfterShowNode();
     }
 

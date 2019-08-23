@@ -3,17 +3,18 @@ package edu.kit.teco.smartwlanconf.ui.fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,11 +22,13 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.thanosfisherman.wifiutils.WifiUtils;
 
 import edu.kit.teco.smartwlanconf.R;
+import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.Config;
+import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 import edu.kit.teco.smartwlanconf.ui.adapter.WifiListItemRecyclerViewAdapter;
+import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +40,7 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnWifiListFragmentInteractionListener}
  * interface.
  */
-public class ListOfWifisFragment extends Fragment{
+public class ListOfWifisFragment extends WifiFragment {
 
     private static final String ARG_COLUMN_COUNT = "Verfügbare Wlan";
     private int mColumnCount = 1;
@@ -121,15 +124,24 @@ public class ListOfWifisFragment extends Fragment{
             DividerItemDecoration dividerItemDecoration= new DividerItemDecoration(context,
                     LinearLayoutManager.VERTICAL);
             recyclerView.addItemDecoration(dividerItemDecoration);
-            WifiUtils.withContext(context).scanWifi(this::getScanResults).start();
+            WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(getContext());
             wifiAdapter = new WifiListItemRecyclerViewAdapter(wifiList, mListener);
             recyclerView.setAdapter(wifiAdapter);
+            final WifiFragment wifiFragment = this;
+            // An Async task always executes in new thread
+            new Thread(new Runnable() {
+                public void run()
+                {
+                    wifi.scanWifi(wifiFragment);
+                }
+            }).start();
             return true;
         }
         return false;
     }
 
-    private void getScanResults(@NonNull final List<ScanResult> results){
+    @Override
+    public void onWaitForWifiScan(List<ScanResult> results){
         View view = getView();
         if(view == null){
             //Has to be tested if a simple return produces no errors
@@ -141,12 +153,17 @@ public class ListOfWifisFragment extends Fragment{
             return;
         }
 
-        if (results.isEmpty())
-        {
+        if (results == null) {
             Snackbar snackbar = Snackbar
                     .make(view, "Keine Wifi Netze gefunden", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Nochmal versuchen!", (View v)->
-                            WifiUtils.withContext(getActivity()).scanWifi(ListOfWifisFragment.this::getScanResults).start());
+                    .setAction("Nochmal versuchen!", (View v)->{
+                        WifiManager wifi =(WifiManager) activity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                        if(!wifi.isWifiEnabled()){
+                            //Does this happen?
+                            Log.e("ListOfWifisFragment","Wifi nicht aktiviert zum Scannen");
+                        }
+                        ((SmartWlanConfActivity)getActivity()).setInitialFragment();
+                    });
             int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
             snackbar.show();

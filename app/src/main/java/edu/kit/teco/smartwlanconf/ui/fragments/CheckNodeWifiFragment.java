@@ -27,7 +27,7 @@ import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
  * {@link OnCheckNodeWifiSuccessListener} interface
  * to handle interaction events.
  */
-public class CheckNodeWifiFragment extends AbstractWaitForWifiConnectionFragment {
+public class CheckNodeWifiFragment extends WifiFragment {
 
     private OnCheckNodeWifiSuccessListener mListener;
 
@@ -61,13 +61,13 @@ public class CheckNodeWifiFragment extends AbstractWaitForWifiConnectionFragment
 
     @Override
     public void onResume() {
+        super.onResume();
 
         View view = getView();
         if(view == null){
             //Has to be tested if a simple return produces no errors
             return;
         }
-        super.onResume();
         LinearLayout nodeID =view.findViewById(R.id.check_node_wifi);
         nodeID.setVisibility(View.VISIBLE);
         LinearLayout progress =view.findViewById(R.id.progress_check_node_wifi);
@@ -97,9 +97,6 @@ public class CheckNodeWifiFragment extends AbstractWaitForWifiConnectionFragment
             String ssid = ((EditText) view.findViewById(R.id.node_id)).getText().toString();
             //Set SSID in parent activity
             ((SmartWlanConfActivity) activity).setmNodeSSID(ssid);
-            SmartWlanConfApplication
-                    .getWifi(activity)
-                    .connectWithWifi_withContext(activity, ssid, Config.NODE_PWD, this);
             //TODO: Does not work
             View mFocusView = activity.getCurrentFocus();
             if(mFocusView != null) {
@@ -111,9 +108,13 @@ public class CheckNodeWifiFragment extends AbstractWaitForWifiConnectionFragment
             nodeID.setVisibility(View.GONE);
             LinearLayout progress = view.findViewById(R.id.progress_check_node_wifi);
             progress.setVisibility(View.VISIBLE);
+                    SmartWlanConfApplication
+                            .getWifi(activity)
+                            .connectWithWifi_withContext(activity, ssid, Config.NODE_PWD, this);
         });
     }
 
+    @Override
     public void onWaitForWifiConnection(Boolean success){
         //Returning from Async call, check if view is still active
         //If not working check if setting a destroyed tag in onDetach() is a solution

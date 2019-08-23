@@ -19,7 +19,7 @@ import okhttp3.Response;
 
 public class HttpNodePost extends AsyncTask<String, Void, Boolean> {
 
-    //Needs API Level 26 because of Duration find workaround if needed
+    //Checking a Timeout Needs API Level 26 because of Duration find workaround if needed
     /*public static final String REQUEST_METHOD = "POST";
     public static final Duration READ_TIMEOUT = Duration.ofMillis(15000);
     public static final int CONNECTION_TIMEOUT = 15000;*/

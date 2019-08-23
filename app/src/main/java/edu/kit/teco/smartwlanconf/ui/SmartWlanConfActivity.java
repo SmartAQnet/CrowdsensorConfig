@@ -7,19 +7,16 @@ import androidx.fragment.app.Fragment;
 import android.Manifest;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.content.Context;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 import edu.kit.teco.smartwlanconf.R;
-import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.fragments.CheckNodeWifiFragment;
+import edu.kit.teco.smartwlanconf.ui.fragments.CheckUserWifiCredentialsFragment;
+import edu.kit.teco.smartwlanconf.ui.fragments.ListOfWifisFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.RestartNodeFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.ShowNodeWebsiteFragment;
-import edu.kit.teco.smartwlanconf.ui.fragments.CheckUserWifiCredentialsFragment;
-import edu.kit.teco.smartwlanconf.ui.fragments.AbstractWaitForWifiConnectionFragment;
-import edu.kit.teco.smartwlanconf.ui.fragments.ListOfWifisFragment;
+import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment;
 
 
 //MainActivity that implements the listeners of its fragments
@@ -86,7 +83,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     //This starts the RestartNodeFragment that initializes the node for wifi connection
     public void onCheckNodeWifiSuccess(){
-        AbstractWaitForWifiConnectionFragment newFragment = new RestartNodeFragment();
+        WifiFragment newFragment = new RestartNodeFragment();
         replaceFragment(newFragment);
     }
 

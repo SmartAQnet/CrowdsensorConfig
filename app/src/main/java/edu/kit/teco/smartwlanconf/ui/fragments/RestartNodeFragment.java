@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
@@ -36,7 +37,7 @@ import static android.content.Context.WIFI_SERVICE;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class RestartNodeFragment extends AbstractWaitForWifiConnectionFragment {
+public class RestartNodeFragment extends WifiFragment {
 
     private OnNodeRestartedListener mListener;
 
@@ -74,6 +75,7 @@ public class RestartNodeFragment extends AbstractWaitForWifiConnectionFragment {
     }
 
     //Waits for connection with user wifi to be established
+    @Override
     public void onWaitForWifiConnection(Boolean success){
         //Returning from Async call, check if view is still active
         //If not working check if setting a destroyed tag in onDetach() is a solution
@@ -85,10 +87,9 @@ public class RestartNodeFragment extends AbstractWaitForWifiConnectionFragment {
         if (success) {
             mListener.onNodeRestartedSuccess();
         } else {
-            final RestartNodeFragment myfrag = this;
             Snackbar snackbar = Snackbar
                     .make(view, "Wifi Verbindung fehlgeschlagen", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Nochmal versuchen!", (View v) -> myfrag.connectToUserWifi());
+                    .setAction("Nochmal versuchen!", (View v) -> connectToUserWifi());
             Activity activity = getActivity();
             if(activity == null){
                 //Has to be tested if a simple return produces no errors, or if an Exception has to be thrown
@@ -100,18 +101,18 @@ public class RestartNodeFragment extends AbstractWaitForWifiConnectionFragment {
         }
     }
 
+    @RequiresPermission(Manifest.permission.CHANGE_WIFI_STATE)
     private void connectToUserWifi(){
         Activity activity = getActivity();
         if(activity == null){
             //Has to be tested if a simple return produces no errors, or if an Exception has to be thrown
             return;
         }
-
         //Some phones seems to loose Permission to Change Wifi state
         //Check here and see if it helps
         PackageManager pm = activity.getPackageManager();
         int hasPerm = pm.checkPermission(
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.CHANGE_WIFI_STATE,
                 activity.getPackageName());
         if (hasPerm != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CHANGE_WIFI_MULTICAST_STATE}, 556);
