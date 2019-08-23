@@ -18,6 +18,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
+import edu.kit.teco.smartwlanconf.ui.Config;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 
 
@@ -29,7 +30,7 @@ import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
  * Use the {@link CheckUserWifiCredentialsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CheckUserWifiCredentialsFragment extends AbstractWaitForWifiConnectionFragment {
+public class CheckUserWifiCredentialsFragment extends WifiFragment {
 
     private static final String ARG_SSID = "SSID";
     private OnCheckUserWifiCredentialsSuccessListener mListener;
@@ -110,10 +111,9 @@ public class CheckUserWifiCredentialsFragment extends AbstractWaitForWifiConnect
             String pwd = ((EditText) view.findViewById(R.id.pwd)).getText().toString();
             //Set  Wlan Passwod in Parent Activity
             activity.setmWlanPwd(pwd);
-            Context context = view.getContext().getApplicationContext();
             SmartWlanConfApplication
                     .getWifi(activity)
-                    .connectWithWifi_withContext(context, activity.getmWlanSSID(), pwd, this);
+                    .connectWithWifi_withContext(activity.getApplicationContext(), activity.getmWlanSSID(), pwd, this);
         });
     }
 
