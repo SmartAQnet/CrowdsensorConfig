@@ -16,6 +16,7 @@ public class WifiConnectionUtils {
     private boolean enabled = false;
     private WifiFragment calling_fragment;
     private WifiManager wifiManager;
+    private BroadcastReceiver wifiScanReceiver;
 
     public static WifiConnectionUtils getInstance() {
         return ourInstance;
@@ -47,7 +48,7 @@ public class WifiConnectionUtils {
     public void scanWifi(WifiFragment wifiFragment){
         Context context = wifiFragment.getActivity().getApplicationContext();
         wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
+        wifiScanReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context c, Intent intent) {
                 boolean success = intent.getBooleanExtra(
@@ -65,7 +66,6 @@ public class WifiConnectionUtils {
             // scan failure handling
             scanSuccess(success, wifiFragment);
         }
-
     }
 
     private void scanSuccess(boolean success, WifiFragment wifiFragment){
@@ -73,6 +73,7 @@ public class WifiConnectionUtils {
             wifiFragment.onWaitForWifiScan(wifiManager.getScanResults());
             return;
         }
+        wifiFragment.getActivity().unregisterReceiver(wifiScanReceiver);
         wifiFragment.onWaitForWifiScan(null);
     }
 

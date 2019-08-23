@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -18,7 +19,6 @@ import com.google.android.material.snackbar.Snackbar;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
-import edu.kit.teco.smartwlanconf.ui.Config;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 
 
@@ -88,6 +88,14 @@ public class CheckUserWifiCredentialsFragment extends WifiFragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        //Hide Progress Bar
+        getView().findViewById(R.id.getusercredentials).setVisibility(View.VISIBLE);
+        getView().findViewById(R.id.checkingWifi).setVisibility(View.GONE);
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof OnCheckUserWifiCredentialsSuccessListener) {
@@ -108,8 +116,17 @@ public class CheckUserWifiCredentialsFragment extends WifiFragment {
 
         final Button connectButton = view.findViewById(R.id.btnConnect);
         connectButton.setOnClickListener((View v)-> {
+            //Hide screen keyboard
+            InputMethodManager inputManager = (InputMethodManager)
+                    v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow((null == activity.getCurrentFocus()) ?
+                    null : activity.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            //Show Progress Bar
+            getView().findViewById(R.id.getusercredentials).setVisibility(View.GONE);
+            getView().findViewById(R.id.checkingWifi).setVisibility(View.VISIBLE);
+
             String pwd = ((EditText) view.findViewById(R.id.pwd)).getText().toString();
-            //Set  Wlan Passwod in Parent Activity
+            //Set  Wlan Password in Parent Activity
             activity.setmWlanPwd(pwd);
             SmartWlanConfApplication
                     .getWifi(activity)
@@ -134,6 +151,9 @@ public class CheckUserWifiCredentialsFragment extends WifiFragment {
                 mListener.onCheckUserWifiCredentialsSuccess();
             }
         } else {
+            //Hide Progress Bar
+            getView().findViewById(R.id.getusercredentials).setVisibility(View.VISIBLE);
+            getView().findViewById(R.id.checkingWifi).setVisibility(View.GONE);
             Snackbar snackbar = Snackbar
                     .make(view, "Wifi Verbindung fehlgeschlagen, falsches Passwort?", Snackbar.LENGTH_LONG);
             snackbar.show();
