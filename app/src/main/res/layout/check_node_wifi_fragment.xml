@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.fragments.CheckNodeWifiFragment">
 
     <LinearLayout
@@ -23,7 +24,14 @@
             android:id="@+id/btn_check_node"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="200px"
             android:text="@string/btn_check_node"/>
+
+        <Button
+            android:id="@+id/btn_scan_qr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Scan Sensor QR Code" />
     </LinearLayout>
 
     <LinearLayout
@@ -47,5 +55,4 @@
             android:inputType="none"
             android:text="Prüfe Wifi des Sensors" />
     </LinearLayout>
-
 </FrameLayout>

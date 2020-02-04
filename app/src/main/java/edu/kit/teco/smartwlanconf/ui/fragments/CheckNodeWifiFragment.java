@@ -2,12 +2,14 @@ package edu.kit.teco.smartwlanconf.ui.fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +17,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
@@ -46,6 +52,7 @@ public class CheckNodeWifiFragment extends WifiFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setCheckNodeWifiButtonListener(view);
+        setScanQRCode(view);
     }
 
     @Override
@@ -111,6 +118,24 @@ public class CheckNodeWifiFragment extends WifiFragment {
                     SmartWlanConfApplication
                             .getWifi(activity)
                             .connectWithWifi_withContext(activity, ssid, Config.NODE_PWD, this);
+        });
+    }
+
+    private void setScanQRCode(View view){
+        Activity activity = getActivity();
+        if(activity == null){
+            //Has to be tested if a simple return produces no errors
+            return;
+        }
+        final Button findAddressButton = view.findViewById(R.id.btn_scan_qr);
+        findAddressButton.setOnClickListener((View v)-> {
+            IntentIntegrator integrator = new IntentIntegrator(activity);
+            integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
+            integrator.setPrompt("Scan Code");
+            integrator.setCameraId(0);
+            integrator.setBeepEnabled(true);
+            integrator.setBarcodeImageEnabled(false);
+            integrator.initiateScan();
         });
     }
 
