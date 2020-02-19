@@ -54,8 +54,8 @@ public class SmartWlanConfApplication extends Application {
 
     public static WifiConnectionUtils getWifi(@NonNull Context context){
         WifiManager wifi = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        if(!wifi.isWifiEnabled()) {
-            SmartWlanConfApplication.getWifi(context).enableWifi(context);
+        if(!SmartWlanConfApplication.getWifi(context).enableWifi(context)) {
+            //Error no Wifi
         }
         return ((SmartWlanConfApplication) context.getApplicationContext()).mWifi;
     }

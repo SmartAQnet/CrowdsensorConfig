@@ -34,9 +34,19 @@
             android:textStyle="bold" />
 
         <EditText
+            android:paddingHorizontal="40dp"
             android:layout_width="match_parent"
             android:layout_height="100dp"
-            android:layout_weight="1"
+            android:layout_weight="3"
+            android:background="@null"
+            android:gravity="center|top"
+            android:inputType="none"
+            android:text="Wählen Sie aus der Liste das WLan mit dem sich der Sensor verbinden soll" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_weight="0"
             android:background="@null"
             android:gravity="center|top"
             android:inputType="none"
