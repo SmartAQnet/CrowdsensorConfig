@@ -1,13 +1,17 @@
 package edu.kit.teco.smartwlanconf.ui.utils;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
+
+import androidx.core.app.ActivityCompat;
 
 import com.thanosfisherman.wifiutils.WifiUtils;
 
@@ -19,13 +23,18 @@ import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment;
 
 public class WifiConnectionUtils {
 
-    private static final WifiConnectionUtils ourInstance = new WifiConnectionUtils();
+    private static WifiConnectionUtils ourInstance;
     private boolean enabled = false;
     private WifiFragment calling_fragment;
     private WifiManager wifiManager;
     private BroadcastReceiver wifiScanReceiver;
 
     public static WifiConnectionUtils getInstance() {
+
+        if(ourInstance == null){
+            ourInstance = new WifiConnectionUtils();
+        }
+
         return ourInstance;
     }
 
@@ -53,23 +62,18 @@ public class WifiConnectionUtils {
             wifiManager.removeNetworkSuggestions(suggestions);
         } else {
             List<WifiConfiguration> list= wifiManager.getConfiguredNetworks();
-            for(WifiConfiguration i:list){
-                //SSID is surrounded by double quotes
-                if(i.SSID.equals("\""+ ssid + "\"")){
-                    if(!wifiManager.removeNetwork(i.networkId)){ return; } //Fehlerbehandlung Netzwerk konnte nicht entfernt werden
-                    break;
-                }
-            }
             WifiConfiguration conf = new WifiConfiguration();
-            conf.SSID = "\"" + ssid + "\"";
-            conf.preSharedKey = "\""+ pwd +"\"";
-            int networkID =wifiManager.addNetwork(conf);
+            //conf.SSID = "\"" + ssid + "\"";
+            conf.SSID = ssid;
+            //conf.preSharedKey = "\""+ pwd +"\"";
+            conf.preSharedKey = pwd;
+            int networkID = wifiManager.updateNetwork(conf);
             if(networkID>0){
                 list = wifiManager.getConfiguredNetworks();
                 for(WifiConfiguration i:list){
                     if(i.networkId == networkID){
                         wifiManager.disconnect();
-                        wifiManager.enableNetwork(i.networkId, true);
+                        //wifiManager.enableNetwork(i.networkId, true);
                         return;
                     }
                 }
@@ -82,7 +86,7 @@ public class WifiConnectionUtils {
 
     public void connectWithWifi_withContext(Context context, String ssid, String pwd, WifiFragment fragment){
         calling_fragment = fragment;
-        //resetCurrentWifi(context, ssid,pwd);
+        resetCurrentWifi(context, ssid,pwd);
         WifiUtils.withContext(context)
                 .connectWith(ssid, pwd)
                 .onConnectionResult(this::checkConnection)

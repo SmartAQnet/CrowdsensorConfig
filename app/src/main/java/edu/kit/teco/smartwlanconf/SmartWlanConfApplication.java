@@ -48,16 +48,14 @@ public class SmartWlanConfApplication extends Application {
         return ((SmartWlanConfApplication)context.getApplicationContext()).mRxDnssd;
     }
 
-    public static WifiConnectionUtils getWifi1(@NonNull Context context){
-        return ((SmartWlanConfApplication) context.getApplicationContext()).mWifi;
-    }
-
     public static WifiConnectionUtils getWifi(@NonNull Context context){
-        WifiManager wifi = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        if(!SmartWlanConfApplication.getWifi(context).enableWifi(context)) {
+        WifiConnectionUtils mwifi = ((SmartWlanConfApplication) context.getApplicationContext()).mWifi;
+        assert(mwifi != null);
+            //WifiManager wifi = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        if (!mwifi.enableWifi(context)) {
             //Error no Wifi
         }
-        return ((SmartWlanConfApplication) context.getApplicationContext()).mWifi;
+        return mwifi;
     }
     private Rx2Dnssd createDnssd() {
         return new Rx2DnssdBindable(this);
