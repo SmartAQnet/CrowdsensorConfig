@@ -5,10 +5,15 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
+
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Intent;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
+
+import com.google.zxing.integration.android.IntentIntegrator;
 
 import java.util.Set;
 
@@ -115,6 +120,18 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         transaction.addToBackStack(null);
         transaction.commit();
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == IntentIntegrator.REQUEST_CODE) {
+            // I want the first child because I know he called the scanner
+            getSupportFragmentManager()
+                    .getFragments().get(0)
+                    .onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+
 
     //Setter, Getter
 

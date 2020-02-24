@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -129,7 +127,15 @@ public class CheckNodeWifiFragment extends WifiFragment {
         }
         final Button findAddressButton = view.findViewById(R.id.btn_scan_qr);
         findAddressButton.setOnClickListener((View v)-> {
-            IntentIntegrator integrator = new IntentIntegrator(activity);
+            //Should work in fragment without calling activity, error not found
+            /*IntentIntegrator.forSupportFragment(CheckNodeWifiFragment.this)
+                    .setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES)
+                    .setPrompt("Scan Code")
+                    .setCameraId(0)
+                    .setBeepEnabled(true)
+                    .setBarcodeImageEnabled(true)
+                    .initiateScan();*/
+            IntentIntegrator integrator = new IntentIntegrator(getActivity());
             integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
             integrator.setPrompt("Scan Code");
             integrator.setCameraId(0);
@@ -162,6 +168,12 @@ public class CheckNodeWifiFragment extends WifiFragment {
             //Set error to show error text with node input field
             SmartWlanConfApplication.setnodeIDError(getActivity(), true);
         }
+    }
+
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        String barcode = result.getContents();
     }
 
     /**
