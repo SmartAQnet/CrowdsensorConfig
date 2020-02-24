@@ -10,13 +10,17 @@ import androidx.fragment.app.FragmentTransaction;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
 
+import java.util.Set;
+
 import edu.kit.teco.smartwlanconf.R;
+import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.fragments.CheckNodeWifiFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.CheckUserWifiCredentialsFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.ListOfWifisFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.RestartNodeFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.ShowNodeWebsiteFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment;
+import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
 
 
 //MainActivity that implements the listeners of its fragments
@@ -71,6 +75,11 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     //This shows the fragment that checks credentials of selected Wifi
     public void onWifiListFragmentInteraction(ScanResult scanResult){
+        //Stop receiver from getting results from Wifi Scan
+        WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(getApplicationContext());
+        getApplication().unregisterReceiver(wifi.getWifiScanReceiver());
+        //Stop running wifi scannning thread
+        (SmartWlanConfApplication.getWifiScan(getApplicationContext())).stop();
         Fragment newfragment = CheckUserWifiCredentialsFragment.newInstance(scanResult.SSID);
         replaceFragment(newfragment);
     }
@@ -93,7 +102,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         replaceFragment(newFragment);
     }
 
-    //This starts the ShowNodeWebsiteFragment that opens an external Browser with website of the node
+    //This is what should be done after trying to open the nodes website
     public void onAfterShowNode(){
         Fragment newFragment = ListOfWifisFragment.newInstance(1);
         replaceFragment(newFragment);

@@ -1,12 +1,15 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
 import android.content.Context;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +24,8 @@ import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 
+import static androidx.constraintlayout.widget.Constraints.TAG;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -34,6 +39,8 @@ public class CheckUserWifiCredentialsFragment extends WifiFragment {
 
     private static final String ARG_SSID = "SSID";
     private OnCheckUserWifiCredentialsSuccessListener mListener;
+    private NsdManager.DiscoveryListener discoveryListener;
+    private NsdManager nsdManager;
 
     public CheckUserWifiCredentialsFragment() {
         // Required empty public constructor
@@ -133,6 +140,62 @@ public class CheckUserWifiCredentialsFragment extends WifiFragment {
                     .connectWithWifi_withContext(activity.getApplicationContext(), activity.getmWlanSSID(), pwd, this);
         });
     }
+
+
+    public void initializeDiscoveryListener() {
+
+        // Instantiate a new DiscoveryListener
+        NsdManager.DiscoveryListener discoveryListener = new NsdManager.DiscoveryListener() {
+
+            // Called as soon as service discovery begins.
+            @Override
+            public void onDiscoveryStarted(String regType) {
+                Log.d(TAG, "Service discovery started");
+            }
+
+            @Override
+            public void onServiceFound(NsdServiceInfo service) {
+                // A service was found! Do something with it.
+                Log.d(TAG, "Service discovery success" + service);
+                /*if (!service.getServiceType().equals(SERVICE_TYPE)) {
+                    // Service type is the string containing the protocol and
+                    // transport layer for this service.
+                    Log.d(TAG, "Unknown Service Type: " + service.getServiceType());
+                } else if (service.getServiceName().equals(serviceName)) {
+                    // The name of the service tells the user what they'd be
+                    // connecting to. It could be "Bob's Chat App".
+                    Log.d(TAG, "Same machine: " + serviceName);
+                } else if (service.getServiceName().contains("NsdChat")){
+                    nsdManager.resolveService(service, resolveListener);
+                }*/
+            }
+
+            @Override
+            public void onServiceLost(NsdServiceInfo service) {
+                // When the network service is no longer available.
+                // Internal bookkeeping code goes here.
+                Log.e(TAG, "service lost: " + service);
+            }
+
+            @Override
+            public void onDiscoveryStopped(String serviceType) {
+                Log.i(TAG, "Discovery stopped: " + serviceType);
+            }
+
+            @Override
+            public void onStartDiscoveryFailed(String serviceType, int errorCode) {
+                Log.e(TAG, "Discovery failed: Error code:" + errorCode);
+                nsdManager.stopServiceDiscovery(this);
+            }
+
+            @Override
+            public void onStopDiscoveryFailed(String serviceType, int errorCode) {
+                Log.e(TAG, "Discovery failed: Error code:" + errorCode);
+                nsdManager.stopServiceDiscovery(this);
+            }
+        };
+    }
+
 
     public void onWaitForWifiConnection (Boolean success){
         //Returning from Async call, check if view is still active

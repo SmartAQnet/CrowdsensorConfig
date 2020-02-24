@@ -20,7 +20,9 @@ import com.github.druk.rx2dnssd.Rx2DnssdBindable;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.net.Inet4Address;
+import java.util.Observable;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
@@ -41,7 +43,7 @@ public class ShowNodeWebsiteFragment extends Fragment {
 
     private OnShowNodeSideListener mListener;
     //Time in seconds searching for Node
-    private int TIMEOUT = 20;
+    private int TIMEOUT = 40;
 
     //the node's ip adress in user wifi network
     private String mNodeIP="";
@@ -97,8 +99,14 @@ public class ShowNodeWebsiteFragment extends Fragment {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .timeout(TIMEOUT, TimeUnit.SECONDS)
-                    .onErrorResumeNext(throwable -> {
-                        return Flowable.error(throwable);
+                    .onExceptionResumeNext(
+                            throwable -> {
+                                showNodeDiscoveryError();
+                                continueAfterDiscovery(false);}
+                    )
+                    .doOnError(throwable -> {
+                            showNodeDiscoveryError();
+                            continueAfterDiscovery(false);
                     })
                     .subscribe(mDNSService -> {
                         if(mDNSService.getServiceName().equals(mNodeServiceName)){
@@ -144,9 +152,11 @@ public class ShowNodeWebsiteFragment extends Fragment {
                 //Has to be tested if a simple return produces no errors
                 return;
             }
+            mListener.onAfterShowNode();
+        } else {
+            //Todo: Just restart or show something else?
+            mListener.onAfterShowNode();
         }
-        //Todo: Just restart or show something else?
-        mListener.onAfterShowNode();
     }
 
     private void stopDiscovery() {

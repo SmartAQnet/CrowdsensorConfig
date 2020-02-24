@@ -29,9 +29,11 @@ import edu.kit.teco.smartwlanconf.ui.Config;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 import edu.kit.teco.smartwlanconf.ui.adapter.WifiListItemRecyclerViewAdapter;
 import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
+import edu.kit.teco.smartwlanconf.ui.utils.WifiScanRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -129,12 +131,10 @@ public class ListOfWifisFragment extends WifiFragment {
             recyclerView.setAdapter(wifiAdapter);
             final WifiFragment wifiFragment = this;
             // An Async task always executes in new thread
-            new Thread(new Runnable() {
-                public void run()
-                {
-                    wifi.scanWifi(wifiFragment);
-                }
-            }).start();
+            WifiScanRunnable wifiScan = new WifiScanRunnable(wifiFragment, wifi);
+            SmartWlanConfApplication.setWifiScan(context, wifiScan);
+            Thread t = new Thread(wifiScan);
+            t.start();
             return true;
         }
         return false;

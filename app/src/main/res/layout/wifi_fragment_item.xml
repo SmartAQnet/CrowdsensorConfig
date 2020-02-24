@@ -10,5 +10,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
         android:background="@color/colorWifiItem"
-        android:textAppearance="?attr/textAppearanceListItem" />
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:inputType="none"/>
 </LinearLayout>

@@ -1,7 +1,6 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
 import android.net.wifi.ScanResult;
-import android.view.View;
 
 import androidx.fragment.app.Fragment;
 

@@ -12,7 +12,6 @@ package edu.kit.teco.smartwlanconf;
 
 import android.app.Application;
 import android.content.Context;
-import android.net.wifi.WifiManager;
 
 import androidx.annotation.NonNull;
 
@@ -20,12 +19,14 @@ import com.github.druk.rx2dnssd.Rx2Dnssd;
 import com.github.druk.rx2dnssd.Rx2DnssdBindable;
 
 import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
+import edu.kit.teco.smartwlanconf.ui.utils.WifiScanRunnable;
 
 public class SmartWlanConfApplication extends Application {
 
     private Rx2Dnssd mRxDnssd;
     private WifiConnectionUtils mWifi;
     private boolean nodeIDError;
+    private WifiScanRunnable wifiScan;
 
     @Override
     public void onCreate() {
@@ -60,4 +61,7 @@ public class SmartWlanConfApplication extends Application {
     private Rx2Dnssd createDnssd() {
         return new Rx2DnssdBindable(this);
     }
+
+    public static void setWifiScan(@NonNull Context context, WifiScanRunnable wifiscan){((SmartWlanConfApplication)context.getApplicationContext()).wifiScan = wifiscan;}
+    public static WifiScanRunnable getWifiScan(@NonNull Context context){return ((SmartWlanConfApplication)context.getApplicationContext()).wifiScan;}
 }

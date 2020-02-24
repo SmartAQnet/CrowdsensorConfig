@@ -1,17 +1,13 @@
 package edu.kit.teco.smartwlanconf.ui.utils;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
-
-import androidx.core.app.ActivityCompat;
 
 import com.thanosfisherman.wifiutils.WifiUtils;
 
@@ -72,7 +68,6 @@ public class WifiConnectionUtils {
                 list = wifiManager.getConfiguredNetworks();
                 for(WifiConfiguration i:list){
                     if(i.networkId == networkID){
-                        wifiManager.disconnect();
                         //wifiManager.enableNetwork(i.networkId, true);
                         return;
                     }
@@ -85,12 +80,17 @@ public class WifiConnectionUtils {
     }
 
     public void connectWithWifi_withContext(Context context, String ssid, String pwd, WifiFragment fragment){
-        calling_fragment = fragment;
-        resetCurrentWifi(context, ssid,pwd);
-        WifiUtils.withContext(context)
-                .connectWith(ssid, pwd)
-                .onConnectionResult(this::checkConnection)
-                .start();
+        boolean disc = wifiManager.disconnect();
+        //if(disc){
+            calling_fragment = fragment;
+            WifiUtils.withContext(context)
+                    .connectWith(ssid, pwd)
+                    .onConnectionResult(this::checkConnection)
+                    .start();
+        //} else {
+            //If wifi is not disconnected, password cannot be checked
+        //
+        // }
     }
 
     private void checkConnection(boolean isSuccess){
@@ -118,13 +118,21 @@ public class WifiConnectionUtils {
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        context.registerReceiver(wifiScanReceiver, intentFilter);
+        try {
+            context.registerReceiver(wifiScanReceiver, intentFilter);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         boolean success = wifiManager.startScan();
         if (!success) {
             // scan failure handling
             scanSuccess(success, wifiFragment);
         }
+    }
+
+    public BroadcastReceiver getWifiScanReceiver(){
+        return wifiScanReceiver;
     }
 
     private void scanSuccess(boolean success, WifiFragment wifiFragment){
@@ -134,10 +142,10 @@ public class WifiConnectionUtils {
         }
         try {
             wifiFragment.getActivity().unregisterReceiver(wifiScanReceiver);
-            wifiFragment.onWaitForWifiScan(null);
-        } catch(NullPointerException e){
+        } catch(Exception e){
             e.printStackTrace();
         }
+        wifiFragment.onWaitForWifiScan(null);
     }
 
 }
