@@ -17,18 +17,13 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+//Just used to send wifi credentials of user wifi asynchronously to node
 public class HttpNodePost extends AsyncTask<String, Void, Boolean> {
 
-    //Checking a Timeout Needs API Level 26 because of Duration find workaround if needed
-    /*public static final String REQUEST_METHOD = "POST";
-    public static final Duration READ_TIMEOUT = Duration.ofMillis(15000);
-    public static final int CONNECTION_TIMEOUT = 15000;*/
-    private Context mContext;
-
-    public HttpNodePost(){ }
+    private ConnectivityManager connectivityManager;
 
     public HttpNodePost(Context context){
-        mContext = context;
+        connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
     @Override
@@ -36,6 +31,8 @@ public class HttpNodePost extends AsyncTask<String, Void, Boolean> {
         super.onPreExecute();
     }
 
+    //Async send of wifi credentials to node
+    //The params used here are the URL of the node, the SSID and the password of the user wifi
     @Override
     protected Boolean doInBackground(String... params){
         try {
@@ -51,14 +48,14 @@ public class HttpNodePost extends AsyncTask<String, Void, Boolean> {
     protected void onPostExecute(Boolean s) {
     }
 
+    //This is the method that actually sends the credentials to node by using the OKHTTP Library
     private Boolean sendData(String... params) throws Exception{
         Network node_network = null;
         try{
-            ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-            for (Network network : connManager.getAllNetworks()){
-                NetworkInfo networkInfo = connManager.getNetworkInfo(network);
+            for (Network network : connectivityManager.getAllNetworks()){
+                NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
                 if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-                    LinkProperties prop = connManager.getLinkProperties(network);
+                    LinkProperties prop = connectivityManager.getLinkProperties(network);
                     if(prop.getInterfaceName().equals(Config.NETWORK_INTERFACE_TYPE)){
                         node_network = network;
                         break;
@@ -72,7 +69,11 @@ public class HttpNodePost extends AsyncTask<String, Void, Boolean> {
         }
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        builder.socketFactory(node_network.getSocketFactory());
+        try {
+            builder.socketFactory(node_network.getSocketFactory());
+        } catch (NullPointerException e){
+            e.printStackTrace();
+        }
         final OkHttpClient client = builder.build();
 
         builder.followRedirects(false)
@@ -92,8 +93,7 @@ public class HttpNodePost extends AsyncTask<String, Void, Boolean> {
         response.body().close();
         if(!response.isSuccessful()){
             throw new IOException("Unexpected code" + responseString);
-
         }
-        return response.isSuccessful();
+        return true;
     }
 }

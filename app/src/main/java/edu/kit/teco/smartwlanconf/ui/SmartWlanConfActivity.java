@@ -3,19 +3,15 @@ package edu.kit.teco.smartwlanconf.ui;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
-
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
-
 import com.google.zxing.integration.android.IntentIntegrator;
 
-import java.util.Set;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
@@ -28,7 +24,9 @@ import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment;
 import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
 
 
-//MainActivity that implements the listeners of its fragments
+// This is the Main activity of the application
+// It starts the different Fragments used throughout the application
+// and receives the Callback from the QR Code Scanner
 public class SmartWlanConfActivity extends AppCompatActivity implements
         ListOfWifisFragment.OnWifiListFragmentInteractionListener,
         CheckUserWifiCredentialsFragment.OnCheckUserWifiCredentialsSuccessListener,
@@ -74,8 +72,8 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     //This shows the fragment with the list of available Wifis
     public void setInitialFragment(){
-        Fragment newfragment = ListOfWifisFragment.newInstance(1);
-        replaceFragment(newfragment);
+        Fragment newFragment = ListOfWifisFragment.newInstance(1);
+        replaceFragment(newFragment);
     }
 
     //This shows the fragment that checks credentials of selected Wifi
@@ -85,14 +83,14 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         getApplication().unregisterReceiver(wifi.getWifiScanReceiver());
         //Stop running wifi scannning thread
         (SmartWlanConfApplication.getWifiScan(getApplicationContext())).stop();
-        Fragment newfragment = CheckUserWifiCredentialsFragment.newInstance(scanResult.SSID);
-        replaceFragment(newfragment);
+        Fragment newFragment = CheckUserWifiCredentialsFragment.newInstance(scanResult.SSID);
+        replaceFragment(newFragment);
     }
 
     //This shows the fragment that tries to connect to node wifi
     public void onCheckUserWifiCredentialsSuccess(){
-        Fragment newfragment = new CheckNodeWifiFragment();
-        replaceFragment(newfragment);
+        Fragment newFragment = new CheckNodeWifiFragment();
+        replaceFragment(newFragment);
     }
 
     //This starts the RestartNodeFragment that initializes the node for wifi connection
@@ -107,13 +105,14 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         replaceFragment(newFragment);
     }
 
-    //This is what should be done after trying to open the nodes website
+    // This is what should be done after trying to open the nodes website
+    // At the moment the application just starts all over again
     public void onAfterShowNode(){
         Fragment newFragment = ListOfWifisFragment.newInstance(1);
         replaceFragment(newFragment);
     }
 
-    //Actual fragment is replaced
+    // Replacement of the actual fragment with the new one
     public void replaceFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.container, fragment);
@@ -121,8 +120,12 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         transaction.commit();
     }
 
+    // This method is the callback for the QR code scanner and just calls the associated method in the fragment
+    // There should be a solution that runs only by calling a callback in the fragment, but this was the easier
+    // way to get going
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == IntentIntegrator.REQUEST_CODE) {
             // I want the first child because I know he called the scanner
             getSupportFragmentManager()

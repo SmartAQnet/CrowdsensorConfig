@@ -9,6 +9,8 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
 
+import androidx.annotation.Nullable;
+
 import com.thanosfisherman.wifiutils.WifiUtils;
 
 import java.util.ArrayList;
@@ -45,8 +47,22 @@ public class WifiConnectionUtils {
         enabled = isSuccess;
     }
 
-    //Only needed to reconnect to network in case that wifi password has changed
-    public void resetCurrentWifi(Context context, String ssid, String pwd){
+    // Passwords for wifi cannot be tested, if there is a valid wifi configuration on the smartphone
+    // For Android Versions below Q Google says:
+    //https://developer.android.com/about/versions/marshmallow/android-6.0-changes.html dazu:
+    //
+    //Wi-Fi and Networking Changes
+    //This release introduces the following behavior changes to the Wi-Fi and networking APIs.
+    //
+    //Your apps can now change the state of WifiConfiguration objects only if you created these objects.
+    //You are not permitted to modify or delete WifiConfiguration objects created by the user or by other apps.
+    // So at the moment the only solution below Android Q is to request the user to remove the configured network
+    // by which he want to connect. This method then checks if the network is removed by user
+    // The Code for Android from Q and upwards just tries to remove the configured network, so that the password
+    // can be checked when reconnect to it
+
+    private void checkCurrentWifi(String ssid){
+        //This code could actually not be tested so far because there is no smartphon available with android Q
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             final WifiNetworkSuggestion suggestion =
                     new WifiNetworkSuggestion.Builder()
@@ -57,56 +73,47 @@ public class WifiConnectionUtils {
             suggestions.add(suggestion);
             wifiManager.removeNetworkSuggestions(suggestions);
         } else {
-            List<WifiConfiguration> list= wifiManager.getConfiguredNetworks();
-            WifiConfiguration conf = new WifiConfiguration();
-            //conf.SSID = "\"" + ssid + "\"";
-            conf.SSID = ssid;
-            //conf.preSharedKey = "\""+ pwd +"\"";
-            conf.preSharedKey = pwd;
-            int networkID = wifiManager.updateNetwork(conf);
-            if(networkID>0){
-                list = wifiManager.getConfiguredNetworks();
-                for(WifiConfiguration i:list){
-                    if(i.networkId == networkID){
-                        //wifiManager.enableNetwork(i.networkId, true);
-                        return;
-                    }
+            for(WifiConfiguration i:wifiManager.getConfiguredNetworks()){
+                if(i.SSID.equals(ssid)){
+                    // Network is not removed by user, not yet determined what should be done
+                    return;
                 }
-            } else {
-                //Error
-                System.out.println("Wifi not reset!");
             }
         }
     }
 
+    //Connects to wifi with given credentials -- bssid not supported
     public void connectWithWifi_withContext(Context context, String ssid, String pwd, WifiFragment fragment){
-        boolean disc = wifiManager.disconnect();
-        //if(disc){
-            calling_fragment = fragment;
-            WifiUtils.withContext(context)
-                    .connectWith(ssid, pwd)
-                    .onConnectionResult(this::checkConnection)
-                    .start();
-        //} else {
-            //If wifi is not disconnected, password cannot be checked
-        //
-        // }
+        //Usage of this method should be further evaluated
+        checkCurrentWifi(ssid);
+        // Set calling fragment for callback
+        calling_fragment = fragment;
+        WifiUtils.withContext(context)
+                .connectWith(ssid, pwd)
+                .onConnectionResult(this::receiveConnectionResult)
+                .start();
     }
 
-    private void checkConnection(boolean isSuccess){
+    //isSuccess is true if connection to wifi is established
+    private void receiveConnectionResult(boolean isSuccess){
+        //return to calling fragment
         calling_fragment.onWaitForWifiConnection(isSuccess);
     }
 
-    public void scanWifi(WifiFragment wifiFragment){
+
+    //Scans for available wifis, result of scan is received through broadcast
+    void scanWifi(WifiFragment wifiFragment){
         Context context;
         try {
             context = wifiFragment.getActivity().getApplicationContext();
-        } catch (Exception e){
+        } catch (NullPointerException e){
             e.printStackTrace();
             return;
         }
 
         wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+
+        //Receiver for Wifi Scan
         wifiScanReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context c, Intent intent) {
@@ -116,6 +123,7 @@ public class WifiConnectionUtils {
             }
         };
 
+        //This is the intent that reports scan results
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         try {
@@ -124,6 +132,7 @@ public class WifiConnectionUtils {
             e.printStackTrace();
         }
 
+        //Start Scanning
         boolean success = wifiManager.startScan();
         if (!success) {
             // scan failure handling
@@ -131,21 +140,23 @@ public class WifiConnectionUtils {
         }
     }
 
+    //Used to stop wifi scanning thread (Scanning is stopped through unregisterReceiver())
     public BroadcastReceiver getWifiScanReceiver(){
         return wifiScanReceiver;
     }
 
+    //Report scanresults back to calling fragment
     private void scanSuccess(boolean success, WifiFragment wifiFragment){
         if(success) {
             wifiFragment.onWaitForWifiScan(wifiManager.getScanResults());
             return;
         }
+        //Stop scanning after failure and return with empty list
         try {
             wifiFragment.getActivity().unregisterReceiver(wifiScanReceiver);
-        } catch(Exception e){
+        } catch(NullPointerException e){
             e.printStackTrace();
         }
         wifiFragment.onWaitForWifiScan(null);
     }
-
 }

@@ -1,5 +1,5 @@
 package edu.kit.teco.smartwlanconf;
-/**
+/*
  * 1. Wlan Liste anzeigen
  * 2. Verbinden mit gewähltem Wlan-> Fehler Toast und zurück
  * 3. Eingabeformular Adresse -> Nicht gefunden Toast
@@ -12,6 +12,7 @@ package edu.kit.teco.smartwlanconf;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -54,7 +55,7 @@ public class SmartWlanConfApplication extends Application {
         assert(mwifi != null);
             //WifiManager wifi = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if (!mwifi.enableWifi(context)) {
-            //Error no Wifi
+            Log.d(SmartWlanConfApplication.class.toString(), "Enable Wifi failed");
         }
         return mwifi;
     }
