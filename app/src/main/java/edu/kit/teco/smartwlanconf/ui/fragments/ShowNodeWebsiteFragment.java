@@ -2,7 +2,6 @@ package edu.kit.teco.smartwlanconf.ui.fragments;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -20,15 +19,11 @@ import com.github.druk.rx2dnssd.Rx2DnssdBindable;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.net.Inet4Address;
-import java.util.Observable;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.Config;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
-import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -38,15 +33,19 @@ import io.reactivex.schedulers.Schedulers;
  * Activities that contain this fragment must implement the
  * {@link //ShowNodeWebsiteFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
+ *
+ * This is just a landing page, wifi credentials have been sent to the node.
+ * When the node is connected to the users wifi it can be located via mDNS
+ * If the node can be found, his website is opened in external browser
+ * otherwise the app returns to CheckUserWifiCredentialsFragment
  */
 public class ShowNodeWebsiteFragment extends Fragment {
 
     private OnShowNodeSideListener mListener;
-    //Time in seconds searching for Node
-    private int TIMEOUT = 40;
 
     //the node's ip adress in user wifi network
-    private String mNodeIP="";
+    private String mNodeIP;
+
     //Necessary for stoping discovery of Bonjour services
     private Disposable mDisposable;
 
@@ -55,13 +54,9 @@ public class ShowNodeWebsiteFragment extends Fragment {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration config){
-        super.onConfigurationChanged(config);
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Start looking for node with bonjour service (mDNS)
         startDiscovery();
     }
 
@@ -73,7 +68,7 @@ public class ShowNodeWebsiteFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof OnShowNodeSideListener) {
             mListener = (OnShowNodeSideListener) context;
@@ -89,6 +84,7 @@ public class ShowNodeWebsiteFragment extends Fragment {
             if(activity == null){
                 throw new NullPointerException();
             }
+            //SSID of node is the same as it's ID, which is his service name
             String mNodeServiceName = activity.getmNodeSSID();
             Rx2DnssdBindable mRxDnssd = (Rx2DnssdBindable) SmartWlanConfApplication.getRxDnssd(getActivity());
 
@@ -98,7 +94,7 @@ public class ShowNodeWebsiteFragment extends Fragment {
                     .compose(mRxDnssd.queryIPRecords())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .timeout(TIMEOUT, TimeUnit.SECONDS)
+                    .timeout(Config.TIMEOUT, TimeUnit.SECONDS)
                     .onExceptionResumeNext(
                             throwable -> {
                                 showNodeDiscoveryError();
@@ -132,16 +128,24 @@ public class ShowNodeWebsiteFragment extends Fragment {
         }
     }
 
+    //Show error if node cannot be found
     private void showNodeDiscoveryError(){
-        Snackbar snackbar = Snackbar
-                .make(getView(), "Knoten nicht im Wlan gefunden!", Snackbar.LENGTH_LONG);
-        int colorSnackRetry = ResourcesCompat.getColor(getResources(), R.color.colorSnackRetry, null);
-        snackbar.setActionTextColor(colorSnackRetry);
-        snackbar.show();
+        View view = getView();
+        if(view != null) {
+            Snackbar snackbar = Snackbar
+                    .make(getView(), "Knoten nicht im Wlan gefunden!", Snackbar.LENGTH_LONG);
+            int colorSnackRetry = ResourcesCompat.getColor(getResources(), R.color.colorSnackRetry, null);
+            snackbar.setActionTextColor(colorSnackRetry);
+            snackbar.show();
+        } else {
+            Log.d(ShowNodeWebsiteFragment.class.toString(), "View is null");
+        }
     }
 
+    //Continue after looking for node
     private void continueAfterDiscovery(Boolean success){
         stopDiscovery();
+        //Open website of node to continue installation of node
         if (success) {
             //open webview with node ip
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://" + mNodeIP));
@@ -152,13 +156,13 @@ public class ShowNodeWebsiteFragment extends Fragment {
                 //Has to be tested if a simple return produces no errors
                 return;
             }
-            mListener.onAfterShowNode();
+            mListener.onAfterShowNode(success);
         } else {
-            //Todo: Just restart or show something else?
-            mListener.onAfterShowNode();
+            mListener.onAfterShowNode(success);
         }
     }
 
+    //Stop looking for node
     private void stopDiscovery() {
         if (mDisposable != null) {
             mDisposable.dispose();
@@ -177,6 +181,6 @@ public class ShowNodeWebsiteFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnShowNodeSideListener {
-        void onAfterShowNode();
+        void onAfterShowNode(boolean success);
     }
 }

@@ -83,7 +83,8 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         getApplication().unregisterReceiver(wifi.getWifiScanReceiver());
         //Stop running wifi scannning thread
         (SmartWlanConfApplication.getWifiScan(getApplicationContext())).stop();
-        Fragment newFragment = CheckUserWifiCredentialsFragment.newInstance(scanResult.SSID);
+        SmartWlanConfApplication.setUserWifiSSID(getApplicationContext(), scanResult.SSID);
+        Fragment newFragment = CheckUserWifiCredentialsFragment.newInstance(getApplicationContext(), true);
         replaceFragment(newFragment);
     }
 
@@ -107,8 +108,13 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     // This is what should be done after trying to open the nodes website
     // At the moment the application just starts all over again
-    public void onAfterShowNode(){
-        Fragment newFragment = ListOfWifisFragment.newInstance(1);
+    public void onAfterShowNode(boolean success){
+        Fragment newFragment;
+        if(success) {
+            newFragment = ListOfWifisFragment.newInstance(1);
+        } else {
+            newFragment = CheckUserWifiCredentialsFragment.newInstance(getApplicationContext(), false);
+        }
         replaceFragment(newFragment);
     }
 

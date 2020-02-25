@@ -41,22 +41,31 @@ public class CheckUserWifiCredentialsFragment extends WifiFragment {
     private OnCheckUserWifiCredentialsSuccessListener mListener;
     private NsdManager.DiscoveryListener discoveryListener;
     private NsdManager nsdManager;
+    private boolean firstTime;
 
     public CheckUserWifiCredentialsFragment() {
         // Required empty public constructor
+    }
+
+    public CheckUserWifiCredentialsFragment(boolean firstTime) {
+        this.firstTime = firstTime;
     }
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param ssid SSID.
+     * @param context, firstTime
      * @return A new instance of fragment CheckUserWifiCredentialsFragment.
+     *
+     *
+     * If it's not the first time a new fragment is created, reason is that the node has not been found in user wifi
+     * Most likely the user has given wrong password for wifi
      */
-    public static CheckUserWifiCredentialsFragment newInstance(String ssid) {
-        CheckUserWifiCredentialsFragment fragment = new CheckUserWifiCredentialsFragment();
+    public static CheckUserWifiCredentialsFragment newInstance(Context context, boolean firstTime) {
+        CheckUserWifiCredentialsFragment fragment = new CheckUserWifiCredentialsFragment(firstTime);
         Bundle args = new Bundle();
-        args.putString(ARG_SSID, ssid);
+        args.putString(ARG_SSID, SmartWlanConfApplication.getUserWifiSSID(context));
         fragment.setArguments(args);
         return fragment;
     }
@@ -70,7 +79,7 @@ public class CheckUserWifiCredentialsFragment extends WifiFragment {
                 //Has to be tested if a simple return produces no errors, or an Exception has to be thrown
                 return;
             }
-            //Set SSID for Wlan in parent
+            //Set Wlan SSID
             ((SmartWlanConfActivity) getActivity()).setmWlanSSID(getArguments().getString(ARG_SSID));
         }
     }
@@ -79,6 +88,9 @@ public class CheckUserWifiCredentialsFragment extends WifiFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+        if(!firstTime){
+            //Todo: Show Hint that password might have been wrong
+        }
         return inflater.inflate(R.layout.wifi_check_credentials_fragment, container, false);
     }
 

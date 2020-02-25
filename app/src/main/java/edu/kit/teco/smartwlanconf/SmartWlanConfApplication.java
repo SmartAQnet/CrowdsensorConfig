@@ -28,6 +28,7 @@ public class SmartWlanConfApplication extends Application {
     private WifiConnectionUtils mWifi;
     private boolean nodeIDError;
     private WifiScanRunnable wifiScan;
+    private String userWifissid;
 
     @Override
     public void onCreate() {
@@ -65,4 +66,7 @@ public class SmartWlanConfApplication extends Application {
 
     public static void setWifiScan(@NonNull Context context, WifiScanRunnable wifiscan){((SmartWlanConfApplication)context.getApplicationContext()).wifiScan = wifiscan;}
     public static WifiScanRunnable getWifiScan(@NonNull Context context){return ((SmartWlanConfApplication)context.getApplicationContext()).wifiScan;}
+
+    public static void setUserWifiSSID(@NonNull Context context, String ssid){((SmartWlanConfApplication)context.getApplicationContext()).userWifissid = ssid;}
+    public static String getUserWifiSSID(@NonNull Context context){return ((SmartWlanConfApplication)context.getApplicationContext()).userWifissid;}
 }
