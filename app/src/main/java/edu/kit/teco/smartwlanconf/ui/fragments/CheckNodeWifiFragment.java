@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,12 @@ import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
  * Activities that contain this fragment must implement the
  * {@link OnCheckNodeWifiSuccessListener} interface
  * to handle interaction events.
+ *
+ * Fragment gets Node ID from user input which is also the SSID of the node wifi
+ * and tries to connect to node wifi.
+ *
+ * User may also try to scan ID from node display
+ *
  */
 public class CheckNodeWifiFragment extends WifiFragment {
 
@@ -54,7 +61,7 @@ public class CheckNodeWifiFragment extends WifiFragment {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof OnCheckNodeWifiSuccessListener) {
             mListener = (OnCheckNodeWifiSuccessListener) context;
@@ -70,7 +77,7 @@ public class CheckNodeWifiFragment extends WifiFragment {
 
         View view = getView();
         if(view == null){
-            //Has to be tested if a simple return produces no errors
+            Log.d(CheckNodeWifiFragment.class.toString(), "view null in onResume()");
             return;
         }
         LinearLayout nodeID =view.findViewById(R.id.check_node_wifi);
@@ -78,6 +85,7 @@ public class CheckNodeWifiFragment extends WifiFragment {
         LinearLayout progress =view.findViewById(R.id.progress_check_node_wifi);
         progress.setVisibility(View.GONE);
         boolean nodeIDError = SmartWlanConfApplication.getnodeIDError(view.getContext());
+        //if nodeIDError is set user has specified wrong id
         if (nodeIDError) {
             EditText node_id = view.findViewById(R.id.node_id);
             node_id.setError(Config.NODE_ID_ERROR);
@@ -91,34 +99,45 @@ public class CheckNodeWifiFragment extends WifiFragment {
         mListener = null;
     }
 
+    //Button to get Node id/ssid and connect to node wifi
     private void setCheckNodeWifiButtonListener(View view){
-        Activity activity = getActivity();
-        if(activity == null){
-            //Has to be tested if a simple return produces no errors
-            return;
-        }
-        final Button findAddressButton = view.findViewById(R.id.btn_check_node);
-        findAddressButton.setOnClickListener((View v)-> {
-            String ssid = ((EditText) view.findViewById(R.id.node_id)).getText().toString();
-            //Set SSID in parent activity
-            ((SmartWlanConfActivity) activity).setmNodeSSID(ssid);
-            //TODO: Does not work
-            View mFocusView = activity.getCurrentFocus();
-            if(mFocusView != null) {
-                InputMethodManager inputManager = (InputMethodManager) activity.getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                mFocusView.clearFocus();
-                inputManager.hideSoftInputFromWindow(mFocusView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-            }
-            LinearLayout nodeID = view.findViewById(R.id.check_node_wifi);
-            nodeID.setVisibility(View.GONE);
-            LinearLayout progress = view.findViewById(R.id.progress_check_node_wifi);
-            progress.setVisibility(View.VISIBLE);
-                    SmartWlanConfApplication
-                            .getWifi(activity)
-                            .connectWithWifi_withContext(activity, ssid, Config.NODE_PWD, this);
-        });
+        final Button checkNodeIDButton = view.findViewById(R.id.btn_check_node);
+        //Read node id/ssid from input
+        checkNodeIDButton.setOnClickListener((View v)-> connectToNodeWifi(getNodeSSID()));
     }
 
+    //Connect to node wifi
+    private void connectToNodeWifi(String ssid){
+        View view = getView();
+        Activity activity = getActivity();
+        //Show progress bar and try to connect
+        LinearLayout nodeID = view.findViewById(R.id.check_node_wifi);
+        nodeID.setVisibility(View.GONE);
+        LinearLayout progress = view.findViewById(R.id.progress_check_node_wifi);
+        progress.setVisibility(View.VISIBLE);
+        SmartWlanConfApplication
+                .getWifi(activity)
+                .connectWithWifi_withContext(activity, ssid, Config.NODE_PWD, this);
+    }
+
+    //Read and save Node id/ssid
+    private String getNodeSSID(){
+        Activity activity = getActivity();
+        String ssid = ((EditText) getView().findViewById(R.id.node_id)).getText().toString();
+        //Set SSID in parent activity
+        ((SmartWlanConfActivity) activity).setmNodeSSID(ssid);
+        //This should hide screen keyboard, but it's not working
+        View mFocusView = activity.getCurrentFocus();
+        if(mFocusView != null) {
+            InputMethodManager inputManager = (InputMethodManager) activity.getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            mFocusView.clearFocus();
+            inputManager.hideSoftInputFromWindow(mFocusView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+        ////
+        return ssid;
+    }
+
+    //Sets the button to start  scanning QR Code from node
     private void setScanQRCode(View view){
         Activity activity = getActivity();
         if(activity == null){
@@ -126,36 +145,28 @@ public class CheckNodeWifiFragment extends WifiFragment {
             return;
         }
         final Button findAddressButton = view.findViewById(R.id.btn_scan_qr);
-        findAddressButton.setOnClickListener((View v)-> {
-            //Should work in fragment without calling activity, error not found
-            /*IntentIntegrator.forSupportFragment(CheckNodeWifiFragment.this)
+        findAddressButton.setOnClickListener((View v)->
+            new IntentIntegrator(getActivity())
                     .setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES)
                     .setPrompt("Scan Code")
                     .setCameraId(0)
                     .setBeepEnabled(true)
-                    .setBarcodeImageEnabled(true)
-                    .initiateScan();*/
-            IntentIntegrator integrator = new IntentIntegrator(getActivity());
-            integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
-            integrator.setPrompt("Scan Code");
-            integrator.setCameraId(0);
-            integrator.setBeepEnabled(true);
-            integrator.setBarcodeImageEnabled(false);
-            integrator.initiateScan();
-        });
+                    .setBarcodeImageEnabled(false)
+                    .initiateScan());
     }
 
+    //Callback for connection attempt to node wifi
     @Override
     public void onWaitForWifiConnection(Boolean success){
         //Returning from Async call, check if view is still active
         //If not working check if setting a destroyed tag in onDetach() is a solution
         if(getView() == null){
-            //Has to be tested if a simple return produces no errors
+            Log.d(CheckNodeWifiFragment.class.toString(), "view null in onWaitForWifiConnection");
             return;
         }
         SmartWlanConfActivity activity = (SmartWlanConfActivity)getActivity();
         if(activity == null){
-            //Has to be tested if a simple return produces no errors
+            Log.d(CheckNodeWifiFragment.class.toString(), "activity null in onWaitForWifiConnection");
             return;
         }
 
@@ -170,10 +181,11 @@ public class CheckNodeWifiFragment extends WifiFragment {
         }
     }
 
-
+    //Callback method for QR code scanning
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         String barcode = result.getContents();
+        connectToNodeWifi(barcode);
     }
 
     /**

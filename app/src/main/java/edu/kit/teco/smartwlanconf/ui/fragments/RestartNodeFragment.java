@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,11 @@ import static android.content.Context.WIFI_SERVICE;
 
 /**
  * A simple {@link Fragment} subclass.
+ * When this fragment is calles the Users phone is now connected to the nodes wifi.
+ *
+ * This fragment sends the wifi credentials of the user wifi to the node
+ * which is then restarted. The users phone is then reconnected to the
+ * users wifi, after successful reconnection ShowNodeWebsiteFragment is called.
  */
 public class RestartNodeFragment extends WifiFragment {
 
@@ -57,14 +63,14 @@ public class RestartNodeFragment extends WifiFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        //Connection to node is established data can be sent to node
+        //Send wifi credentials to sensor node and restart it
         connectNodeWithUserWifi();
-        //Node is now restarting, connect to user wifi and look for node with ShowNodeWebsiteFragment
+        //Node is now restarting, connect to user wifi and lookup for node in user wifi by calling ShowNodeWebsiteFragment
         connectToUserWifi();
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof OnNodeRestartedListener) {
             mListener = (OnNodeRestartedListener) context;
@@ -74,7 +80,7 @@ public class RestartNodeFragment extends WifiFragment {
         }
     }
 
-    //Waits for connection with user wifi to be established
+    //This is the callback method for connectToUserWifi(), when user is reconnected to user wifi
     @Override
     public void onWaitForWifiConnection(Boolean success){
         //Returning from Async call, check if view is still active
@@ -101,6 +107,7 @@ public class RestartNodeFragment extends WifiFragment {
         }
     }
 
+    //Reconnects the users phone with the users wifi
     @RequiresPermission(Manifest.permission.CHANGE_WIFI_STATE)
     private void connectToUserWifi(){
         Activity activity = getActivity();
@@ -119,36 +126,48 @@ public class RestartNodeFragment extends WifiFragment {
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CHANGE_WIFI_STATE}, 557);
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CHANGE_NETWORK_STATE}, 558);
         }
+        //reconnect to user wifi
         SmartWlanConfApplication
                 .getWifi(activity)
                 .connectWithWifi_withContext(activity, ((SmartWlanConfActivity) activity).getmWlanSSID(), ((SmartWlanConfActivity) activity).getmWlanPwd(), this);
     }
 
-    //Sending wifi data to node restarts the node
+    //Sending wifi credentials with http to node restarts the node
     private void connectNodeWithUserWifi(){
 
         Context context = getContext();
         if(context == null){
-            //Has to be tested if a simple return produces no errors, or if an Exception has to be thrown
+            Log.d(RestartNodeFragment.class.toString(), "context in connectNodeWithUserWifi() is null");
             return;
         }
 
         View view = getView();
         if(view == null){
-            //Has to be tested if a simple return produces no errors, or if an Exception has to be thrown
+            Log.d(RestartNodeFragment.class.toString(), "view in connectNodeWithUserWifi() is null");
             return;
         }
 
-        //IP of Gateway is HTTP-Server address of Node
-        final String gatewayIP = lookupGateway((Activity) context);
+        //As the user's phone is connected to the wifi of the node
+        //it's IP is the gateway IP, so you have to look for it
+        String gatewayIP;
+        try {
+            gatewayIP = lookupGateway((Activity) context);
+        } catch (NullPointerException e) {
+            Log.d(RestartNodeFragment.class.toString(), "lookupGateway() returned null");
+            return;
+        }
 
         HttpNodePost request = new HttpNodePost(context.getApplicationContext());
         try {
+            //URL to send wifi credentials
             final String wlanUrl = "http://" + gatewayIP + "/_ac/connect";
+            //Set credentials
             HashMap<String, String> credentials = getNodeWifiCredentials((Activity)context);
+            //Send Data via http
             boolean result = request.execute(wlanUrl,
                     credentials.get("SSID"),
                     credentials.get("PWD")).get();
+            //Check if credentials could be sent
             if(!result){
                 Snackbar snackbar = Snackbar
                         .make(view, "Wifi Daten konnten nicht an Knoten geschickt werden!", Snackbar.LENGTH_INDEFINITE)
@@ -162,8 +181,8 @@ public class RestartNodeFragment extends WifiFragment {
         }
     }
 
-    //Gets Gateway IP, which is the url for the Node
-    private String lookupGateway(Activity activity){
+    //Gets Gateway IP, which is the ip adress of the node
+    private String lookupGateway(Activity activity) throws NullPointerException {
         final WifiManager manager = (WifiManager) activity.getApplicationContext().getSystemService(WIFI_SERVICE);
         final DhcpInfo dhcp = manager.getDhcpInfo();
         byte[] ipAdress = BigInteger.valueOf(dhcp.gateway).toByteArray();
@@ -178,11 +197,11 @@ public class RestartNodeFragment extends WifiFragment {
             return (InetAddress.getByAddress(ipAdress)).getHostAddress();
         } catch (UnknownHostException e){
             e.printStackTrace();
+            throw new NullPointerException();
         }
-        return null;
     }
 
-    //Read SSID and Password and prepare for HTTP Post
+    //Put wifi credentials in a Hashmap
     private HashMap<String, String> getNodeWifiCredentials(Activity activity){
         HashMap<String, String> credentials = new HashMap<>();
         credentials.put("SSID", ((SmartWlanConfActivity) activity).getmWlanSSID());

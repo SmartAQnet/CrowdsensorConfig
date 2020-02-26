@@ -40,6 +40,8 @@ import java.util.List;
  * <p/>
  * Activities containing this fragment MUST implement the {@link OnWifiListFragmentInteractionListener}
  * interface.
+ *
+ * This fragment shows the results of a scan for available wifis
  */
 public class ListOfWifisFragment extends WifiFragment {
 
@@ -58,6 +60,7 @@ public class ListOfWifisFragment extends WifiFragment {
 
     }
 
+    //columncount sets the number of columns used to display wifis
     public static ListOfWifisFragment newInstance(int columnCount) {
         ListOfWifisFragment fragment = new ListOfWifisFragment();
         Bundle args = new Bundle();
@@ -86,10 +89,7 @@ public class ListOfWifisFragment extends WifiFragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (!setAdapter(view)){
-            //Todo: Muss da was gemacht werden?
-            System.out.println("Adapter für WIFI  Liste nicht gesetzt!");
-        }
+        setAdapter(view);
     }
 
     @Override
@@ -109,46 +109,43 @@ public class ListOfWifisFragment extends WifiFragment {
         mListener = null;
     }
 
-    private boolean setAdapter(View view){
-        Context context = getContext();
-        if(context == null){
-            return false;
+
+    //This methods starts scanning and
+    //sets the WifiListItemRecyclerAdapter that is used for showing scan results
+    private void setAdapter(View view){
+        Context context = getActivity();
+        RecyclerView recyclerView = view.findViewById(R.id.list);
+        if (mColumnCount <= 1) {
+            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        } else {
+            recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
         }
-        // Set the adapter
-        if (view instanceof FrameLayout) {
-            RecyclerView recyclerView = view.findViewById(R.id.list);
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-            }
-            DividerItemDecoration dividerItemDecoration= new DividerItemDecoration(context,
-                    LinearLayoutManager.VERTICAL);
-            recyclerView.addItemDecoration(dividerItemDecoration);
-            WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(getContext());
-            wifiAdapter = new WifiListItemRecyclerViewAdapter(wifiList, mListener);
-            recyclerView.setAdapter(wifiAdapter);
-            final WifiFragment wifiFragment = this;
-            // An Async task always executes in new thread
-            WifiScanRunnable wifiScan = new WifiScanRunnable(wifiFragment, wifi);
-            SmartWlanConfApplication.setWifiScan(context, wifiScan);
-            Thread t = new Thread(wifiScan);
-            t.start();
-            return true;
-        }
-        return false;
+        DividerItemDecoration dividerItemDecoration= new DividerItemDecoration(context,
+                LinearLayoutManager.VERTICAL);
+        recyclerView.addItemDecoration(dividerItemDecoration);
+        WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(getContext());
+        wifiAdapter = new WifiListItemRecyclerViewAdapter(wifiList, mListener);
+        recyclerView.setAdapter(wifiAdapter);
+        final WifiFragment wifiFragment = this;
+        //Start scanning for wifis in async task
+        WifiScanRunnable wifiScan = new WifiScanRunnable(wifiFragment, wifi);
+        //Save wifiscan to stop runnable after scanning wifis
+        SmartWlanConfApplication.setWifiScan(context, wifiScan);
+        Thread t = new Thread(wifiScan);
+        t.start();
     }
 
+    //Callback method, when wifi scan returns it's results
     @Override
     public void onWaitForWifiScan(List<ScanResult> results){
         View view = getView();
         if(view == null){
-            //Has to be tested if a simple return produces no errors
+            Log.d(ListOfWifisFragment.class.toString(), "view is null in onWaitForWifiScan()");
             return;
         }
         Activity activity = getActivity();
         if(activity == null){
-            //Has to be tested if a simple return produces no errors
+            Log.d(ListOfWifisFragment.class.toString(), "activity is null in onWaitForWifiScan()");
             return;
         }
 
@@ -168,20 +165,20 @@ public class ListOfWifisFragment extends WifiFragment {
             snackbar.show();
             return;
         }
-        //Scan results not empty hide splash screen
+        //Scan results if not empty show list
         LinearLayout splash = view.findViewById(R.id.splash);
         RecyclerView list = view.findViewById(R.id.list);
         splash.setVisibility(View.GONE);
         list.setVisibility(View.VISIBLE);
         wifiList.clear();
-        int netCount = results.size() - 1;
-        while (netCount >= 0) {
-            ScanResult result = results.get(netCount);
+
+        // Add results to list of wifis
+        for(int i = 0; i < results.size(); i++){
+            ScanResult result = results.get(i);
             if (!result.SSID.isEmpty() && result.frequency <= Config.WIFI_BANDWIDTH) {
                 wifiList.add(result);
                 wifiAdapter.notifyDataSetChanged();
             }
-            --netCount;
         }
 
     }

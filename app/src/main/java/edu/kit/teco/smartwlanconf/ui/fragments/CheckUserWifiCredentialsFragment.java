@@ -34,7 +34,8 @@ import static androidx.constraintlayout.widget.Constraints.TAG;
  * to handle interaction events.
  * Use the {@link CheckUserWifiCredentialsFragment#newInstance} factory method to
  * create an instance of this fragment.
- */
+ * As
+ *  */
 public class CheckUserWifiCredentialsFragment extends WifiFragment {
 
     private static final String ARG_SSID = "SSID";

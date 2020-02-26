@@ -16,6 +16,8 @@ import java.util.List;
 /**
  * {@link RecyclerView.Adapter} that can display a {@link android.net.wifi.ScanResult} and makes a call to the
  * specified {@link OnWifiListFragmentInteractionListener}.
+ *
+ * See https://developer.android.com/guide/topics/ui/layout/recyclerview
  */
 public class WifiListItemRecyclerViewAdapter extends RecyclerView.Adapter<WifiListItemRecyclerViewAdapter.ViewHolder> {
 
@@ -39,10 +41,11 @@ public class WifiListItemRecyclerViewAdapter extends RecyclerView.Adapter<WifiLi
         holder.mItem = mValues.get(position);
         holder.mContentView.setText(mValues.get(position).SSID);
 
+        //Every scan result gets an onClickListener
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (null != mListener) {
+                if (mListener != null) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
                     mListener.onWifiListFragmentInteraction(holder.mItem);

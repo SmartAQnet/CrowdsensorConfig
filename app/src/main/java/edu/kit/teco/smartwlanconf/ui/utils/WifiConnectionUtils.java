@@ -9,8 +9,6 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
 
-import androidx.annotation.Nullable;
-
 import com.thanosfisherman.wifiutils.WifiUtils;
 
 import java.util.ArrayList;
@@ -72,6 +70,7 @@ public class WifiConnectionUtils {
             suggestions = new ArrayList<>();
             suggestions.add(suggestion);
             wifiManager.removeNetworkSuggestions(suggestions);
+            //wifiManager.addNetworkSuggestions(suggestions);
         } else {
             for(WifiConfiguration i:wifiManager.getConfiguredNetworks()){
                 if(i.SSID.equals(ssid)){
