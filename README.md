@@ -14,7 +14,7 @@ He then has to enter the credentials of the selected wifi.
 
 <img src="images/Screenshot_20200228-100219.png"  width="250" height="360">
 
-After that the application connects to the wifi of the user. The crowdsensor opens it's own wifi with his id as ssid. When CrowdsensorConfig is connected to the wifi, he asks the user to enter the id of the sensor.
+After that the application connects to the wifi of the user. The crowdsensor opens it's own wifi with his id as ssid. When CrowdsensorConfig is connected to the wifi, he asks the user to enter the id of the sensor, or to scan the QR code on the sensorsscreen.
 
 <img src="images/Screenshot_20200228-100249.png"  width="250" height="360">
 
