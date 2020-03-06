@@ -18,6 +18,7 @@ import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.fragments.CheckNodeWifiFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.CheckUserWifiCredentialsFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.ListOfWifisFragment;
+import edu.kit.teco.smartwlanconf.ui.fragments.NodeNotFound;
 import edu.kit.teco.smartwlanconf.ui.fragments.RestartNodeFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.ShowNodeWebsiteFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment;
@@ -32,7 +33,8 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         CheckUserWifiCredentialsFragment.OnCheckUserWifiCredentialsSuccessListener,
         CheckNodeWifiFragment.OnCheckNodeWifiSuccessListener,
         RestartNodeFragment.OnNodeRestartedListener,
-        ShowNodeWebsiteFragment.OnShowNodeSideListener{
+        ShowNodeWebsiteFragment.OnShowNodeSiteListener,
+        NodeNotFound.OnAfterNodeNotFound {
 
 
 
@@ -108,7 +110,19 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     // This is what should be done after trying to open the nodes website
     // At the moment the application just starts all over again
-    public void onAfterShowNode(boolean success){
+    public void onAfterShowNodeSuccess(boolean success){
+        Fragment newFragment;
+        if(success) {
+            newFragment = NodeNotFound.newInstance();
+        } else {
+            newFragment = CheckUserWifiCredentialsFragment.newInstance(getApplicationContext(), false);
+        }
+        replaceFragment(newFragment);
+    }
+
+    // This is what should be done after trying to open the nodes website
+    // At the moment the application just starts all over again
+    public void onAfterNodeNotFound(boolean success){
         Fragment newFragment;
         if(success) {
             newFragment = ListOfWifisFragment.newInstance(1);

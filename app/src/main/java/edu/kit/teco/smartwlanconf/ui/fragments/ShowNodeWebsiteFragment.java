@@ -41,7 +41,7 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class ShowNodeWebsiteFragment extends Fragment {
 
-    private OnShowNodeSideListener mListener;
+    private OnShowNodeSiteListener mListener;
 
     //the node's ip adress in user wifi network
     private String mNodeIP;
@@ -70,8 +70,8 @@ public class ShowNodeWebsiteFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if (context instanceof OnShowNodeSideListener) {
-            mListener = (OnShowNodeSideListener) context;
+        if (context instanceof OnShowNodeSiteListener) {
+            mListener = (OnShowNodeSiteListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -156,9 +156,9 @@ public class ShowNodeWebsiteFragment extends Fragment {
                 //Has to be tested if a simple return produces no errors
                 return;
             }
-            mListener.onAfterShowNode(success);
+            mListener.onAfterShowNodeSuccess(success);
         } else {
-            mListener.onAfterShowNode(success);
+            mListener.onAfterShowNodeSuccess(success);
         }
     }
 
@@ -180,7 +180,7 @@ public class ShowNodeWebsiteFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnShowNodeSideListener {
-        void onAfterShowNode(boolean success);
+    public interface OnShowNodeSiteListener {
+        void onAfterShowNodeSuccess(boolean success);
     }
 }

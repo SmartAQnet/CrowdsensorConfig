@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.fragments.NodeNotFound">
+
+    <LinearLayout
+        android:id="@+id/check_node_wifi"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:visibility="visible">
+
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:ems="10"
+            android:inputType="none"
+            android:gravity="center_horizontal"
+            android:text="@string/node_not_found" />
+
+        <EditText
+            android:id="@+id/node_ip"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:ems="10"
+            android:inputType="text"
+            android:hint="@string/node_ip" />
+        <Button
+            android:id="@+id/btn_check_ip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="200px"
+            android:text="@string/btn_check_ip"/>
+
+    </LinearLayout>
+
+</FrameLayout>

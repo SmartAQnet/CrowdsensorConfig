@@ -39,6 +39,7 @@ import static androidx.constraintlayout.widget.Constraints.TAG;
 public class CheckUserWifiCredentialsFragment extends WifiFragment {
 
     private static final String ARG_SSID = "SSID";
+    private static final String ARG_FIRSTTIME = "FirstTime";
     private OnCheckUserWifiCredentialsSuccessListener mListener;
     private NsdManager.DiscoveryListener discoveryListener;
     private NsdManager nsdManager;
@@ -46,10 +47,6 @@ public class CheckUserWifiCredentialsFragment extends WifiFragment {
 
     public CheckUserWifiCredentialsFragment() {
         // Required empty public constructor
-    }
-
-    public CheckUserWifiCredentialsFragment(boolean firstTime) {
-        this.firstTime = firstTime;
     }
 
     /**
@@ -64,9 +61,10 @@ public class CheckUserWifiCredentialsFragment extends WifiFragment {
      * Most likely the user has given wrong password for wifi
      */
     public static CheckUserWifiCredentialsFragment newInstance(Context context, boolean firstTime) {
-        CheckUserWifiCredentialsFragment fragment = new CheckUserWifiCredentialsFragment(firstTime);
+        CheckUserWifiCredentialsFragment fragment = new CheckUserWifiCredentialsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_SSID, SmartWlanConfApplication.getUserWifiSSID(context));
+        args.putBoolean(ARG_FIRSTTIME, firstTime);
         fragment.setArguments(args);
         return fragment;
     }
@@ -76,12 +74,9 @@ public class CheckUserWifiCredentialsFragment extends WifiFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             SmartWlanConfActivity activity = (SmartWlanConfActivity) getActivity();
-            if(activity == null){
-                //Has to be tested if a simple return produces no errors, or an Exception has to be thrown
-                return;
-            }
             //Set Wlan SSID
             ((SmartWlanConfActivity) getActivity()).setmWlanSSID(getArguments().getString(ARG_SSID));
+            firstTime = getArguments().getBoolean(ARG_FIRSTTIME);
         }
     }
 

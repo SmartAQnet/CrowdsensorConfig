@@ -3,8 +3,15 @@
     <string name="wlanssid">Wifi SSID</string>
 
     <string name="node_id">Node ID</string>
+    <string name="node_ip">Node IP</string>
     <string name="btn_check_wifi">Prüfe Wlanverbindung</string>
 
     <string name="btn_check_node">Prüfe Sensorverbindung</string>
+    <string name="btn_check_ip">Prüfe IP-Adresse</string>
+    <string name="node_not_found">
+            Der Sensor konnte nicht automatisch im Wlan gefunden werden.
+            Geben Sie bitte die 12-stellige IP Adresse ein, die auf dem Display des Sensors
+            angezeigt wird.
+    </string>
 
 </resources>
