@@ -28,5 +28,6 @@ public class WifiScanRunnable implements Runnable{
 
         public void stop(){
             running = false;
+            hasStarted = false;
         }
 }

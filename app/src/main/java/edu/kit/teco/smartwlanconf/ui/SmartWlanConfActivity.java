@@ -16,7 +16,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.fragments.CheckNodeWifiFragment;
-import edu.kit.teco.smartwlanconf.ui.fragments.CheckUserWifiCredentialsFragment;
+import edu.kit.teco.smartwlanconf.ui.fragments.GetUserWifiCredentialsFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.ListOfWifisFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.NodeNotFound;
 import edu.kit.teco.smartwlanconf.ui.fragments.RestartNodeFragment;
@@ -30,7 +30,7 @@ import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
 // and receives the Callback from the QR Code Scanner
 public class SmartWlanConfActivity extends AppCompatActivity implements
         ListOfWifisFragment.OnWifiListFragmentInteractionListener,
-        CheckUserWifiCredentialsFragment.OnCheckUserWifiCredentialsSuccessListener,
+        GetUserWifiCredentialsFragment.OnGetUserWifiCredentialsListener,
         CheckNodeWifiFragment.OnCheckNodeWifiSuccessListener,
         RestartNodeFragment.OnNodeRestartedListener,
         ShowNodeWebsiteFragment.OnShowNodeSiteListener,
@@ -86,12 +86,12 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         //Stop running wifi scannning thread
         (SmartWlanConfApplication.getWifiScan(getApplicationContext())).stop();
         SmartWlanConfApplication.setUserWifiSSID(getApplicationContext(), scanResult.SSID);
-        Fragment newFragment = CheckUserWifiCredentialsFragment.newInstance(getApplicationContext(), true);
+        Fragment newFragment = GetUserWifiCredentialsFragment.newInstance(getApplicationContext(), true);
         replaceFragment(newFragment);
     }
 
     //This shows the fragment that tries to connect to node wifi
-    public void onCheckUserWifiCredentialsSuccess(){
+    public void onGotUserWifiCredentials(){
         Fragment newFragment = new CheckNodeWifiFragment();
         replaceFragment(newFragment);
     }
@@ -115,7 +115,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         if(success) {
             newFragment = NodeNotFound.newInstance();
         } else {
-            newFragment = CheckUserWifiCredentialsFragment.newInstance(getApplicationContext(), false);
+            newFragment = GetUserWifiCredentialsFragment.newInstance(getApplicationContext(), false);
         }
         replaceFragment(newFragment);
     }
@@ -127,7 +127,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         if(success) {
             newFragment = ListOfWifisFragment.newInstance(1);
         } else {
-            newFragment = CheckUserWifiCredentialsFragment.newInstance(getApplicationContext(), false);
+            newFragment = GetUserWifiCredentialsFragment.newInstance(getApplicationContext(), false);
         }
         replaceFragment(newFragment);
     }

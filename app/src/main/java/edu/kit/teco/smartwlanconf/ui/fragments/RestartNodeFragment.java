@@ -82,7 +82,7 @@ public class RestartNodeFragment extends WifiFragment {
 
     //This is the callback method for connectToUserWifi(), when user is reconnected to user wifi
     @Override
-    public void onWaitForWifiConnection(Boolean success){
+    public void onWaitForWifiConnection(boolean success){
         //Returning from Async call, check if view is still active
         //If not working check if setting a destroyed tag in onDetach() is a solution
         View view = getView();

@@ -4,7 +4,7 @@
 
     <string name="node_id">Node ID</string>
     <string name="node_ip">Node IP</string>
-    <string name="btn_check_wifi">Prüfe Wlanverbindung</string>
+    <string name="btn_open_check_node_wifi_fragment">Weiter</string>
 
     <string name="btn_check_node">Prüfe Sensorverbindung</string>
     <string name="btn_check_ip">Prüfe IP-Adresse</string>

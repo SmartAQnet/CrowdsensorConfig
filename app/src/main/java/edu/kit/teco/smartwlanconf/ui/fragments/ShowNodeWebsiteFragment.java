@@ -94,7 +94,7 @@ public class ShowNodeWebsiteFragment extends Fragment {
                     .compose(mRxDnssd.queryIPRecords())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .timeout(Config.TIMEOUT, TimeUnit.SECONDS)
+                    .timeout(Config.TIMEOUT_FOR_MDNSSCAN, TimeUnit.SECONDS)
                     .onExceptionResumeNext(
                             throwable -> {
                                 showNodeDiscoveryError();

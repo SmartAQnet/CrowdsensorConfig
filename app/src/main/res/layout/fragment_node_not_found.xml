@@ -6,7 +6,7 @@
     tools:context=".ui.fragments.NodeNotFound">
 
     <LinearLayout
-        android:id="@+id/check_node_wifi"
+        android:id="@+id/look_for_node_ip"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -36,6 +36,28 @@
             android:layout_marginBottom="200px"
             android:text="@string/btn_check_ip"/>
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/progress_check_node_wifi_after_failed_connection"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
+        <ProgressBar
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:gravity="center"
+            android:inputType="none"
+            android:text="Suche Wifi des Sensors" />
     </LinearLayout>
 
 </FrameLayout>

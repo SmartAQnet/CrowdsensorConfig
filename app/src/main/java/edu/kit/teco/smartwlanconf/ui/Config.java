@@ -5,7 +5,7 @@ package edu.kit.teco.smartwlanconf.ui;
 //Perhaps not complete, constants in code should be moved here
 public final class Config {
     //Time in seconds searching for Node
-    public final static int TIMEOUT = 40;
+    public final static int TIMEOUT_FOR_MDNSSCAN = 40;
 
     //These are the constants needed to send wifi credentials to the node
     public final static String SSIDPARAM = "SSID";
