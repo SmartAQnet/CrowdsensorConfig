@@ -101,7 +101,7 @@ public class CheckNodeWifiFragment extends WifiFragment{
         final Button checkNodeIDButton = view.findViewById(R.id.btn_check_node);
         //Read node id/ssid from input
         checkNodeIDButton.setOnClickListener((View v)->
-                connectToWifi(getActivity(), view, getNodeSSID(getActivity()), "a", this));
+                connectToWifi(getActivity(), view, getNodeSSID(getActivity()), Config.NODE_PWD, this));
     }
 
     //Connect to node wifi

@@ -143,7 +143,7 @@ public class ShowNodeWebsiteFragment extends Fragment {
     }
 
     //Continue after looking for node
-    private void continueAfterDiscovery(Boolean success){
+    private void continueAfterDiscovery(boolean success){
         stopDiscovery();
         //Open website of node to continue installation of node
         if (success) {
@@ -156,10 +156,8 @@ public class ShowNodeWebsiteFragment extends Fragment {
                 //Has to be tested if a simple return produces no errors
                 return;
             }
-            mListener.onAfterShowNodeSuccess(success);
-        } else {
-            mListener.onAfterShowNodeSuccess(success);
         }
+        mListener.onAfterShowNodeSuccess(success);
     }
 
     //Stop looking for node

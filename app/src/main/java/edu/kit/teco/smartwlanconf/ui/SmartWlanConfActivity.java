@@ -91,8 +91,13 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
     }
 
     //This shows the fragment that tries to connect to node wifi
-    public void onGotUserWifiCredentials(){
-        Fragment newFragment = new CheckNodeWifiFragment();
+    public void onGotUserWifiCredentials(boolean firstTime){
+        Fragment newFragment;
+        if(!firstTime){
+            newFragment = new RestartNodeFragment();
+        } else {
+            newFragment = new CheckNodeWifiFragment();
+        }
         replaceFragment(newFragment);
     }
 
@@ -113,9 +118,9 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
     public void onAfterShowNodeSuccess(boolean success){
         Fragment newFragment;
         if(success) {
-            newFragment = NodeNotFound.newInstance();
+            newFragment = ListOfWifisFragment.newInstance(1);
         } else {
-            newFragment = GetUserWifiCredentialsFragment.newInstance(getApplicationContext(), false);
+            newFragment = NodeNotFound.newInstance();
         }
         replaceFragment(newFragment);
     }

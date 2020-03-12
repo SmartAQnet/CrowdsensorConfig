@@ -97,10 +97,6 @@ public class RestartNodeFragment extends WifiFragment {
                     .make(view, "Wifi Verbindung fehlgeschlagen", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Nochmal versuchen!", (View v) -> connectToUserWifi());
             Activity activity = getActivity();
-            if(activity == null){
-                //Has to be tested if a simple return produces no errors, or if an Exception has to be thrown
-                return;
-            }
             int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
             snackbar.show();

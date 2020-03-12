@@ -135,7 +135,8 @@ public class GetUserWifiCredentialsFragment extends Fragment {
             String pwd = ((EditText) view.findViewById(R.id.pwd)).getText().toString();
             //Set  Wlan Password in Parent Activity
             activity.setmWlanPwd(pwd);
-            mListener.onGotUserWifiCredentials();
+            //Todo: onGotUserWifiCredentials() insert Parameter firstTime
+            mListener.onGotUserWifiCredentials(firstTime);
         });
     }
 
@@ -150,6 +151,6 @@ public class GetUserWifiCredentialsFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnGetUserWifiCredentialsListener {
-        void onGotUserWifiCredentials();
+        void onGotUserWifiCredentials(boolean firstTime);
     }
 }

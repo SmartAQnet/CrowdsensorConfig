@@ -3,9 +3,12 @@ package edu.kit.teco.smartwlanconf.ui.fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -21,6 +24,11 @@ import android.widget.EditText;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,16 +88,8 @@ public class NodeNotFound extends WifiFragment{
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-    }
-
-    //Button to get Node id/ssid and connect to node wifi
-    private void setCheckNodeIPButtonListener(View view){
-        //Read node id/ssid from input
-        view.findViewById(R.id.btn_check_ip).setOnClickListener((View v)-> {
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://" + ((EditText) getView().findViewById(R.id.node_ip)).getText().toString()));
-            startActivity(browserIntent);
-        });
+        setCheckNodeIPButtonListener(view);
+        scanForNodeWifi();
     }
 
     @Override
@@ -136,17 +136,17 @@ public class NodeNotFound extends WifiFragment{
             return;
         }
 
-        //Todo: Überarbeiten, wenn nix gefunden
+        //Keine Ergebnisse
         if (results == null) {
             Snackbar snackbar = Snackbar
-                    .make(view, "Keine Wifi Netze gefunden", Snackbar.LENGTH_INDEFINITE)
+                    .make(view, "Wifi nicht aktiviert?", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Nochmal versuchen!", (View v)->{
                         WifiManager wifi =(WifiManager) activity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                         if(!wifi.isWifiEnabled()){
                             //Does this happen?
-                            Log.e("ListOfWifisFragment","Wifi nicht aktiviert zum Scannen");
+                            Log.e("NodeNotFound","Wifi nicht aktiviert zum Scannen");
                         }
-                        ((SmartWlanConfActivity)getActivity()).setInitialFragment();
+                        scanForNodeWifi();
                     });
             int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
@@ -167,12 +167,64 @@ public class NodeNotFound extends WifiFragment{
             if (!result.SSID.isEmpty()
                     && result.frequency <= Config.WIFI_BANDWIDTH
                     && result.SSID == ((SmartWlanConfActivity)getActivity()).getmNodeSSID()) {
-                //Todo: Found Node wifi => Wifi credentials wrong, open CheckUserWifiCredentialsFragment
-                //
+                //Open GetUserWifiCredentialsFragment
+                mListener.onAfterNodeNotFound(false);
             }
         }
-        //Todo: Wifi node not found => get IP Address from user
-        //Check if IP exists and open external Browser
+        //Stop running scan
+        SmartWlanConfApplication.getWifiScan(getContext()).stop();
+        //Wifi node not found => get IP Address from user
+    }
+
+    //Button to get Node id/ssid and connect to node wifi
+    private void setCheckNodeIPButtonListener(View view){
+        //Read node id/ssid from input
+        view.findViewById(R.id.btn_check_ip).setOnClickListener((View v)-> {
+            IPTest ipTest = new IPTest();
+            String uri = "http://" + ((EditText) getView().findViewById(R.id.node_ip)).getText().toString();
+            try {
+                URL url = new URL(uri);
+                boolean isIPReachable = ipTest.execute(url).get();
+                if(isIPReachable){
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+                    startActivity(browserIntent);
+                    //Open first page of app
+                    mListener.onAfterNodeNotFound(true);
+                } else {
+                    //TODO: IP nicht erreichbar nochmal eingeben Fehlerhinweis an Eingabe
+                }
+            } catch (MalformedURLException urle){
+                urle.printStackTrace();
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+        });
+    }
+
+
+    class IPTest extends AsyncTask<URL, Void, Boolean>{
+        @Override
+        protected Boolean doInBackground(URL... urls) {
+            ConnectivityManager cm = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo netInfo = cm.getActiveNetworkInfo();
+            if (netInfo != null && netInfo.isConnected()) {
+                try {
+                    HttpURLConnection urlc = (HttpURLConnection) urls[0].openConnection();
+                    urlc.setConnectTimeout(10 * 1000);          // 10 s.
+                    urlc.connect();
+                    //Just look if there is a response code
+                    if (urlc.getResponseCode() != -1) {
+                        Log.wtf("Connection", "Success !");
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } catch (IOException e) {
+                    return false;
+                }
+            }
+            return false;
+        }
     }
 
     /**
