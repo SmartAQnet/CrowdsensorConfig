@@ -7,6 +7,10 @@ public final class Config {
     //Time in seconds searching for Node
     public final static int TIMEOUT_FOR_MDNSSCAN = 40;
 
+    public final static String SENSOR_PREFIX = "1";
+
+    public final static String LISTOFSENSORS_TITLE = "Bitte klicken Sie auf Ihren Sensor";
+
     //These are the constants needed to send wifi credentials to the node
     public final static String SSIDPARAM = "SSID";
     public final static String PWDPARAM = "Passphrase";

@@ -171,7 +171,7 @@ public class CheckNodeWifiFragment extends WifiFragment{
             if (mListener != null) mListener.onCheckNodeWifiSuccess();
         } else {
             //Couldn't connect to node wifi, reopen fragment that asks for node id
-            activity.onGotUserWifiCredentials();
+            activity.onGotUserWifiCredentials(false);
             //Set error to show error text with node input field
             SmartWlanConfApplication.setnodeIDError(getActivity(), true);
         }

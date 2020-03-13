@@ -17,6 +17,7 @@ import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.fragments.CheckNodeWifiFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.GetUserWifiCredentialsFragment;
+import edu.kit.teco.smartwlanconf.ui.fragments.ListOfSensorsFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.ListOfWifisFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.NodeNotFound;
 import edu.kit.teco.smartwlanconf.ui.fragments.RestartNodeFragment;
@@ -34,7 +35,8 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         CheckNodeWifiFragment.OnCheckNodeWifiSuccessListener,
         RestartNodeFragment.OnNodeRestartedListener,
         ShowNodeWebsiteFragment.OnShowNodeSiteListener,
-        NodeNotFound.OnAfterNodeNotFound {
+        NodeNotFound.OnAfterNodeNotFound,
+        ListOfSensorsFragment.OnSensorListInteractionListener{
 
 
 
@@ -72,8 +74,20 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     //The different fragments are managed here
 
-    //This shows the fragment with the list of available Wifis
+    //This shows the fragment with the list of available sensors
     public void setInitialFragment(){
+        Fragment newFragment = ListOfSensorsFragment.newInstance(1);
+        replaceFragment(newFragment);
+    }
+
+    //This shows ListOfWifisFragment
+    public void onSensorListInteraction(ScanResult scanResult){
+        //Stop receiver from getting results from Wifi Scan
+        WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(getApplicationContext());
+        getApplication().unregisterReceiver(wifi.getWifiScanReceiver());
+        //Stop running wifi scannning thread
+        (SmartWlanConfApplication.getWifiScan(getApplicationContext())).stop();
+        mNodeSSID = scanResult.SSID;
         Fragment newFragment = ListOfWifisFragment.newInstance(1);
         replaceFragment(newFragment);
     }
@@ -85,8 +99,8 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         getApplication().unregisterReceiver(wifi.getWifiScanReceiver());
         //Stop running wifi scannning thread
         (SmartWlanConfApplication.getWifiScan(getApplicationContext())).stop();
-        SmartWlanConfApplication.setUserWifiSSID(getApplicationContext(), scanResult.SSID);
-        Fragment newFragment = GetUserWifiCredentialsFragment.newInstance(getApplicationContext(), true);
+        mWlanSSID = scanResult.SSID;
+        Fragment newFragment = GetUserWifiCredentialsFragment.newInstance(getApplicationContext(), true, mWlanSSID);
         replaceFragment(newFragment);
     }
 
@@ -132,7 +146,8 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         if(success) {
             newFragment = ListOfWifisFragment.newInstance(1);
         } else {
-            newFragment = GetUserWifiCredentialsFragment.newInstance(getApplicationContext(), false);
+            newFragment = GetUserWifiCredentialsFragment.newInstance(getApplicationContext(), false, mWlanSSID
+            );
         }
         replaceFragment(newFragment);
     }

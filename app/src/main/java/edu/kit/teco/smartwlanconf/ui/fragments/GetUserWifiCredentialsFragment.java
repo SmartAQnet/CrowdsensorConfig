@@ -57,10 +57,10 @@ public class GetUserWifiCredentialsFragment extends Fragment {
      * If it's not the first time a new fragment is created, reason is that the node has not been found in user wifi
      * Most likely the user has given wrong password for wifi
      */
-    public static GetUserWifiCredentialsFragment newInstance(Context context, boolean firstTime) {
+    public static GetUserWifiCredentialsFragment newInstance(Context context, boolean firstTime, String userWifiSSID) {
         GetUserWifiCredentialsFragment fragment = new GetUserWifiCredentialsFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_SSID, SmartWlanConfApplication.getUserWifiSSID(context));
+        args.putString(ARG_SSID, userWifiSSID);
         args.putBoolean(ARG_FIRSTTIME, firstTime);
         fragment.setArguments(args);
         return fragment;
