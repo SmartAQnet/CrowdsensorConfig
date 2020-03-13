@@ -39,7 +39,7 @@ import io.reactivex.schedulers.Schedulers;
  * If the node can be found, his website is opened in external browser
  * otherwise the app returns to CheckUserWifiCredentialsFragment
  */
-public class ShowNodeWebsiteFragment extends Fragment {
+public class ShowNodeWebsiteFragment extends WifiFragment {
 
     private OnShowNodeSiteListener mListener;
 
@@ -56,8 +56,9 @@ public class ShowNodeWebsiteFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //Start looking for node with bonjour service (mDNS)
-        startDiscovery();
+        connectToWifi(((SmartWlanConfActivity)getActivity()).getmWlanSSID(),
+                ((SmartWlanConfActivity)getActivity()).getmWlanPwd(),
+                this);
     }
 
     @Nullable
@@ -78,6 +79,32 @@ public class ShowNodeWebsiteFragment extends Fragment {
         }
     }
 
+    //Reconnect to user wifi
+    @Override
+    public void onWaitForWifiConnection(boolean success){
+        //Returning from Async call, check if view is still active
+        //If not working check if setting a destroyed tag in onDetach() is a solution
+        View view = getView();
+        if(view == null){
+            //Has to be tested if a simple return produces no errors, or an Exception has to be thrown
+            return;
+        }
+        if (success) {
+            //Start looking for node with bonjour service (mDNS)
+            startDiscovery();
+        } else {
+            Snackbar snackbar = Snackbar
+                    .make(view, "Verbindung zu" + ((SmartWlanConfActivity) getActivity()).getmWlanSSID()+ " fehlgeschlagen. Neuer Verbindungsversuch!", Snackbar.LENGTH_LONG);
+            int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
+            snackbar.setActionTextColor(colorSnackRetry);
+            snackbar.show();
+            connectToWifi(((SmartWlanConfActivity)getActivity()).getmWlanSSID(),
+                    ((SmartWlanConfActivity)getActivity()).getmWlanPwd(),
+                    this);
+        }
+    }
+
+    //Start searching for sensor with mDNS
     private void startDiscovery() {
         try {
             SmartWlanConfActivity activity = ((SmartWlanConfActivity) getActivity());
@@ -133,7 +160,7 @@ public class ShowNodeWebsiteFragment extends Fragment {
         View view = getView();
         if(view != null) {
             Snackbar snackbar = Snackbar
-                    .make(getView(), "Knoten nicht im Wlan gefunden!", Snackbar.LENGTH_LONG);
+                    .make(getView(), "Sensor nicht im Wlan gefunden!", Snackbar.LENGTH_LONG);
             int colorSnackRetry = ResourcesCompat.getColor(getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
             snackbar.show();
@@ -150,12 +177,6 @@ public class ShowNodeWebsiteFragment extends Fragment {
             //open webview with node ip
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://" + mNodeIP));
             startActivity(browserIntent);
-            //Returning from Async call, check if view is still active
-            //If not working check if setting a destroyed tag in onDetach() is a solution
-            if (getView() == null) {
-                //Has to be tested if a simple return produces no errors
-                return;
-            }
         }
         mListener.onAfterShowNodeSuccess(success);
     }

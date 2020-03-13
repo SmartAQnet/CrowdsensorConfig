@@ -6,13 +6,13 @@
     android:visibility="visible">
 
     <androidx.recyclerview.widget.RecyclerView xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/wifilist"
-        android:name="edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment"
+        android:id="@+id/wiflist"
+        android:name="edu.kit.teco.smartwlanconf.adapter.WifiListItemRecyclerViewAdapter"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.fragments.ListOfWifisFragment"
         tools:listitem="@layout/wifi_list_item" />

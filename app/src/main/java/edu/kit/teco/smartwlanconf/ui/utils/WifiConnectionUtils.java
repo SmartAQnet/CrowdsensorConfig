@@ -155,6 +155,8 @@ public class WifiConnectionUtils {
             wifiFragment.getActivity().unregisterReceiver(wifiScanReceiver);
         } catch(NullPointerException e){
             e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
         }
         wifiFragment.onWaitForWifiScan(null);
     }

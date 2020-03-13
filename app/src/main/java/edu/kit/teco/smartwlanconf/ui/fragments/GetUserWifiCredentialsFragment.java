@@ -1,12 +1,14 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
 import android.content.Context;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.core.content.res.ResourcesCompat;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +16,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
+import edu.kit.teco.smartwlanconf.ui.Config;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 
 /**
@@ -26,16 +31,15 @@ import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
  * Use the {@link CheckUserWifiCredentialsFragment#newInstance} factory method to
  * create an instance of this fragment.
  *
- * This fragment just gets the password for selected wifi from user and open CheckNodeWifiFragment in first try
- * when coming from NodeNotFound skip CheckNodeWifiFragment and goto RestartNodeFragment
+ * This fragment just gets the password for selected wifi from user
  */
 
 /** Todo: Rename to GetUserWifiCredentials
- *  Show hint when opened from NodeNotFound
- *  Adapt XML layout
- *  Skip CheckNodeWifiFragment when coming from NodeNotFound
+ *  Todo: Show hint when opened from NodeNotFound
+ *  Todo: Adapt XML layout
 */
-public class GetUserWifiCredentialsFragment extends Fragment {
+
+public class GetUserWifiCredentialsFragment extends WifiFragment {
 
     private static final String ARG_SSID = "SSID";
     private static final String ARG_FIRSTTIME = "FirstTime";
@@ -84,7 +88,7 @@ public class GetUserWifiCredentialsFragment extends Fragment {
         if(!firstTime){
             //Todo: Show Hint that password might have been wrong
         }
-        return inflater.inflate(R.layout.wifi_check_credentials_fragment, container, false);
+        return inflater.inflate(R.layout.get_wifi_credentials_fragment, container, false);
     }
 
     @Override
@@ -135,9 +139,32 @@ public class GetUserWifiCredentialsFragment extends Fragment {
             String pwd = ((EditText) view.findViewById(R.id.pwd)).getText().toString();
             //Set  Wlan Password in Parent Activity
             activity.setmWlanPwd(pwd);
-            //Todo: onGotUserWifiCredentials() insert Parameter firstTime
-            mListener.onGotUserWifiCredentials(firstTime);
+            //Remove Error hint
+            ((EditText)view.findViewById(R.id.ssid)).setError(null);
+            connectToWifi(activity.getmWlanSSID(), activity.getmWlanPwd(), this);
         });
+    }
+
+    @Override
+    public void onWaitForWifiConnection(boolean success){
+        //Returning from Async call, check if view is still active
+        //If not working check if setting a destroyed tag in onDetach() is a solution
+        View view = getView();
+        if(view == null){
+            //Has to be tested if a simple return produces no errors, or an Exception has to be thrown
+            return;
+        }
+        if (success) {
+            mListener.onGotUserWifiCredentials(firstTime);
+        } else {
+            Snackbar snackbar = Snackbar
+                    .make(getView(), "Wifi Verbindung fehlgeschlagen bitte Passwort prüfen!", Snackbar.LENGTH_LONG);
+            int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
+            snackbar.setActionTextColor(colorSnackRetry);
+            snackbar.show();
+            EditText node_id = view.findViewById(R.id.ssid);
+            node_id.setError(Config.SSID_ERROR);
+        }
     }
 
     /**

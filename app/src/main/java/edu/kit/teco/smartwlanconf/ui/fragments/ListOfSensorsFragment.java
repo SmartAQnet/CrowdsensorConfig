@@ -75,14 +75,13 @@ public class ListOfSensorsFragment extends WifiFragment {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
         this.setRetainInstance(true);
-        getActivity().setTitle(Config.LISTOFSENSORS_TITLE);
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.wifi_fragment_item_list, container, false);
+        return inflater.inflate(R.layout.sensor_fragment_item_list, container, false);
     }
 
     @Override
@@ -112,10 +111,10 @@ public class ListOfSensorsFragment extends WifiFragment {
 
 
     //This methods starts scanning and
-    //sets the WifiListItemRecyclerAdapter that is used for showing scan results
+    //sets the SensorListItemRecyclerAdapter that is used for showing scan results
     private void setAdapter(View view){
         Context context = getActivity();
-        RecyclerView recyclerView = view.findViewById(R.id.sensorlist);
+        RecyclerView recyclerView = view.findViewById(R.id.wifilist);
         if (mColumnCount <= 1) {
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
         } else {
@@ -143,26 +142,12 @@ public class ListOfSensorsFragment extends WifiFragment {
         }
 
         if (results == null) {
-            Snackbar snackbar = Snackbar
-                    .make(view, "Kein Sensor gefunden", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Nochmal versuchen!", (View v)->{
-                        WifiManager wifi =(WifiManager) activity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                        if(!wifi.isWifiEnabled()){
-                            //Does this happen?
-                            Log.e("ListOfWifisFragment","Wifi nicht aktiviert zum Scannen");
-                        }
-                        //First stop running scanner
-                        SmartWlanConfApplication.getWifiScan(getContext()).stop();
-                        ((SmartWlanConfActivity) getActivity()).setInitialFragment();
-                    });
-            int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
-            snackbar.setActionTextColor(colorSnackRetry);
-            snackbar.show();
+            noSensorFound();
             return;
         }
         //Scan results if not empty show list
         LinearLayout splash = view.findViewById(R.id.splash);
-        RecyclerView list = view.findViewById(R.id.sensorlist);
+        RecyclerView list = view.findViewById(R.id.wifilist);
         splash.setVisibility(View.GONE);
         list.setVisibility(View.VISIBLE);
         sensorList.clear();
@@ -175,7 +160,31 @@ public class ListOfSensorsFragment extends WifiFragment {
                 sensorsAdapter.notifyDataSetChanged();
             }
         }
+        if(sensorList.isEmpty()){
+            noSensorFound();
+            return;
+        }
+        //Change title to telöl user waht to do
+        getActivity().setTitle(Config.LISTOFSENSORS_TITLE);
 
+    }
+
+    private void noSensorFound(){
+        Snackbar snackbar = Snackbar
+                .make(getView(), "Kein Sensor gefunden!", Snackbar.LENGTH_INDEFINITE)
+                .setAction("Nochmal versuchen!", (View v)->{
+                    WifiManager wifi =(WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                    if(!wifi.isWifiEnabled()){
+                        //Does this happen?
+                        Log.e("ListOfWifisFragment","Wifi nicht aktiviert zum Scannen");
+                    }
+                    //First stop running scanner
+                    SmartWlanConfApplication.getWifiScan(getContext()).stop();
+                    ((SmartWlanConfActivity) getActivity()).setInitialFragment();
+                });
+        int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
+        snackbar.setActionTextColor(colorSnackRetry);
+        snackbar.show();
     }
 
     /**

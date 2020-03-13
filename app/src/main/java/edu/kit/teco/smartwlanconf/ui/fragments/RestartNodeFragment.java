@@ -30,6 +30,7 @@ import java.util.HashMap;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
+import edu.kit.teco.smartwlanconf.ui.Config;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 import edu.kit.teco.smartwlanconf.ui.utils.HttpNodePost;
 
@@ -63,10 +64,10 @@ public class RestartNodeFragment extends WifiFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        //Send wifi credentials to sensor node and restart it
-        connectNodeWithUserWifi();
-        //Node is now restarting, connect to user wifi and lookup for node in user wifi by calling ShowNodeWebsiteFragment
-        connectToUserWifi();
+        //Connect to sensor wifi
+        connectToWifi(((SmartWlanConfActivity)getActivity()).getmNodeSSID(),
+                Config.NODE_PWD,
+                this);
     }
 
     @Override
@@ -80,7 +81,7 @@ public class RestartNodeFragment extends WifiFragment {
         }
     }
 
-    //This is the callback method for connectToUserWifi(), when user is reconnected to user wifi
+    //connect to sensor wifi
     @Override
     public void onWaitForWifiConnection(boolean success){
         //Returning from Async call, check if view is still active
@@ -91,58 +92,25 @@ public class RestartNodeFragment extends WifiFragment {
             return;
         }
         if (success) {
+            //Send wifi credentials to sensor node and restart it
+            connectNodeWithUserWifi();
             mListener.onNodeRestartedSuccess();
         } else {
             Snackbar snackbar = Snackbar
-                    .make(view, "Wifi Verbindung fehlgeschlagen", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Nochmal versuchen!", (View v) -> connectToUserWifi());
-            Activity activity = getActivity();
-            int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
+                    .make(view, "Verbindung zu Sensor fehlgeschlagen", Snackbar.LENGTH_LONG);
+            int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
             snackbar.show();
+            //Send wifi credentials to sensor node and restart it
+            connectNodeWithUserWifi();
         }
     }
 
-    //Reconnects the users phone with the users wifi
-    @RequiresPermission(Manifest.permission.CHANGE_WIFI_STATE)
-    private void connectToUserWifi(){
-        Activity activity = getActivity();
-        if(activity == null){
-            //Has to be tested if a simple return produces no errors, or if an Exception has to be thrown
-            return;
-        }
-        //Some phones seems to loose Permission to Change Wifi state
-        //Check here and see if it helps
-        PackageManager pm = activity.getPackageManager();
-        int hasPerm = pm.checkPermission(
-                Manifest.permission.CHANGE_WIFI_STATE,
-                activity.getPackageName());
-        if (hasPerm != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CHANGE_WIFI_MULTICAST_STATE}, 556);
-            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CHANGE_WIFI_STATE}, 557);
-            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CHANGE_NETWORK_STATE}, 558);
-        }
-        //reconnect to user wifi
-        SmartWlanConfApplication
-                .getWifi(activity)
-                .connectWithWifi_withContext(activity, ((SmartWlanConfActivity) activity).getmWlanSSID(), ((SmartWlanConfActivity) activity).getmWlanPwd(), this);
-    }
 
     //Sending wifi credentials with http to node restarts the node
     private void connectNodeWithUserWifi(){
 
         Context context = getContext();
-        if(context == null){
-            Log.d(RestartNodeFragment.class.toString(), "context in connectNodeWithUserWifi() is null");
-            return;
-        }
-
-        View view = getView();
-        if(view == null){
-            Log.d(RestartNodeFragment.class.toString(), "view in connectNodeWithUserWifi() is null");
-            return;
-        }
-
         //As the user's phone is connected to the wifi of the node
         //it's IP is the gateway IP, so you have to look for it
         String gatewayIP;
@@ -166,7 +134,7 @@ public class RestartNodeFragment extends WifiFragment {
             //Check if credentials could be sent
             if(!result){
                 Snackbar snackbar = Snackbar
-                        .make(view, "Wifi Daten konnten nicht an Knoten geschickt werden!", Snackbar.LENGTH_INDEFINITE)
+                        .make(getView(), "Wifi Daten konnten nicht an Knoten geschickt werden!", Snackbar.LENGTH_INDEFINITE)
                         .setAction("Nochmal versuchen!", (View v) -> this.connectNodeWithUserWifi());
                 int colorSnackRetry = ResourcesCompat.getColor(context.getResources(), R.color.colorSnackRetry, null);
                 snackbar.setActionTextColor(colorSnackRetry);

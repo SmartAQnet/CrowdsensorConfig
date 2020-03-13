@@ -115,7 +115,7 @@ public class ListOfWifisFragment extends WifiFragment {
     //sets the WifiListItemRecyclerAdapter that is used for showing scan results
     private void setAdapter(View view){
         Context context = getActivity();
-        RecyclerView recyclerView = view.findViewById(R.id.wifilist);
+        RecyclerView recyclerView = view.findViewById(R.id.wiflist);
         if (mColumnCount <= 1) {
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
         } else {
@@ -127,9 +127,8 @@ public class ListOfWifisFragment extends WifiFragment {
         WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(getContext());
         wifiAdapter = new WifiListItemRecyclerViewAdapter(wifiList, mListener);
         recyclerView.setAdapter(wifiAdapter);
-        final WifiFragment wifiFragment = this;
         //Start scanning for wifis in async task
-        WifiScanRunnable wifiScan = new WifiScanRunnable(wifiFragment, wifi);
+        WifiScanRunnable wifiScan = new WifiScanRunnable(this, wifi);
         //Save wifiscan to stop runnable after scanning wifis
         SmartWlanConfApplication.setWifiScan(context, wifiScan);
         Thread t = new Thread(wifiScan);
@@ -151,19 +150,7 @@ public class ListOfWifisFragment extends WifiFragment {
         }
 
         if (results == null) {
-            Snackbar snackbar = Snackbar
-                    .make(view, "Keine Wifi Netze gefunden", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Nochmal versuchen!", (View v)->{
-                        WifiManager wifi =(WifiManager) activity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                        if(!wifi.isWifiEnabled()){
-                            //Does this happen?
-                            Log.e("ListOfWifisFragment","Wifi nicht aktiviert zum Scannen");
-                        }
-                        ((SmartWlanConfActivity)getActivity()).setInitialFragment();
-                    });
-            int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
-            snackbar.setActionTextColor(colorSnackRetry);
-            snackbar.show();
+            noWifiFound();
             return;
         }
         //Scan results if not empty show list
@@ -172,13 +159,34 @@ public class ListOfWifisFragment extends WifiFragment {
         // Add results to list of wifis
         for(int i = 0; i < results.size(); i++){
             ScanResult result = results.get(i);
-            if (!result.SSID.isEmpty() && result.frequency <= Config.WIFI_BANDWIDTH) {
+            if (!result.SSID.isEmpty() && result.frequency <= Config.WIFI_BANDWIDTH && !result.SSID.startsWith(Config.SENSOR_PREFIX)) {
                 wifiList.add(result);
                 wifiAdapter.notifyDataSetChanged();
             }
         }
-
+        if(wifiList.isEmpty()){
+            noWifiFound();
+        }
     }
+
+    private void noWifiFound(){
+        Snackbar snackbar = Snackbar
+                .make(getView(), "Kein Wifi gefunden!", Snackbar.LENGTH_INDEFINITE)
+                .setAction("Nochmal versuchen!", (View v)->{
+                    WifiManager wifi =(WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                    if(!wifi.isWifiEnabled()){
+                        //Does this happen?
+                        Log.e("ListOfWifisFragment","Wifi nicht aktiviert zum Scannen");
+                    }
+                    //First stop running scanner
+                    SmartWlanConfApplication.getWifiScan(getContext()).stop();
+                    startScanning();
+                });
+        int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
+        snackbar.setActionTextColor(colorSnackRetry);
+        snackbar.show();
+    }
+
 
     /**
      * This interface must be implemented by activities that contain this

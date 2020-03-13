@@ -89,7 +89,7 @@ public class NodeNotFound extends WifiFragment{
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setCheckNodeIPButtonListener(view);
-        scanForNodeWifi();
+        startScanning();
     }
 
     @Override
@@ -139,25 +139,13 @@ public class NodeNotFound extends WifiFragment{
         //Keine Ergebnisse
         if (results == null) {
             Snackbar snackbar = Snackbar
-                    .make(view, "Wifi nicht aktiviert?", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Nochmal versuchen!", (View v)->{
-                        WifiManager wifi =(WifiManager) activity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                        if(!wifi.isWifiEnabled()){
-                            //Does this happen?
-                            Log.e("NodeNotFound","Wifi nicht aktiviert zum Scannen");
-                        }
-                        scanForNodeWifi();
-                    });
+                    .make(view, "Keine Wifi gefunden. Suche wird wiederholt", Snackbar.LENGTH_LONG);
             int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
             snackbar.show();
+            startScanning();
             return;
         }
-        //Scan results if not empty show list
-        //LinearLayout splash = view.findViewById(R.id.splash);
-        //RecyclerView list = view.findViewById(R.id.list);
-        //splash.setVisibility(View.GONE);
-        //list.setVisibility(View.VISIBLE);
         List<ScanResult> wifiList = new ArrayList<>();
         wifiList.clear();
 
@@ -168,7 +156,7 @@ public class NodeNotFound extends WifiFragment{
                     && result.frequency <= Config.WIFI_BANDWIDTH
                     && result.SSID == ((SmartWlanConfActivity)getActivity()).getmNodeSSID()) {
                 //Open GetUserWifiCredentialsFragment
-                mListener.onAfterNodeNotFound(false);
+                mListener.onAfterNodeNotFound(true);
             }
         }
         //Stop running scan
@@ -189,7 +177,7 @@ public class NodeNotFound extends WifiFragment{
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
                     startActivity(browserIntent);
                     //Open first page of app
-                    mListener.onAfterNodeNotFound(true);
+                    mListener.onAfterNodeNotFound(false);
                 } else {
                     //TODO: IP nicht erreichbar nochmal eingeben Fehlerhinweis an Eingabe
                 }
@@ -239,6 +227,6 @@ public class NodeNotFound extends WifiFragment{
      */
     public interface OnAfterNodeNotFound {
         // TODO: Update argument type and name
-        void onAfterNodeNotFound(boolean success);
+        void onAfterNodeNotFound(boolean nodeFound);
     }
 }
