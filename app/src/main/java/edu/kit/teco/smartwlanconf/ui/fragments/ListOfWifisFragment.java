@@ -89,6 +89,8 @@ public class ListOfWifisFragment extends WifiFragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setAdapter(view);
+        //Start scanning for sensors in async task
+        startScanning();
     }
 
     @Override
@@ -113,7 +115,7 @@ public class ListOfWifisFragment extends WifiFragment {
     //sets the WifiListItemRecyclerAdapter that is used for showing scan results
     private void setAdapter(View view){
         Context context = getActivity();
-        RecyclerView recyclerView = view.findViewById(R.id.list);
+        RecyclerView recyclerView = view.findViewById(R.id.wifilist);
         if (mColumnCount <= 1) {
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
         } else {
@@ -165,10 +167,6 @@ public class ListOfWifisFragment extends WifiFragment {
             return;
         }
         //Scan results if not empty show list
-        LinearLayout splash = view.findViewById(R.id.splash);
-        RecyclerView list = view.findViewById(R.id.list);
-        splash.setVisibility(View.GONE);
-        list.setVisibility(View.VISIBLE);
         wifiList.clear();
 
         // Add results to list of wifis

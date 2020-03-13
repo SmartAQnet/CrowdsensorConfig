@@ -89,6 +89,8 @@ public class ListOfSensorsFragment extends WifiFragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setAdapter(view);
+        //Start scanning for sensors in async task
+        startScanning();
     }
 
     @Override
@@ -113,7 +115,7 @@ public class ListOfSensorsFragment extends WifiFragment {
     //sets the WifiListItemRecyclerAdapter that is used for showing scan results
     private void setAdapter(View view){
         Context context = getActivity();
-        RecyclerView recyclerView = view.findViewById(R.id.list);
+        RecyclerView recyclerView = view.findViewById(R.id.sensorlist);
         if (mColumnCount <= 1) {
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
         } else {
@@ -122,16 +124,8 @@ public class ListOfSensorsFragment extends WifiFragment {
         DividerItemDecoration dividerItemDecoration= new DividerItemDecoration(context,
                 LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
-        WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(getContext());
         sensorsAdapter = new SensorListItemRecyclerViewAdapter(sensorList, mListener);
         recyclerView.setAdapter(sensorsAdapter);
-        final WifiFragment wifiFragment = this;
-        //Start scanning for wifis in async task
-        WifiScanRunnable wifiScan = new WifiScanRunnable(wifiFragment, wifi);
-        //Save wifiscan to stop runnable after scanning wifis
-        SmartWlanConfApplication.setWifiScan(context, wifiScan);
-        Thread t = new Thread(wifiScan);
-        t.start();
     }
 
     //Callback method, when wifi scan returns it's results
@@ -150,14 +144,16 @@ public class ListOfSensorsFragment extends WifiFragment {
 
         if (results == null) {
             Snackbar snackbar = Snackbar
-                    .make(view, "Keine Wifi Netze gefunden", Snackbar.LENGTH_INDEFINITE)
+                    .make(view, "Kein Sensor gefunden", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Nochmal versuchen!", (View v)->{
                         WifiManager wifi =(WifiManager) activity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                         if(!wifi.isWifiEnabled()){
                             //Does this happen?
                             Log.e("ListOfWifisFragment","Wifi nicht aktiviert zum Scannen");
                         }
-                        ((SmartWlanConfActivity)getActivity()).setInitialFragment();
+                        //First stop running scanner
+                        SmartWlanConfApplication.getWifiScan(getContext()).stop();
+                        ((SmartWlanConfActivity) getActivity()).setInitialFragment();
                     });
             int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
@@ -166,7 +162,7 @@ public class ListOfSensorsFragment extends WifiFragment {
         }
         //Scan results if not empty show list
         LinearLayout splash = view.findViewById(R.id.splash);
-        RecyclerView list = view.findViewById(R.id.list);
+        RecyclerView list = view.findViewById(R.id.sensorlist);
         splash.setVisibility(View.GONE);
         list.setVisibility(View.VISIBLE);
         sensorList.clear();

@@ -5,56 +5,8 @@
     android:layout_height="match_parent"
     android:visibility="visible">
 
-    <LinearLayout
-        android:id="@+id/splash"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:orientation="vertical">
-
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_weight="3"
-            android:background="@null"
-            android:gravity="center"
-            android:inputType="none"
-            android:text="Dustsensor Einrichtungsapp"
-            android:textStyle="bold" />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_weight="3"
-            android:background="@null"
-            android:gravity="center|top"
-            android:inputType="none"
-            android:text="Wifi wird gesucht...(2.5 GHz)"
-            android:textStyle="bold" />
-
-        <EditText
-            android:paddingHorizontal="40dp"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_weight="3"
-            android:background="@null"
-            android:gravity="center|top"
-            android:inputType="none"
-            android:text="Wählen Sie aus der Liste das WLan mit dem sich der Sensor verbinden soll" />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_weight="0"
-            android:background="@null"
-            android:gravity="center|top"
-            android:inputType="none"
-            android:text="developed by teco" />
-    </LinearLayout>
-
     <androidx.recyclerview.widget.RecyclerView xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/list"
+        android:id="@+id/wifilist"
         android:name="edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -63,6 +15,6 @@
         android:visibility="gone"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.fragments.ListOfWifisFragment"
-        tools:listitem="@layout/wifi_fragment_item" />
+        tools:listitem="@layout/wifi_list_item" />
 
 </FrameLayout>
