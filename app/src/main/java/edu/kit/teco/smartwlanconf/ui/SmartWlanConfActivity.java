@@ -76,7 +76,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     //This shows the fragment with the list of available sensors
     public void setInitialFragment(){
-        Fragment newFragment = ListOfSensorsFragment.newInstance(1);
+        Fragment newFragment = ListOfWifisFragment.newInstance(1);
         replaceFragment(newFragment);
     }
 
