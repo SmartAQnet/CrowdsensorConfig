@@ -15,7 +15,6 @@ import com.google.zxing.integration.android.IntentIntegrator;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
-import edu.kit.teco.smartwlanconf.ui.fragments.CheckNodeWifiFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.GetUserWifiCredentialsFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.ListOfSensorsFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.ListOfWifisFragment;
@@ -32,7 +31,6 @@ import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
 public class SmartWlanConfActivity extends AppCompatActivity implements
         ListOfWifisFragment.OnWifiListFragmentInteractionListener,
         GetUserWifiCredentialsFragment.OnGetUserWifiCredentialsListener,
-        CheckNodeWifiFragment.OnCheckNodeWifiSuccessListener,
         RestartNodeFragment.OnNodeRestartedListener,
         ShowNodeWebsiteFragment.OnShowNodeSiteListener,
         NodeNotFound.OnAfterNodeNotFound,
@@ -76,7 +74,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     //This shows the fragment with the list of available sensors
     public void setInitialFragment(){
-        Fragment newFragment = ListOfWifisFragment.newInstance(1);
+        Fragment newFragment = ListOfSensorsFragment.newInstance(1);
         replaceFragment(newFragment);
     }
 
@@ -84,7 +82,12 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
     public void onSensorListInteraction(ScanResult scanResult){
         //Stop receiver from getting results from Wifi Scan
         WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(getApplicationContext());
-        getApplication().unregisterReceiver(wifi.getWifiScanReceiver());
+        try {
+            getApplication().unregisterReceiver(wifi.getWifiScanReceiver());
+        } catch (IllegalArgumentException e) {
+            //Nothing to do, is catched if Scanreceiver is not registered
+            e.printStackTrace();
+        }
         //Stop running wifi scannning thread
         (SmartWlanConfApplication.getWifiScan(getApplicationContext())).stop();
         mNodeSSID = scanResult.SSID;
@@ -106,12 +109,9 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     //This shows the fragment that tries to connect to node wifi
     public void onGotUserWifiCredentials(boolean firstTime){
+        //Todo: firstTime entfernen
         Fragment newFragment;
-        if(!firstTime){
-            newFragment = new RestartNodeFragment();
-        } else {
-            newFragment = new CheckNodeWifiFragment();
-        }
+        newFragment = new RestartNodeFragment();
         replaceFragment(newFragment);
     }
 
