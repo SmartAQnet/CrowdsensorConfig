@@ -5,11 +5,15 @@ package edu.kit.teco.smartwlanconf.ui;
 //Perhaps not complete, constants in code should be moved here
 public final class Config {
     //Time in seconds searching for Node
-    public final static int TIMEOUT_FOR_MDNSSCAN = 40;
+    public final static int TIMEOUT_FOR_MDNSSCAN = 10;
 
+    //Characters the sensors name starts with
     public final static String SENSOR_PREFIX = "1";
 
+    //Title bar names used for different fragments
+    public final static String APP_TITLE = "Crowd Sensor Konfiguration";
     public final static String LISTOFSENSORS_TITLE = "Bitte klicken Sie auf Ihren Sensor";
+    public final static String LISTOFWIFIS_TITLE = "Bitte klicken Sie auf Ihr Wifi";
 
     //These are the constants needed to send wifi credentials to the node
     public final static String SSIDPARAM = "SSID";

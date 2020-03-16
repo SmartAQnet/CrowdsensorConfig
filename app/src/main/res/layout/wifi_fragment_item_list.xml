@@ -5,14 +5,36 @@
     android:layout_height="match_parent"
     android:visibility="visible">
 
+    <LinearLayout
+        android:id="@+id/wifiprogress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="visible"
+        android:gravity="center">
+        <ProgressBar
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"/>
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_weight="0"
+            android:background="@null"
+            android:gravity="center"
+            android:inputType="none"
+            android:text="Suche verfügbare Wifi-Netze" />
+    </LinearLayout>
+
     <androidx.recyclerview.widget.RecyclerView xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/wiflist"
+        android:id="@+id/wifilist"
         android:name="edu.kit.teco.smartwlanconf.adapter.WifiListItemRecyclerViewAdapter"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.fragments.ListOfWifisFragment"
         tools:listitem="@layout/wifi_list_item" />

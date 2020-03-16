@@ -65,7 +65,7 @@ public class WifiFragment extends Fragment {
         //reconnect to user wifi
         SmartWlanConfApplication
                 .getWifi(activity)
-                .connectWithWifi_withContext(activity, ((SmartWlanConfActivity) activity).getmWlanSSID(), ((SmartWlanConfActivity) activity).getmWlanPwd(), fragment);
+                .connectWithWifi_withContext(activity, ssid, pwd, fragment);
     }
 
 }

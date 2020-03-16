@@ -1,5 +1,6 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -94,13 +95,11 @@ public class GetUserWifiCredentialsFragment extends WifiFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        SmartWlanConfActivity activity = (SmartWlanConfActivity) getActivity();
-        if(activity == null){
-            //Has to be tested if a simple return produces no errors, or an Exception has to be thrown
-            return;
+        if(!firstTime){
+            //Todo: Show Hint that password might have been wrong
         }
-        ((EditText) view.findViewById(R.id.ssid)).setText(activity.getmWlanSSID());
-        setConnectButtonListener(view, activity);
+        ((EditText) view.findViewById(R.id.ssid)).setText(((SmartWlanConfActivity)getActivity()).getmWlanSSID());
+        setConnectButtonListener(view, ((SmartWlanConfActivity)getActivity()));
     }
 
     @Override
@@ -135,7 +134,6 @@ public class GetUserWifiCredentialsFragment extends WifiFragment {
                     v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
             inputManager.hideSoftInputFromWindow((null == activity.getCurrentFocus()) ?
                     null : activity.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-
             String pwd = ((EditText) view.findViewById(R.id.pwd)).getText().toString();
             //Set  Wlan Password in Parent Activity
             activity.setmWlanPwd(pwd);
@@ -164,6 +162,8 @@ public class GetUserWifiCredentialsFragment extends WifiFragment {
             snackbar.show();
             EditText node_id = view.findViewById(R.id.ssid);
             node_id.setError(Config.SSID_ERROR);
+            SmartWlanConfActivity activity = (SmartWlanConfActivity) getActivity();
+            connectToWifi(activity.getmWlanSSID(), activity.getmWlanPwd(), this);
         }
     }
 

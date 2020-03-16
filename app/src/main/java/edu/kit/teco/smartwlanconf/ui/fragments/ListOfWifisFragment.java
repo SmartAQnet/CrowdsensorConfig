@@ -115,7 +115,7 @@ public class ListOfWifisFragment extends WifiFragment {
     //sets the WifiListItemRecyclerAdapter that is used for showing scan results
     private void setAdapter(View view){
         Context context = getActivity();
-        RecyclerView recyclerView = view.findViewById(R.id.wiflist);
+        RecyclerView recyclerView = view.findViewById(R.id.wifilist);
         if (mColumnCount <= 1) {
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
         } else {
@@ -124,15 +124,12 @@ public class ListOfWifisFragment extends WifiFragment {
         DividerItemDecoration dividerItemDecoration= new DividerItemDecoration(context,
                 LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
-        WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(getContext());
         wifiAdapter = new WifiListItemRecyclerViewAdapter(wifiList, mListener);
         recyclerView.setAdapter(wifiAdapter);
-        //Start scanning for wifis in async task
-        WifiScanRunnable wifiScan = new WifiScanRunnable(this, wifi);
-        //Save wifiscan to stop runnable after scanning wifis
-        SmartWlanConfApplication.setWifiScan(context, wifiScan);
-        Thread t = new Thread(wifiScan);
-        t.start();
+        view.findViewById(R.id.wifiprogress).setVisibility(View.VISIBLE);
+        view.findViewById(R.id.wifilist).setVisibility(View.GONE);
+        startScanning();
+
     }
 
     //Callback method, when wifi scan returns it's results
@@ -166,6 +163,10 @@ public class ListOfWifisFragment extends WifiFragment {
         }
         if(wifiList.isEmpty()){
             noWifiFound();
+        } else {
+            view.findViewById(R.id.wifiprogress).setVisibility(View.GONE);
+            view.findViewById(R.id.wifilist).setVisibility(View.VISIBLE);
+            getActivity().setTitle(Config.LISTOFWIFIS_TITLE);
         }
     }
 

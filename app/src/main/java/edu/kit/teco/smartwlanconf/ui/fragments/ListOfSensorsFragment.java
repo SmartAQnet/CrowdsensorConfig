@@ -87,6 +87,7 @@ public class ListOfSensorsFragment extends WifiFragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        //Create list of Sensors
         setAdapter(view);
         //Start scanning for sensors in async task
         startScanning();
@@ -164,7 +165,7 @@ public class ListOfSensorsFragment extends WifiFragment {
             noSensorFound();
             return;
         }
-        //Change title to telöl user waht to do
+        //Change title to tell user what to do
         getActivity().setTitle(Config.LISTOFSENSORS_TITLE);
 
     }

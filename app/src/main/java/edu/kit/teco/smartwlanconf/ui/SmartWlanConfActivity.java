@@ -50,10 +50,10 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.wifi_activity);
-
         //Although permission is set in Manifest, it is necessary to request permission here,
         //can not be set in SmartWlanConfApplication because of context
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 555);
+        setTitle(Config.APP_TITLE);
 
         if (savedInstanceState == null) {
             setInitialFragment();

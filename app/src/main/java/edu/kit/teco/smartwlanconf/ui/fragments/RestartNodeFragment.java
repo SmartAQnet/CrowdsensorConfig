@@ -15,8 +15,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresPermission;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
@@ -29,7 +27,6 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 
 import edu.kit.teco.smartwlanconf.R;
-import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.Config;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 import edu.kit.teco.smartwlanconf.ui.utils.HttpNodePost;
@@ -56,6 +53,7 @@ public class RestartNodeFragment extends WifiFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+        getActivity().setTitle(Config.APP_TITLE);
         return inflater.inflate(R.layout.restart_node_fragment, container, false);
     }
 
@@ -101,8 +99,9 @@ public class RestartNodeFragment extends WifiFragment {
             int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
             snackbar.show();
-            //Send wifi credentials to sensor node and restart it
-            connectNodeWithUserWifi();
+            connectToWifi(((SmartWlanConfActivity)getActivity()).getmNodeSSID(),
+                    Config.NODE_PWD,
+                    this);
         }
     }
 
