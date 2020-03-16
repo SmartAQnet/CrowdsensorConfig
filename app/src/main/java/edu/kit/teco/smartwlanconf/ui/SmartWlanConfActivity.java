@@ -83,7 +83,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         //Stop receiver from getting results from Wifi Scan
         WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(getApplicationContext());
         try {
-            getApplication().unregisterReceiver(wifi.getWifiScanReceiver());
+            getApplication().unregisterReceiver(wifi.getWifiScanBroadcastReceiver());
         } catch (IllegalArgumentException e) {
             //Nothing to do, is catched if Scanreceiver is not registered
             e.printStackTrace();
@@ -99,7 +99,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
     public void onWifiListFragmentInteraction(ScanResult scanResult){
         //Stop receiver from getting results from Wifi Scan
         WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(getApplicationContext());
-        getApplication().unregisterReceiver(wifi.getWifiScanReceiver());
+        getApplication().unregisterReceiver(wifi.getWifiScanBroadcastReceiver());
         //Stop running wifi scannning thread
         (SmartWlanConfApplication.getWifiScan(getApplicationContext())).stop();
         mWlanSSID = scanResult.SSID;

@@ -12,13 +12,17 @@ package edu.kit.teco.smartwlanconf;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.IntentFilter;
+import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.github.druk.rx2dnssd.Rx2Dnssd;
 import com.github.druk.rx2dnssd.Rx2DnssdBindable;
+import com.google.zxing.integration.android.IntentIntegrator;
 
+import edu.kit.teco.smartwlanconf.ui.Config;
 import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
 import edu.kit.teco.smartwlanconf.ui.utils.WifiScanRunnable;
 
@@ -28,6 +32,7 @@ public class SmartWlanConfApplication extends Application {
     private WifiConnectionUtils mWifi;
     private boolean nodeIDError;
     private WifiScanRunnable wifiScan;
+    private IntentFilter wifiscanIntentFilter;
 
     @Override
     public void onCreate() {
@@ -36,6 +41,9 @@ public class SmartWlanConfApplication extends Application {
         mRxDnssd = createDnssd();
         mWifi = WifiConnectionUtils.getInstance();
         nodeIDError = false;
+        //This is the intent that reports scan results
+        wifiscanIntentFilter = new IntentFilter();
+        wifiscanIntentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
     }
 
     public static boolean getnodeIDError(@NonNull Context context){
@@ -48,6 +56,10 @@ public class SmartWlanConfApplication extends Application {
 
     public static Rx2Dnssd getRxDnssd(@NonNull Context context){
         return ((SmartWlanConfApplication)context.getApplicationContext()).mRxDnssd;
+    }
+
+    public static IntentFilter getWifiscanIntentfilter(@NonNull Context context){
+        return((SmartWlanConfApplication)context.getApplicationContext()).wifiscanIntentFilter;
     }
 
     public static WifiConnectionUtils getWifi(@NonNull Context context){

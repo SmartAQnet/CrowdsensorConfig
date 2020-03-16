@@ -1,6 +1,7 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
@@ -27,10 +28,8 @@ import java.util.List;
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.Config;
-import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 import edu.kit.teco.smartwlanconf.ui.adapter.SensorListItemRecyclerViewAdapter;
-import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
-import edu.kit.teco.smartwlanconf.ui.utils.WifiScanRunnable;
+
 
 
 /**
@@ -41,7 +40,7 @@ import edu.kit.teco.smartwlanconf.ui.utils.WifiScanRunnable;
  *
  * This fragment shows the results of a scan for available wifis
  */
-public class ListOfSensorsFragment extends WifiFragment {
+public class ListOfSensorsFragment extends WifiFragment{
 
     private static final String ARG_COLUMN_COUNT = "Verfügbare Sensoren";
     private int mColumnCount = 1;
@@ -90,7 +89,6 @@ public class ListOfSensorsFragment extends WifiFragment {
         //Create list of Sensors
         setAdapter(view);
         //Start scanning for sensors in async task
-        startScanning();
     }
 
     @Override
@@ -98,6 +96,7 @@ public class ListOfSensorsFragment extends WifiFragment {
         super.onAttach(context);
         if (context instanceof OnSensorListInteractionListener) {
             mListener = (OnSensorListInteractionListener) context;
+            startScanning();
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
@@ -110,6 +109,17 @@ public class ListOfSensorsFragment extends WifiFragment {
         mListener = null;
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        //Stop scanning after failure and return with empty list
+        try {
+            getActivity().unregisterReceiver(getWifiScanBroadcastreceiver());
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+
+    }
 
     //This methods starts scanning and
     //sets the SensorListItemRecyclerAdapter that is used for showing scan results
@@ -181,7 +191,7 @@ public class ListOfSensorsFragment extends WifiFragment {
                     }
                     //First stop running scanner
                     SmartWlanConfApplication.getWifiScan(getContext()).stop();
-                    ((SmartWlanConfActivity) getActivity()).setInitialFragment();
+                    startScanning();
                 });
         int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
         snackbar.setActionTextColor(colorSnackRetry);

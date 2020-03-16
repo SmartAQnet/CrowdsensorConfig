@@ -156,14 +156,16 @@ public class GetUserWifiCredentialsFragment extends WifiFragment {
             mListener.onGotUserWifiCredentials(firstTime);
         } else {
             Snackbar snackbar = Snackbar
-                    .make(getView(), "Wifi Verbindung fehlgeschlagen bitte Passwort prüfen!", Snackbar.LENGTH_LONG);
+                    .make(getView(), "Wifi Verbindung fehlgeschlagen bitte Passwort prüfen!", Snackbar.LENGTH_LONG)
+                    .setAction("Nochmal versuchen!", (View v) -> {
+                        EditText node_id = view.findViewById(R.id.ssid);
+                        node_id.setError(Config.SSID_ERROR);
+                        this.setConnectButtonListener(view, (SmartWlanConfActivity)getActivity());
+                    });
             int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
             snackbar.show();
-            EditText node_id = view.findViewById(R.id.ssid);
-            node_id.setError(Config.SSID_ERROR);
-            SmartWlanConfActivity activity = (SmartWlanConfActivity) getActivity();
-            connectToWifi(activity.getmWlanSSID(), activity.getmWlanPwd(), this);
+
         }
     }
 

@@ -89,8 +89,6 @@ public class ListOfWifisFragment extends WifiFragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setAdapter(view);
-        //Start scanning for sensors in async task
-        startScanning();
     }
 
     @Override
@@ -98,6 +96,8 @@ public class ListOfWifisFragment extends WifiFragment {
         super.onAttach(context);
         if (context instanceof OnWifiListFragmentInteractionListener) {
             mListener = (OnWifiListFragmentInteractionListener) context;
+            //Start scanning for sensors in async task
+            startScanning();
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
@@ -110,6 +110,14 @@ public class ListOfWifisFragment extends WifiFragment {
         mListener = null;
     }
 
+    public void onStop(){
+        super.onStop();
+        try {
+            getActivity().unregisterReceiver(getWifiScanBroadcastreceiver());
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 
     //This methods starts scanning and
     //sets the WifiListItemRecyclerAdapter that is used for showing scan results
@@ -128,8 +136,6 @@ public class ListOfWifisFragment extends WifiFragment {
         recyclerView.setAdapter(wifiAdapter);
         view.findViewById(R.id.wifiprogress).setVisibility(View.VISIBLE);
         view.findViewById(R.id.wifilist).setVisibility(View.GONE);
-        startScanning();
-
     }
 
     //Callback method, when wifi scan returns it's results

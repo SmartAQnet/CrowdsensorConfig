@@ -3,7 +3,6 @@ package edu.kit.teco.smartwlanconf.ui.utils;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSuggestion;
@@ -15,6 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
+import edu.kit.teco.smartwlanconf.ui.fragments.ListOfSensorsFragment;
+import edu.kit.teco.smartwlanconf.ui.fragments.ListOfWifisFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment;
 
 public class WifiConnectionUtils {
@@ -23,7 +25,6 @@ public class WifiConnectionUtils {
     private boolean enabled = false;
     private WifiFragment calling_fragment;
     private WifiManager wifiManager;
-    private BroadcastReceiver wifiScanReceiver;
 
     public static WifiConnectionUtils getInstance() {
 
@@ -113,20 +114,17 @@ public class WifiConnectionUtils {
         wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 
         //Receiver for Wifi Scan
-        wifiScanReceiver = new BroadcastReceiver() {
+        wifiFragment.setWifiScanBroadcastreceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context c, Intent intent) {
                 boolean success = intent.getBooleanExtra(
                         WifiManager.EXTRA_RESULTS_UPDATED, false);
                 scanSuccess(success, wifiFragment);
             }
-        };
+        });
 
-        //This is the intent that reports scan results
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         try {
-            context.registerReceiver(wifiScanReceiver, intentFilter);
+            context.registerReceiver(wifiFragment.getWifiScanBroadcastreceiver(), SmartWlanConfApplication.getWifiscanIntentfilter(context));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -139,24 +137,11 @@ public class WifiConnectionUtils {
         }
     }
 
-    //Used to stop wifi scanning thread (Scanning is stopped through unregisterReceiver())
-    public BroadcastReceiver getWifiScanReceiver(){
-        return wifiScanReceiver;
-    }
-
     //Report scanresults back to calling fragment
     private void scanSuccess(boolean success, WifiFragment wifiFragment){
         if(success) {
             wifiFragment.onWaitForWifiScan(wifiManager.getScanResults());
             return;
-        }
-        //Stop scanning after failure and return with empty list
-        try {
-            wifiFragment.getActivity().unregisterReceiver(wifiScanReceiver);
-        } catch(NullPointerException e){
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
         }
         wifiFragment.onWaitForWifiScan(null);
     }
