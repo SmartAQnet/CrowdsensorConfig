@@ -18,17 +18,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import com.google.android.material.snackbar.Snackbar;
 
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.Config;
-import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 import edu.kit.teco.smartwlanconf.ui.adapter.WifiListItemRecyclerViewAdapter;
-import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
-import edu.kit.teco.smartwlanconf.ui.utils.WifiScanRunnable;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,16 +88,15 @@ public class ListOfWifisFragment extends WifiFragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
+        getActivity().setTitle(Config.LISTOFWIFIS_TITLE);
         //Create wifi list
         setAdapter(getView());
-
         getView().findViewById(R.id.wifiprogress).setVisibility(View.VISIBLE);
         getView().findViewById(R.id.wifilist).setVisibility(View.GONE);
-        getView().findViewById(R.id.wifilist).setVisibility(View.GONE);
         //Start scanning for sensors in async task
-        startScanning();
+        startScanning(this);
     }
 
     @Override
@@ -122,11 +118,6 @@ public class ListOfWifisFragment extends WifiFragment {
 
     public void onStop(){
         super.onStop();
-        try {
-            getActivity().unregisterReceiver(getWifiScanBroadcastreceiver());
-        } catch(Exception e){
-            e.printStackTrace();
-        }
     }
 
     //This methods starts scanning and
@@ -162,6 +153,8 @@ public class ListOfWifisFragment extends WifiFragment {
             return;
         }
 
+        //stopScanning(this);
+
         if (results == null) {
             noWifiFound();
             return;
@@ -182,7 +175,7 @@ public class ListOfWifisFragment extends WifiFragment {
         } else {
             view.findViewById(R.id.wifiprogress).setVisibility(View.GONE);
             view.findViewById(R.id.wifilist).setVisibility(View.VISIBLE);
-            getActivity().setTitle(Config.LISTOFWIFIS_TITLE);
+            SmartWlanConfApplication.getWifiScan(getContext()).stop();
         }
     }
 
@@ -199,7 +192,7 @@ public class ListOfWifisFragment extends WifiFragment {
                     SmartWlanConfApplication.getWifiScan(getContext()).stop();
                     getView().findViewById(R.id.wifiprogress).setVisibility(View.VISIBLE);
                     getView().findViewById(R.id.wifilist).setVisibility(View.GONE);
-                    startScanning();
+                    startScanning(this);
                 });
         int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
         snackbar.setActionTextColor(colorSnackRetry);

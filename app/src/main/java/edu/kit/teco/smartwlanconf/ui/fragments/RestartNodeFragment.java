@@ -51,7 +51,6 @@ public class RestartNodeFragment extends WifiFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        getActivity().setTitle(Config.APP_TITLE);
         return inflater.inflate(R.layout.restart_node_fragment, container, false);
     }
 
@@ -59,6 +58,12 @@ public class RestartNodeFragment extends WifiFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        getActivity().setTitle(Config.APP_TITLE);
     }
 
     @Override

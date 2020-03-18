@@ -3,7 +3,7 @@ package edu.kit.teco.smartwlanconf.ui;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
+import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
 
@@ -21,7 +21,6 @@ import edu.kit.teco.smartwlanconf.ui.fragments.ListOfWifisFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.NodeNotFound;
 import edu.kit.teco.smartwlanconf.ui.fragments.RestartNodeFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.ShowNodeWebsiteFragment;
-import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment;
 import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
 
 
@@ -70,6 +69,14 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         super.onStop();
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if(getSupportFragmentManager().getBackStackEntryCount()==0){
+            setInitialFragment();
+        }
+    }
+
     //The different fragments are managed here
 
     //This shows the fragment with the list of available sensors
@@ -80,10 +87,6 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     //This shows ListOfWifisFragment
     public void onSensorListInteraction(ScanResult scanResult){
-        //Stop receiver from getting results from Wifi Scan
-        WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(getApplicationContext());
-        //Stop wifi scannning thread
-        (SmartWlanConfApplication.getWifiScan(getApplicationContext())).stop();
         mNodeSSID = scanResult.SSID;
         Fragment newFragment = ListOfWifisFragment.newInstance(1);
         replaceFragment(newFragment);
@@ -91,8 +94,6 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     //This shows the fragment that checks credentials of selected Wifi
     public void onWifiListFragmentInteraction(ScanResult scanResult){
-        //Stop wifi scannning thread
-        (SmartWlanConfApplication.getWifiScan(getApplicationContext())).stop();
         mWlanSSID = scanResult.SSID;
         Fragment newFragment = GetUserWifiCredentialsFragment.newInstance(getApplicationContext(), true, mWlanSSID);
         replaceFragment(newFragment);
@@ -143,10 +144,10 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     // Replacement of the actual fragment with the new one
     public void replaceFragment(Fragment fragment) {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.container, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.container, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     // This method is the callback for the QR code scanner and just calls the associated method in the fragment
@@ -166,10 +167,6 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
 
     //Setter, Getter
-
-    public void setmNodeSSID(String ssid){
-        mNodeSSID = ssid;
-    }
     public void setmWlanSSID (String ssid){
         mWlanSSID  = ssid;
     }

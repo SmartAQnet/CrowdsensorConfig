@@ -1,7 +1,6 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
@@ -86,12 +85,11 @@ public class ListOfSensorsFragment extends WifiFragment{
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        startScanning();
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
 
         //Create list of Sensors
         setAdapter(getView());
@@ -101,7 +99,9 @@ public class ListOfSensorsFragment extends WifiFragment{
         RecyclerView list = getView().findViewById(R.id.wifilist);
         splash.setVisibility(View.VISIBLE);
         list.setVisibility(View.GONE);
-
+        //Change title to tell user what to do
+        getActivity().setTitle(Config.LISTOFSENSORS_TITLE);
+        startScanning(this);
     }
 
     @Override
@@ -124,12 +124,6 @@ public class ListOfSensorsFragment extends WifiFragment{
     @Override
     public void onStop() {
         super.onStop();
-        //Stop scanning after failure and return with empty list
-        try {
-            getActivity().unregisterReceiver(getWifiScanBroadcastreceiver());
-        } catch(Exception e){
-            e.printStackTrace();
-        }
     }
 
     //This methods starts scanning and
@@ -163,6 +157,8 @@ public class ListOfSensorsFragment extends WifiFragment{
             return;
         }
 
+        //stopScanning(this);
+
         if (results == null) {
             noSensorFound();
             return;
@@ -186,9 +182,7 @@ public class ListOfSensorsFragment extends WifiFragment{
             noSensorFound();
             return;
         }
-        //Change title to tell user what to do
-        getActivity().setTitle(Config.LISTOFSENSORS_TITLE);
-
+        SmartWlanConfApplication.getWifiScan(getContext()).stop();
     }
 
     private void noSensorFound(){
@@ -207,7 +201,7 @@ public class ListOfSensorsFragment extends WifiFragment{
                     RecyclerView list = getView().findViewById(R.id.wifilist);
                     splash.setVisibility(View.VISIBLE);
                     list.setVisibility(View.GONE);
-                    startScanning();
+                    startScanning(this);
                 });
         int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
         snackbar.setActionTextColor(colorSnackRetry);

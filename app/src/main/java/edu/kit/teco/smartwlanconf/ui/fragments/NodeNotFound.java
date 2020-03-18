@@ -95,7 +95,7 @@ public class NodeNotFound extends WifiFragment{
         setCheckNodeIPButtonListener(getView());
         getView().findViewById(R.id.progress_check_node_wifi_after_failed_connection).setVisibility(View.VISIBLE);
         getView().findViewById(R.id.look_for_node_ip).setVisibility(View.GONE);
-        startScanning();
+        startScanning(this);
     }
 
     @Override
@@ -138,9 +138,10 @@ public class NodeNotFound extends WifiFragment{
             Snackbar snackbar = Snackbar
                     .make(view, "Keine Wifi gefunden. Wifi aktiv?", Snackbar.LENGTH_LONG)
                     .setAction("Nochmal versuchen!", (View v)->{
+                        SmartWlanConfApplication.getWifiScan(getContext()).stop();
                         getView().findViewById(R.id.progress_check_node_wifi_after_failed_connection).setVisibility(View.VISIBLE);
                         getView().findViewById(R.id.look_for_node_ip).setVisibility(View.GONE);
-                        startScanning();
+                        startScanning(this);
                     });
             int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
