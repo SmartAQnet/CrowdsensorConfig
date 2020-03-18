@@ -1,10 +1,8 @@
 package edu.kit.teco.smartwlanconf.ui.fragments;
 
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -61,11 +59,6 @@ public class RestartNodeFragment extends WifiFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        //Connect to sensor wifi
-        connectToWifi(((SmartWlanConfActivity)getActivity()).getmNodeSSID(),
-                Config.NODE_PWD,
-                this);
     }
 
     @Override
@@ -73,6 +66,10 @@ public class RestartNodeFragment extends WifiFragment {
         super.onAttach(context);
         if (context instanceof OnNodeRestartedListener) {
             mListener = (OnNodeRestartedListener) context;
+            //Connect to sensor wifi
+            connectToWifi(((SmartWlanConfActivity)getActivity()).getmNodeSSID(),
+                    Config.NODE_PWD,
+                    this);
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -92,16 +89,17 @@ public class RestartNodeFragment extends WifiFragment {
         if (success) {
             //Send wifi credentials to sensor node and restart it
             connectNodeWithUserWifi();
-            mListener.onNodeRestartedSuccess();
         } else {
             Snackbar snackbar = Snackbar
-                    .make(view, "Verbindung zu Sensor fehlgeschlagen", Snackbar.LENGTH_LONG);
+                    .make(view, "Verbindung zu Sensor fehlgeschlagen", Snackbar.LENGTH_LONG)
+                    .setAction("Nochmal versuchen!", (View v)->{
+                        connectToWifi(((SmartWlanConfActivity)getActivity()).getmNodeSSID(),
+                                Config.NODE_PWD,
+                                this);
+                    });
             int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
             snackbar.show();
-            connectToWifi(((SmartWlanConfActivity)getActivity()).getmNodeSSID(),
-                    Config.NODE_PWD,
-                    this);
         }
     }
 
@@ -138,6 +136,8 @@ public class RestartNodeFragment extends WifiFragment {
                 int colorSnackRetry = ResourcesCompat.getColor(context.getResources(), R.color.colorSnackRetry, null);
                 snackbar.setActionTextColor(colorSnackRetry);
                 snackbar.show();
+            } else {
+                mListener.onNodeRestartedSuccess();
             }
         } catch(Exception e) {
             e.printStackTrace();

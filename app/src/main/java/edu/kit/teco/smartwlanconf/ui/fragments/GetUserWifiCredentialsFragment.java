@@ -86,25 +86,23 @@ public class GetUserWifiCredentialsFragment extends WifiFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        if(!firstTime){
-            //Todo: Show Hint that password might have been wrong
-        }
         return inflater.inflate(R.layout.get_wifi_credentials_fragment, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if(!firstTime){
-            //Todo: Show Hint that password might have been wrong
-        }
-        ((EditText) view.findViewById(R.id.ssid)).setText(((SmartWlanConfActivity)getActivity()).getmWlanSSID());
-        setConnectButtonListener(view, ((SmartWlanConfActivity)getActivity()));
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        if(!firstTime){
+            //Todo: Show Hint that password might have been wrong
+        }
+        ((EditText) getView().findViewById(R.id.ssid)).setText(((SmartWlanConfActivity)getActivity()).getmWlanSSID());
+        setConnectButtonListener(getView(), ((SmartWlanConfActivity)getActivity()));
+
     }
 
     @Override

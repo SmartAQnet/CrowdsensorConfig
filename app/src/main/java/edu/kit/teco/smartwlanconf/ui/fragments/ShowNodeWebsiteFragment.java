@@ -49,16 +49,12 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
     //Necessary for stoping discovery of Bonjour services
     private Disposable mDisposable;
 
-    public ShowNodeWebsiteFragment() {
-        // Required empty public constructor
-    }
+    // Required empty public constructor
+    public ShowNodeWebsiteFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        connectToWifi(((SmartWlanConfActivity)getActivity()).getmWlanSSID(),
-                ((SmartWlanConfActivity)getActivity()).getmWlanPwd(),
-                this);
     }
 
     @Nullable
@@ -66,6 +62,14 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         return inflater.inflate(R.layout.show_node_website_fragment, container, false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        connectToWifi(((SmartWlanConfActivity)getActivity()).getmWlanSSID(),
+                ((SmartWlanConfActivity)getActivity()).getmWlanPwd(),
+                this);
     }
 
     @Override
@@ -94,13 +98,16 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
             startDiscovery();
         } else {
             Snackbar snackbar = Snackbar
-                    .make(view, "Verbindung zu" + ((SmartWlanConfActivity) getActivity()).getmWlanSSID()+ " fehlgeschlagen. Neuer Verbindungsversuch!", Snackbar.LENGTH_LONG);
+                    .make(view, "Verbindung zu" + ((SmartWlanConfActivity) getActivity()).getmWlanSSID()+ " fehlgeschlagen.", Snackbar.LENGTH_LONG)
+                    .setAction("Nochmal versuchen!", (View v)->{
+                        connectToWifi(((SmartWlanConfActivity)getActivity()).getmWlanSSID(),
+                                ((SmartWlanConfActivity)getActivity()).getmWlanPwd(),
+                                this);
+                });
+
             int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
             snackbar.show();
-            connectToWifi(((SmartWlanConfActivity)getActivity()).getmWlanSSID(),
-                    ((SmartWlanConfActivity)getActivity()).getmWlanPwd(),
-                    this);
         }
     }
 
@@ -124,12 +131,10 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
                     .timeout(Config.TIMEOUT_FOR_MDNSSCAN, TimeUnit.SECONDS)
                     .onExceptionResumeNext(
                             throwable -> {
-                                showNodeDiscoveryError();
-                                continueAfterDiscovery(false);}
+                                showNodeDiscoveryError();}
                     )
                     .doOnError(throwable -> {
                             showNodeDiscoveryError();
-                            continueAfterDiscovery(false);
                     })
                     .subscribe(mDNSService -> {
                         if(mDNSService.getServiceName().equals(mNodeServiceName)){
@@ -148,7 +153,7 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
                     }, throwable -> {
                         Log.e("ShowNodeWebSiteFragment", "DNSSDError: ", throwable);
                         showNodeDiscoveryError();
-                        continueAfterDiscovery(false);});
+                    });
         } catch (Exception e) {
             //Activity no longer active, do nothing
             Log.e("ShowNodeWebSiteFragment", "Activity null in startDiscovery");
@@ -160,12 +165,15 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
         View view = getView();
         if(view != null) {
             Snackbar snackbar = Snackbar
-                    .make(getView(), "Sensor nicht im Wlan gefunden!", Snackbar.LENGTH_LONG);
+                    .make(getView(), "Sensor nicht im Wlan gefunden!", Snackbar.LENGTH_LONG)
+                    .setAction("Weiter!", (View v)-> continueAfterDiscovery(false));
+
             int colorSnackRetry = ResourcesCompat.getColor(getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
             snackbar.show();
         } else {
             Log.d(ShowNodeWebsiteFragment.class.toString(), "View is null");
+            continueAfterDiscovery(false);
         }
     }
 

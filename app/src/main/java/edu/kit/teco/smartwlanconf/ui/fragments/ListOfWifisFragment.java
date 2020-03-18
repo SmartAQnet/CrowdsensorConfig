@@ -88,7 +88,19 @@ public class ListOfWifisFragment extends WifiFragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setAdapter(view);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        //Create wifi list
+        setAdapter(getView());
+
+        getView().findViewById(R.id.wifiprogress).setVisibility(View.VISIBLE);
+        getView().findViewById(R.id.wifilist).setVisibility(View.GONE);
+        getView().findViewById(R.id.wifilist).setVisibility(View.GONE);
+        //Start scanning for sensors in async task
+        startScanning();
     }
 
     @Override
@@ -96,8 +108,6 @@ public class ListOfWifisFragment extends WifiFragment {
         super.onAttach(context);
         if (context instanceof OnWifiListFragmentInteractionListener) {
             mListener = (OnWifiListFragmentInteractionListener) context;
-            //Start scanning for sensors in async task
-            startScanning();
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
@@ -187,6 +197,8 @@ public class ListOfWifisFragment extends WifiFragment {
                     }
                     //First stop running scanner
                     SmartWlanConfApplication.getWifiScan(getContext()).stop();
+                    getView().findViewById(R.id.wifiprogress).setVisibility(View.VISIBLE);
+                    getView().findViewById(R.id.wifilist).setVisibility(View.GONE);
                     startScanning();
                 });
         int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);

@@ -82,13 +82,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
     public void onSensorListInteraction(ScanResult scanResult){
         //Stop receiver from getting results from Wifi Scan
         WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(getApplicationContext());
-        try {
-            getApplication().unregisterReceiver(wifi.getWifiScanBroadcastReceiver());
-        } catch (IllegalArgumentException e) {
-            //Nothing to do, is catched if Scanreceiver is not registered
-            e.printStackTrace();
-        }
-        //Stop running wifi scannning thread
+        //Stop wifi scannning thread
         (SmartWlanConfApplication.getWifiScan(getApplicationContext())).stop();
         mNodeSSID = scanResult.SSID;
         Fragment newFragment = ListOfWifisFragment.newInstance(1);
@@ -97,10 +91,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     //This shows the fragment that checks credentials of selected Wifi
     public void onWifiListFragmentInteraction(ScanResult scanResult){
-        //Stop receiver from getting results from Wifi Scan
-        WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(getApplicationContext());
-        getApplication().unregisterReceiver(wifi.getWifiScanBroadcastReceiver());
-        //Stop running wifi scannning thread
+        //Stop wifi scannning thread
         (SmartWlanConfApplication.getWifiScan(getApplicationContext())).stop();
         mWlanSSID = scanResult.SSID;
         Fragment newFragment = GetUserWifiCredentialsFragment.newInstance(getApplicationContext(), true, mWlanSSID);
@@ -115,12 +106,6 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         replaceFragment(newFragment);
     }
 
-    //This starts the RestartNodeFragment that initializes the node for wifi connection
-    public void onCheckNodeWifiSuccess(){
-        WifiFragment newFragment = new RestartNodeFragment();
-        replaceFragment(newFragment);
-    }
-
     //This starts the ShowNodeWebsiteFragment that opens an external Browser with website of the node
     public void onNodeRestartedSuccess(){
         Fragment newFragment = new ShowNodeWebsiteFragment();
@@ -132,8 +117,10 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
     public void onAfterShowNodeSuccess(boolean success){
         Fragment newFragment;
         if(success) {
+            //On success just restart app
             newFragment = ListOfWifisFragment.newInstance(1);
         } else {
+            //Node not found, try to to find error
             newFragment = NodeNotFound.newInstance();
         }
         replaceFragment(newFragment);
@@ -144,8 +131,10 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
     public void onAfterNodeNotFound(boolean success){
         Fragment newFragment;
         if(success) {
+            //On success just restart app
             newFragment = ListOfWifisFragment.newInstance(1);
         } else {
+            //wifi password was wrong, go to GetUserWifiCredentialsFragment
             newFragment = GetUserWifiCredentialsFragment.newInstance(getApplicationContext(), false, mWlanSSID
             );
         }

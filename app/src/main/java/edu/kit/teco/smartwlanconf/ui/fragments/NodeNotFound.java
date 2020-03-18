@@ -79,8 +79,7 @@ public class NodeNotFound extends WifiFragment{
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_node_not_found, container, false);
     }
@@ -88,7 +87,14 @@ public class NodeNotFound extends WifiFragment{
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setCheckNodeIPButtonListener(view);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setCheckNodeIPButtonListener(getView());
+        getView().findViewById(R.id.progress_check_node_wifi_after_failed_connection).setVisibility(View.VISIBLE);
+        getView().findViewById(R.id.look_for_node_ip).setVisibility(View.GONE);
         startScanning();
     }
 
@@ -109,20 +115,11 @@ public class NodeNotFound extends WifiFragment{
         mListener = null;
     }
 
-    private void scanForNodeWifi(){
-        final WifiFragment wifiFragment = this;
-        WifiConnectionUtils wifi = SmartWlanConfApplication.getWifi(getContext());
-        //Start scanning for wifis in async task
-        WifiScanRunnable wifiScan = new WifiScanRunnable(wifiFragment, wifi);
-        //Save wifiscan to stop runnable after scanning wifis
-        SmartWlanConfApplication.setWifiScan(getContext(), wifiScan);
-        Thread t = new Thread(wifiScan);
-        t.start();
-    }
 
-    //If not successful mDNS lookup failed, ask user for IP-address of node
-    //If successful Wifi password was wrong, open CheckUserWifiCredentialsFragment
-    //Callback method, when wifi scan returns it's results
+    /**
+     * If scan for sensor is not successful then mDNS lookup failed => ask user for IP-address of node
+     * If scan for sensor is successful then wifi password was wrong => open GetUserWifiCredentialsFragment
+     */
     @Override
     public void onWaitForWifiScan(List<ScanResult> results){
         View view = getView();
@@ -136,14 +133,18 @@ public class NodeNotFound extends WifiFragment{
             return;
         }
 
-        //Keine Ergebnisse
+        //No results
         if (results == null) {
             Snackbar snackbar = Snackbar
-                    .make(view, "Keine Wifi gefunden. Suche wird wiederholt", Snackbar.LENGTH_LONG);
+                    .make(view, "Keine Wifi gefunden. Wifi aktiv?", Snackbar.LENGTH_LONG)
+                    .setAction("Nochmal versuchen!", (View v)->{
+                        getView().findViewById(R.id.progress_check_node_wifi_after_failed_connection).setVisibility(View.VISIBLE);
+                        getView().findViewById(R.id.look_for_node_ip).setVisibility(View.GONE);
+                        startScanning();
+                    });
             int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
             snackbar.show();
-            startScanning();
             return;
         }
         List<ScanResult> wifiList = new ArrayList<>();
@@ -161,7 +162,8 @@ public class NodeNotFound extends WifiFragment{
         }
         //Stop running scan
         SmartWlanConfApplication.getWifiScan(getContext()).stop();
-        //Wifi node not found => get IP Address from user
+        getView().findViewById(R.id.progress_check_node_wifi_after_failed_connection).setVisibility(View.GONE);
+        getView().findViewById(R.id.look_for_node_ip).setVisibility(View.VISIBLE);
     }
 
     //Button to get Node id/ssid and connect to node wifi

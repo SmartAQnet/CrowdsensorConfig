@@ -86,9 +86,22 @@ public class ListOfSensorsFragment extends WifiFragment{
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        startScanning();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
         //Create list of Sensors
-        setAdapter(view);
-        //Start scanning for sensors in async task
+        setAdapter(getView());
+
+        //Show splash screen
+        LinearLayout splash = getView().findViewById(R.id.splash);
+        RecyclerView list = getView().findViewById(R.id.wifilist);
+        splash.setVisibility(View.VISIBLE);
+        list.setVisibility(View.GONE);
+
     }
 
     @Override
@@ -96,7 +109,6 @@ public class ListOfSensorsFragment extends WifiFragment{
         super.onAttach(context);
         if (context instanceof OnSensorListInteractionListener) {
             mListener = (OnSensorListInteractionListener) context;
-            startScanning();
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
@@ -118,7 +130,6 @@ public class ListOfSensorsFragment extends WifiFragment{
         } catch(Exception e){
             e.printStackTrace();
         }
-
     }
 
     //This methods starts scanning and
@@ -191,6 +202,11 @@ public class ListOfSensorsFragment extends WifiFragment{
                     }
                     //First stop running scanner
                     SmartWlanConfApplication.getWifiScan(getContext()).stop();
+                    //Show splash screen
+                    LinearLayout splash = getView().findViewById(R.id.splash);
+                    RecyclerView list = getView().findViewById(R.id.wifilist);
+                    splash.setVisibility(View.VISIBLE);
+                    list.setVisibility(View.GONE);
                     startScanning();
                 });
         int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
