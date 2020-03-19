@@ -1,5 +1,7 @@
 package edu.kit.teco.smartwlanconf.ui.utils;
 
+import android.util.Log;
+
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment;
 
@@ -24,12 +26,20 @@ public class WifiScanRunnable implements Runnable{
                 //Start scan only once
                 if(!hasStarted) {
                     hasStarted = true;
-                    wifi.scanWifi(wifiFragment, activity);
+                    wifi.scanWifi(wifiFragment);
                 }
             }
         }
 
         public void stop(){
+            // Try to stop scanning, otherwise scanning will keep on sending results to
+            // Fragment that is already in Background
+            try{
+                wifiFragment.getActivity().getApplication().unregisterReceiver(wifiFragment.getWifiScanBroadcastreceiver());
+            } catch (Exception e){
+                //Nothing to do
+                Log.d(WifiScanRunnable.class.toString(),"Unable to unregister " + wifiFragment.getClass().toString());
+            }
             running = false;
             hasStarted = false;
         }

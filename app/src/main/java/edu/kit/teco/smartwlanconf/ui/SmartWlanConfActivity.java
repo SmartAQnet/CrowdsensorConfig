@@ -42,8 +42,12 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
     //Data to connect with wifi network of user
     private String mWlanSSID = "";
     private String mWlanPwd = "";
-
-
+    private ListOfSensorsFragment listOfSensorsFragment;
+    private ListOfWifisFragment listOfWifisFragment;
+    private GetUserWifiCredentialsFragment getUserWifiCredentialsFragment;
+    private RestartNodeFragment restartNodeFragment;
+    private NodeNotFound nodeNotFound;
+    private ShowNodeWebsiteFragment showNodeWebsiteFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,36 +85,45 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     //This shows the fragment with the list of available sensors
     public void setInitialFragment(){
-        Fragment newFragment = ListOfSensorsFragment.newInstance(1);
-        replaceFragment(newFragment);
+        if(listOfSensorsFragment == null) {
+            listOfSensorsFragment = ListOfSensorsFragment.newInstance(1);
+        }
+        replaceFragment(listOfSensorsFragment);
     }
 
     //This shows ListOfWifisFragment
     public void onSensorListInteraction(ScanResult scanResult){
         mNodeSSID = scanResult.SSID;
-        Fragment newFragment = ListOfWifisFragment.newInstance(1);
-        replaceFragment(newFragment);
+        if(listOfWifisFragment == null) {
+            listOfWifisFragment = ListOfWifisFragment.newInstance(1);
+        }
+        replaceFragment(listOfWifisFragment);
     }
 
     //This shows the fragment that checks credentials of selected Wifi
     public void onWifiListFragmentInteraction(ScanResult scanResult){
         mWlanSSID = scanResult.SSID;
-        Fragment newFragment = GetUserWifiCredentialsFragment.newInstance(getApplicationContext(), true, mWlanSSID);
-        replaceFragment(newFragment);
+        if(getUserWifiCredentialsFragment == null) {
+            getUserWifiCredentialsFragment = GetUserWifiCredentialsFragment.newInstance(false);
+        }
+        replaceFragment(getUserWifiCredentialsFragment);
     }
 
     //This shows the fragment that tries to connect to node wifi
-    public void onGotUserWifiCredentials(boolean firstTime){
-        //Todo: firstTime entfernen
-        Fragment newFragment;
-        newFragment = new RestartNodeFragment();
-        replaceFragment(newFragment);
+    public void onGotUserWifiCredentials(){
+        if(restartNodeFragment == null) {
+            restartNodeFragment = new RestartNodeFragment();
+        }
+        replaceFragment(restartNodeFragment );
     }
 
     //This starts the ShowNodeWebsiteFragment that opens an external Browser with website of the node
     public void onNodeRestartedSuccess(){
-        Fragment newFragment = new ShowNodeWebsiteFragment();
-        replaceFragment(newFragment);
+
+        if(showNodeWebsiteFragment == null){
+            showNodeWebsiteFragment = new ShowNodeWebsiteFragment();
+        }
+        replaceFragment(showNodeWebsiteFragment);
     }
 
     // This is what should be done after trying to open the nodes website
@@ -119,10 +132,16 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         Fragment newFragment;
         if(success) {
             //On success just restart app
-            newFragment = ListOfWifisFragment.newInstance(1);
+            if(listOfWifisFragment == null) {
+                listOfWifisFragment = ListOfWifisFragment.newInstance(1);
+            }
+            newFragment = listOfWifisFragment;
         } else {
             //Node not found, try to to find error
-            newFragment = NodeNotFound.newInstance();
+            if(nodeNotFound== null) {
+                nodeNotFound = NodeNotFound.newInstance();
+            }
+            newFragment = nodeNotFound;
         }
         replaceFragment(newFragment);
     }
@@ -133,11 +152,16 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         Fragment newFragment;
         if(success) {
             //On success just restart app
-            newFragment = ListOfWifisFragment.newInstance(1);
+            if(listOfWifisFragment == null) {
+                listOfWifisFragment = ListOfWifisFragment.newInstance(1);
+            }
+            newFragment = listOfWifisFragment;
         } else {
             //wifi password was wrong, go to GetUserWifiCredentialsFragment
-            newFragment = GetUserWifiCredentialsFragment.newInstance(getApplicationContext(), false, mWlanSSID
-            );
+            if(getUserWifiCredentialsFragment == null) {
+                getUserWifiCredentialsFragment = GetUserWifiCredentialsFragment.newInstance(true);
+            }
+            newFragment = getUserWifiCredentialsFragment;
         }
         replaceFragment(newFragment);
     }
@@ -170,6 +194,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
     public void setmWlanSSID (String ssid){
         mWlanSSID  = ssid;
     }
+
     public void setmWlanPwd(String pwd){
         mWlanPwd = pwd;
     }

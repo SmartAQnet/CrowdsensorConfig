@@ -8,6 +8,8 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSuggestion;
 import android.os.Build;
 
+import androidx.lifecycle.Lifecycle;
+
 import com.thanosfisherman.wifiutils.WifiUtils;
 
 import java.util.ArrayList;
@@ -15,9 +17,6 @@ import java.util.List;
 
 
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
-import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
-import edu.kit.teco.smartwlanconf.ui.fragments.ListOfSensorsFragment;
-import edu.kit.teco.smartwlanconf.ui.fragments.ListOfWifisFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.WifiFragment;
 
 public class WifiConnectionUtils {
@@ -103,7 +102,7 @@ public class WifiConnectionUtils {
 
 
     //Scans for available wifis, result of scan is received through broadcast
-    void scanWifi(WifiFragment wifiFragment, SmartWlanConfActivity activity){
+    void scanWifi(WifiFragment wifiFragment){
         Context context;
         try {
             context = wifiFragment.getActivity().getApplicationContext();
@@ -120,7 +119,7 @@ public class WifiConnectionUtils {
             public void onReceive(Context c, Intent intent) {
                 boolean success = intent.getBooleanExtra(
                         WifiManager.EXTRA_RESULTS_UPDATED, false);
-                scanSuccess(success, wifiFragment, activity);
+                scanSuccess(success, wifiFragment);
             }
         });
 
@@ -134,17 +133,16 @@ public class WifiConnectionUtils {
         boolean success = wifiManager.startScan();
         if (!success) {
             // scan failure handling
-            scanSuccess(success, wifiFragment, activity);
+            scanSuccess(success, wifiFragment);
         }
     }
 
     //Report scanresults back to calling fragment
-    private void scanSuccess(boolean success, WifiFragment wifiFragment, SmartWlanConfActivity activity){
-        if(success) {
-            wifiFragment.stopScanning(activity);
-            wifiFragment.onWaitForWifiScan(wifiManager.getScanResults());
-            return;
+    private void scanSuccess(boolean success, WifiFragment wifiFragment) {
+        if (success) {
+                wifiFragment.onWaitForWifiScan(wifiManager.getScanResults());
+        } else {
+            wifiFragment.onWaitForWifiScan(null);
         }
-        wifiFragment.onWaitForWifiScan(null);
     }
 }

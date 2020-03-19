@@ -27,6 +27,7 @@ import java.util.List;
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.Config;
+import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
 import edu.kit.teco.smartwlanconf.ui.adapter.SensorListItemRecyclerViewAdapter;
 
 
@@ -124,6 +125,7 @@ public class ListOfSensorsFragment extends WifiFragment{
     @Override
     public void onStop() {
         super.onStop();
+        stopScanning();
     }
 
     //This methods starts scanning and
@@ -157,8 +159,6 @@ public class ListOfSensorsFragment extends WifiFragment{
             return;
         }
 
-        //stopScanning(this);
-
         if (results == null) {
             noSensorFound();
             return;
@@ -180,9 +180,7 @@ public class ListOfSensorsFragment extends WifiFragment{
         }
         if(sensorList.isEmpty()){
             noSensorFound();
-            return;
         }
-        SmartWlanConfApplication.getWifiScan(getContext()).stop();
     }
 
     private void noSensorFound(){
@@ -194,8 +192,6 @@ public class ListOfSensorsFragment extends WifiFragment{
                         //Does this happen?
                         Log.e("ListOfWifisFragment","Wifi nicht aktiviert zum Scannen");
                     }
-                    //First stop running scanner
-                    SmartWlanConfApplication.getWifiScan(getContext()).stop();
                     //Show splash screen
                     LinearLayout splash = getView().findViewById(R.id.splash);
                     RecyclerView list = getView().findViewById(R.id.wifilist);

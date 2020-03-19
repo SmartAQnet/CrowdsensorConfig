@@ -21,7 +21,7 @@ public final class Config {
     public final static String NETWORK_INTERFACE_TYPE = "wlan0";
 
 
-    public final static String SSID_ERROR = "Bitte SSID prüfen und erneut eingeben.";
+    public final static String PWD_ERROR = "Bitte Passwort prüfen und erneut eingeben.";
 
     // Only select 2.5 GHz Wifi
     // Just not to run in trouble with smartphones not supporting 5GHz, maybe obsolete in future

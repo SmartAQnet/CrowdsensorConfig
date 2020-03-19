@@ -23,6 +23,8 @@ import edu.kit.teco.smartwlanconf.ui.utils.WifiScanRunnable;
 public class WifiFragment extends Fragment {
 
     private BroadcastReceiver wifiScanBroadcastreceiver;
+    private WifiScanRunnable wifiScanRunnable;
+    private Thread wifiScanThread;
 
     //Callback method to wait for a wifi connection
     public void onWaitForWifiConnection(boolean success){}
@@ -30,17 +32,22 @@ public class WifiFragment extends Fragment {
     public void onWaitForWifiScan(List<ScanResult> wifiList){}
 
     public void startScanning(WifiFragment fragment) {
+        // Before starting new scan, stop last running
+        if(wifiScanThread != null){
+            stopScanning();
+        }
         //create wifiscanner
-        WifiScanRunnable wifiScan = new WifiScanRunnable(fragment, SmartWlanConfApplication.getWifi(getContext()));
+        wifiScanRunnable = new WifiScanRunnable(fragment, SmartWlanConfApplication.getWifi(getContext()));
         //remember wifiscanner to be able to stop scanning
-        SmartWlanConfApplication.setWifiScan(getContext(), wifiScan);
-        Thread t = new Thread(SmartWlanConfApplication.getWifiScan(getContext()));
-        t.start();
+        wifiScanThread = new Thread(wifiScanRunnable);
+        wifiScanThread.start();
     }
 
-    public void stopScanning(SmartWlanConfActivity activity){
+    public void stopScanning(){
         //Stop wifi scannning thread
-        (SmartWlanConfApplication.getWifiScan(activity)).stop();
+        if(wifiScanThread.getState()!= Thread.State.TERMINATED) {
+            wifiScanRunnable.stop();
+        }
     }
 
     //Connects to given wifi

@@ -64,6 +64,10 @@ public class RestartNodeFragment extends WifiFragment {
     public void onStart() {
         super.onStart();
         getActivity().setTitle(Config.APP_TITLE);
+        //Connect to sensor wifi
+        connectToWifi(((SmartWlanConfActivity)getActivity()).getmNodeSSID(),
+                Config.NODE_PWD,
+                this);
     }
 
     @Override
@@ -71,10 +75,6 @@ public class RestartNodeFragment extends WifiFragment {
         super.onAttach(context);
         if (context instanceof OnNodeRestartedListener) {
             mListener = (OnNodeRestartedListener) context;
-            //Connect to sensor wifi
-            connectToWifi(((SmartWlanConfActivity)getActivity()).getmNodeSSID(),
-                    Config.NODE_PWD,
-                    this);
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -96,7 +96,7 @@ public class RestartNodeFragment extends WifiFragment {
             connectNodeWithUserWifi();
         } else {
             Snackbar snackbar = Snackbar
-                    .make(view, "Verbindung zu Sensor fehlgeschlagen", Snackbar.LENGTH_LONG)
+                    .make(view, "Verbindung zu Sensor fehlgeschlagen", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Nochmal versuchen!", (View v)->{
                         connectToWifi(((SmartWlanConfActivity)getActivity()).getmNodeSSID(),
                                 Config.NODE_PWD,
@@ -112,23 +112,23 @@ public class RestartNodeFragment extends WifiFragment {
     //Sending wifi credentials with http to node restarts the node
     private void connectNodeWithUserWifi(){
 
-        Context context = getContext();
+        Activity activity = getActivity();
         //As the user's phone is connected to the wifi of the node
         //it's IP is the gateway IP, so you have to look for it
         String gatewayIP;
         try {
-            gatewayIP = lookupGateway((Activity) context);
+            gatewayIP = lookupGateway(activity);
         } catch (NullPointerException e) {
             Log.d(RestartNodeFragment.class.toString(), "lookupGateway() returned null");
             return;
         }
 
-        HttpNodePost request = new HttpNodePost(context.getApplicationContext());
+        HttpNodePost request = new HttpNodePost(activity.getApplicationContext());
         try {
             //URL to send wifi credentials
             final String wlanUrl = "http://" + gatewayIP + "/_ac/connect";
             //Set credentials
-            HashMap<String, String> credentials = getNodeWifiCredentials((Activity)context);
+            HashMap<String, String> credentials = getNodeWifiCredentials(activity);
             //Send Data via http
             boolean result = request.execute(wlanUrl,
                     credentials.get("SSID"),
@@ -138,7 +138,7 @@ public class RestartNodeFragment extends WifiFragment {
                 Snackbar snackbar = Snackbar
                         .make(getView(), "Wifi Daten konnten nicht an Knoten geschickt werden!", Snackbar.LENGTH_INDEFINITE)
                         .setAction("Nochmal versuchen!", (View v) -> this.connectNodeWithUserWifi());
-                int colorSnackRetry = ResourcesCompat.getColor(context.getResources(), R.color.colorSnackRetry, null);
+                int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
                 snackbar.setActionTextColor(colorSnackRetry);
                 snackbar.show();
             } else {

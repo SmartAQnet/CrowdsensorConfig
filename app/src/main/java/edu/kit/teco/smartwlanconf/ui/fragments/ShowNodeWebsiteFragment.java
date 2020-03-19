@@ -98,7 +98,7 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
             startDiscovery();
         } else {
             Snackbar snackbar = Snackbar
-                    .make(view, "Verbindung zu" + ((SmartWlanConfActivity) getActivity()).getmWlanSSID()+ " fehlgeschlagen.", Snackbar.LENGTH_LONG)
+                    .make(view, "Verbindung zu" + ((SmartWlanConfActivity) getActivity()).getmWlanSSID()+ " fehlgeschlagen.", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Nochmal versuchen!", (View v)->{
                         connectToWifi(((SmartWlanConfActivity)getActivity()).getmWlanSSID(),
                                 ((SmartWlanConfActivity)getActivity()).getmWlanPwd(),
@@ -165,7 +165,7 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
         View view = getView();
         if(view != null) {
             Snackbar snackbar = Snackbar
-                    .make(getView(), "Sensor nicht im Wlan gefunden!", Snackbar.LENGTH_LONG)
+                    .make(getView(), "Sensor nicht im Wlan gefunden!", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Weiter!", (View v)-> continueAfterDiscovery(false));
 
             int colorSnackRetry = ResourcesCompat.getColor(getResources(), R.color.colorSnackRetry, null);

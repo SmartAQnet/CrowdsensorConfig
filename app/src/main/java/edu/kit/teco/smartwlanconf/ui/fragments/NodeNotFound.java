@@ -110,6 +110,12 @@ public class NodeNotFound extends WifiFragment{
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        stopScanning();
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
@@ -136,9 +142,8 @@ public class NodeNotFound extends WifiFragment{
         //No results
         if (results == null) {
             Snackbar snackbar = Snackbar
-                    .make(view, "Keine Wifi gefunden. Wifi aktiv?", Snackbar.LENGTH_LONG)
+                    .make(view, "Keine Wifi gefunden. Wifi aktiv?", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Nochmal versuchen!", (View v)->{
-                        SmartWlanConfApplication.getWifiScan(getContext()).stop();
                         getView().findViewById(R.id.progress_check_node_wifi_after_failed_connection).setVisibility(View.VISIBLE);
                         getView().findViewById(R.id.look_for_node_ip).setVisibility(View.GONE);
                         startScanning(this);
@@ -161,8 +166,6 @@ public class NodeNotFound extends WifiFragment{
                 mListener.onAfterNodeNotFound(true);
             }
         }
-        //Stop running scan
-        SmartWlanConfApplication.getWifiScan(getContext()).stop();
         getView().findViewById(R.id.progress_check_node_wifi_after_failed_connection).setVisibility(View.GONE);
         getView().findViewById(R.id.look_for_node_ip).setVisibility(View.VISIBLE);
     }

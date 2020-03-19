@@ -118,6 +118,7 @@ public class ListOfWifisFragment extends WifiFragment {
 
     public void onStop(){
         super.onStop();
+        stopScanning();
     }
 
     //This methods starts scanning and
@@ -153,8 +154,6 @@ public class ListOfWifisFragment extends WifiFragment {
             return;
         }
 
-        //stopScanning(this);
-
         if (results == null) {
             noWifiFound();
             return;
@@ -175,7 +174,6 @@ public class ListOfWifisFragment extends WifiFragment {
         } else {
             view.findViewById(R.id.wifiprogress).setVisibility(View.GONE);
             view.findViewById(R.id.wifilist).setVisibility(View.VISIBLE);
-            SmartWlanConfApplication.getWifiScan(getContext()).stop();
         }
     }
 
@@ -188,8 +186,6 @@ public class ListOfWifisFragment extends WifiFragment {
                         //Does this happen?
                         Log.e("ListOfWifisFragment","Wifi nicht aktiviert zum Scannen");
                     }
-                    //First stop running scanner
-                    SmartWlanConfApplication.getWifiScan(getContext()).stop();
                     getView().findViewById(R.id.wifiprogress).setVisibility(View.VISIBLE);
                     getView().findViewById(R.id.wifilist).setVisibility(View.GONE);
                     startScanning(this);
