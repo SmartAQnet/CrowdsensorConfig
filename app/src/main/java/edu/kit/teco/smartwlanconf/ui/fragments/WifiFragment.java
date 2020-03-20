@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
+import android.util.Log;
 
 import androidx.annotation.RequiresPermission;
 import androidx.core.app.ActivityCompat;
@@ -32,21 +33,21 @@ public class WifiFragment extends Fragment {
     public void onWaitForWifiScan(List<ScanResult> wifiList){}
 
     public void startScanning(WifiFragment fragment) {
-        // Before starting new scan, stop last running
-        if(wifiScanThread != null){
-            stopScanning();
-        }
-        //create wifiscanner
+        // Create wifiscanner
         wifiScanRunnable = new WifiScanRunnable(fragment, SmartWlanConfApplication.getWifi(getContext()));
         //remember wifiscanner to be able to stop scanning
         wifiScanThread = new Thread(wifiScanRunnable);
         wifiScanThread.start();
     }
 
-    public void stopScanning(){
-        //Stop wifi scannning thread
-        if(wifiScanThread.getState()!= Thread.State.TERMINATED) {
-            wifiScanRunnable.stop();
+    public void stopScanning(WifiFragment wifiFragment){
+        // Try to stop scanning, otherwise scanning will keep on sending results to
+        // Fragment that has already been stopped
+        try{
+            wifiFragment.getActivity().getApplication().unregisterReceiver(wifiFragment.getWifiScanBroadcastreceiver());
+        } catch (Exception e){
+            //Nothing to do
+            Log.d(WifiScanRunnable.class.toString(),"Unable to unregister " + wifiFragment.getClass().toString());
         }
     }
 

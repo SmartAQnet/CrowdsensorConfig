@@ -148,9 +148,9 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     // This is what should be done after trying to open the nodes website
     // At the moment the application just starts all over again
-    public void onAfterNodeNotFound(boolean success){
+    public void onAfterNodeNotFound(boolean wrongPassword){
         Fragment newFragment;
-        if(success) {
+        if(!wrongPassword) {
             //On success just restart app
             if(listOfWifisFragment == null) {
                 listOfWifisFragment = ListOfWifisFragment.newInstance(1);
@@ -159,8 +159,9 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         } else {
             //wifi password was wrong, go to GetUserWifiCredentialsFragment
             if(getUserWifiCredentialsFragment == null) {
-                getUserWifiCredentialsFragment = GetUserWifiCredentialsFragment.newInstance(true);
+                getUserWifiCredentialsFragment = GetUserWifiCredentialsFragment.newInstance(wrongPassword);
             }
+            getUserWifiCredentialsFragment.setWrongPassword(wrongPassword);
             newFragment = getUserWifiCredentialsFragment;
         }
         replaceFragment(newFragment);

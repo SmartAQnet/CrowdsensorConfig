@@ -46,8 +46,8 @@ public class ListOfSensorsFragment extends WifiFragment{
     private int mColumnCount = 1;
     private OnSensorListInteractionListener mListener;
     private List<ScanResult> sensorList = new ArrayList<>();
-
     private SensorListItemRecyclerViewAdapter sensorsAdapter;
+    private Snackbar snackbar;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -125,7 +125,10 @@ public class ListOfSensorsFragment extends WifiFragment{
     @Override
     public void onStop() {
         super.onStop();
-        stopScanning();
+        if(snackbar != null){
+            snackbar.dismiss();
+        }
+        stopScanning(this );
     }
 
     //This methods starts scanning and
@@ -184,7 +187,7 @@ public class ListOfSensorsFragment extends WifiFragment{
     }
 
     private void noSensorFound(){
-        Snackbar snackbar = Snackbar
+        snackbar = Snackbar
                 .make(getView(), "Kein Sensor gefunden!", Snackbar.LENGTH_INDEFINITE)
                 .setAction("Nochmal versuchen!", (View v)->{
                     WifiManager wifi =(WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);

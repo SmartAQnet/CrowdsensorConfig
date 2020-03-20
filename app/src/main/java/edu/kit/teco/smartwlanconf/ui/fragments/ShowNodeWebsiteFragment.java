@@ -52,6 +52,8 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
     // Required empty public constructor
     public ShowNodeWebsiteFragment() {}
 
+    private Snackbar snackbar;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,11 +67,19 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
         connectToWifi(((SmartWlanConfActivity)getActivity()).getmWlanSSID(),
                 ((SmartWlanConfActivity)getActivity()).getmWlanPwd(),
                 this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if(snackbar != null){
+            snackbar.dismiss();
+        }
     }
 
     @Override
@@ -97,7 +107,7 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
             //Start looking for node with bonjour service (mDNS)
             startDiscovery();
         } else {
-            Snackbar snackbar = Snackbar
+            snackbar = Snackbar
                     .make(view, "Verbindung zu" + ((SmartWlanConfActivity) getActivity()).getmWlanSSID()+ " fehlgeschlagen.", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Nochmal versuchen!", (View v)->{
                         connectToWifi(((SmartWlanConfActivity)getActivity()).getmWlanSSID(),
@@ -114,12 +124,8 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
     //Start searching for sensor with mDNS
     private void startDiscovery() {
         try {
-            SmartWlanConfActivity activity = ((SmartWlanConfActivity) getActivity());
-            if(activity == null){
-                throw new NullPointerException();
-            }
             //SSID of node is the same as it's ID, which is his service name
-            String mNodeServiceName = activity.getmNodeSSID();
+            String mNodeServiceName = ((SmartWlanConfActivity) getActivity()).getmNodeSSID();
             Rx2DnssdBindable mRxDnssd = (Rx2DnssdBindable) SmartWlanConfApplication.getRxDnssd(getActivity());
 
             //Searching for Bounjour Services from https://github.com/andriydruk/RxDNSSD
@@ -164,13 +170,11 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
     private void showNodeDiscoveryError(){
         View view = getView();
         if(view != null) {
-            Snackbar snackbar = Snackbar
-                    .make(getView(), "Sensor nicht im Wlan gefunden!", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Weiter!", (View v)-> continueAfterDiscovery(false));
-
             int colorSnackRetry = ResourcesCompat.getColor(getResources(), R.color.colorSnackRetry, null);
-            snackbar.setActionTextColor(colorSnackRetry);
-            snackbar.show();
+            snackbar = Snackbar.make(getView(), "Sensor nicht im Wlan gefunden!", Snackbar.LENGTH_INDEFINITE);
+            snackbar.setAction("Weiter!", (View v)-> continueAfterDiscovery(false))
+                    .setActionTextColor(colorSnackRetry)
+                    .show();
         } else {
             Log.d(ShowNodeWebsiteFragment.class.toString(), "View is null");
             continueAfterDiscovery(false);

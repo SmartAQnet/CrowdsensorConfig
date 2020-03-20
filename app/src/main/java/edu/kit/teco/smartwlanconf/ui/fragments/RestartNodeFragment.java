@@ -21,7 +21,6 @@ import com.google.android.material.snackbar.Snackbar;
 import java.math.BigInteger;
 import java.net.InetAddress;
 
-import java.net.UnknownHostException;
 import java.util.HashMap;
 
 import edu.kit.teco.smartwlanconf.R;
@@ -42,6 +41,7 @@ import static android.content.Context.WIFI_SERVICE;
 public class RestartNodeFragment extends WifiFragment {
 
     private OnNodeRestartedListener mListener;
+    private Snackbar snackbar;
 
     public RestartNodeFragment() {
         // Required empty public constructor
@@ -71,6 +71,14 @@ public class RestartNodeFragment extends WifiFragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        if(snackbar != null) {
+            snackbar.dismiss();
+        }
+    }
+
+    @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof OnNodeRestartedListener) {
@@ -95,7 +103,7 @@ public class RestartNodeFragment extends WifiFragment {
             //Send wifi credentials to sensor node and restart it
             connectNodeWithUserWifi();
         } else {
-            Snackbar snackbar = Snackbar
+            snackbar = Snackbar
                     .make(view, "Verbindung zu Sensor fehlgeschlagen", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Nochmal versuchen!", (View v)->{
                         connectToWifi(((SmartWlanConfActivity)getActivity()).getmNodeSSID(),
@@ -135,12 +143,12 @@ public class RestartNodeFragment extends WifiFragment {
                     credentials.get("PWD")).get();
             //Check if credentials could be sent
             if(!result){
-                Snackbar snackbar = Snackbar
-                        .make(getView(), "Wifi Daten konnten nicht an Knoten geschickt werden!", Snackbar.LENGTH_INDEFINITE)
-                        .setAction("Nochmal versuchen!", (View v) -> this.connectNodeWithUserWifi());
                 int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
-                snackbar.setActionTextColor(colorSnackRetry);
-                snackbar.show();
+
+                snackbar = Snackbar.make(getView(), "Wifi Daten konnten nicht an Knoten geschickt werden!", Snackbar.LENGTH_INDEFINITE);
+                snackbar.setAction("Nochmal versuchen!", (View v) -> this.connectNodeWithUserWifi())
+                        .setActionTextColor(colorSnackRetry)
+                        .show();
             } else {
                 mListener.onNodeRestartedSuccess();
             }
@@ -163,7 +171,7 @@ public class RestartNodeFragment extends WifiFragment {
         try {
             //ipAdress to String
             return (InetAddress.getByAddress(ipAdress)).getHostAddress();
-        } catch (UnknownHostException e){
+        } catch (Exception e){
             e.printStackTrace();
             throw new NullPointerException();
         }

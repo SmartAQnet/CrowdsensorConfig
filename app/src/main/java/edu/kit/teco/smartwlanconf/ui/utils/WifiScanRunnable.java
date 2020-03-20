@@ -22,24 +22,11 @@ public class WifiScanRunnable implements Runnable{
 
         public void run()
         {
-            while(running){
-                //Start scan only once
-                if(!hasStarted) {
-                    hasStarted = true;
-                    wifi.scanWifi(wifiFragment);
-                }
-            }
+            wifi.scanWifi(wifiFragment);
         }
 
         public void stop(){
-            // Try to stop scanning, otherwise scanning will keep on sending results to
-            // Fragment that is already in Background
-            try{
-                wifiFragment.getActivity().getApplication().unregisterReceiver(wifiFragment.getWifiScanBroadcastreceiver());
-            } catch (Exception e){
-                //Nothing to do
-                Log.d(WifiScanRunnable.class.toString(),"Unable to unregister " + wifiFragment.getClass().toString());
-            }
+
             running = false;
             hasStarted = false;
         }

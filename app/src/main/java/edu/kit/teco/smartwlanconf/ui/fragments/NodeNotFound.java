@@ -50,6 +50,7 @@ import edu.kit.teco.smartwlanconf.ui.utils.WifiScanRunnable;
 public class NodeNotFound extends WifiFragment{
 
     private OnAfterNodeNotFound mListener;
+    private Snackbar snackbar;
 
     public NodeNotFound() {
         // Required empty public constructor
@@ -90,8 +91,8 @@ public class NodeNotFound extends WifiFragment{
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
         setCheckNodeIPButtonListener(getView());
         getView().findViewById(R.id.progress_check_node_wifi_after_failed_connection).setVisibility(View.VISIBLE);
         getView().findViewById(R.id.look_for_node_ip).setVisibility(View.GONE);
@@ -112,7 +113,10 @@ public class NodeNotFound extends WifiFragment{
     @Override
     public void onStop() {
         super.onStop();
-        stopScanning();
+        if(snackbar != null){
+            snackbar.dismiss();
+        }
+        stopScanning(this);
     }
 
     @Override
@@ -141,14 +145,13 @@ public class NodeNotFound extends WifiFragment{
 
         //No results
         if (results == null) {
-            Snackbar snackbar = Snackbar
-                    .make(view, "Keine Wifi gefunden. Wifi aktiv?", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Nochmal versuchen!", (View v)->{
+            int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
+            snackbar = Snackbar.make(view, "Keine Wifi gefunden. Wifi aktiv?", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("Neue Suche!", (View v)->{
                         getView().findViewById(R.id.progress_check_node_wifi_after_failed_connection).setVisibility(View.VISIBLE);
                         getView().findViewById(R.id.look_for_node_ip).setVisibility(View.GONE);
                         startScanning(this);
                     });
-            int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
             snackbar.show();
             return;
@@ -185,7 +188,10 @@ public class NodeNotFound extends WifiFragment{
                     //Open first page of app
                     mListener.onAfterNodeNotFound(false);
                 } else {
-                    //TODO: IP nicht erreichbar nochmal eingeben Fehlerhinweis an Eingabe
+                    int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
+                    snackbar = Snackbar.make(view, "IP-Adresse nicht erreichbar. Bitte prüfen?", Snackbar.LENGTH_LONG);
+                    snackbar.setActionTextColor(colorSnackRetry);
+                    snackbar.show();
                 }
             } catch (MalformedURLException urle){
                 urle.printStackTrace();
@@ -232,7 +238,6 @@ public class NodeNotFound extends WifiFragment{
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnAfterNodeNotFound {
-        // TODO: Update argument type and name
-        void onAfterNodeNotFound(boolean nodeFound);
+        void onAfterNodeNotFound(boolean wrongPassword);
     }
 }
