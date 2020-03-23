@@ -2,25 +2,24 @@
 
 CrowdsensorConfig is an android app used to configure a stationary crowdsensor of SmartAQNet in a users wifi. 
 
-CrowdSensorConfig first looks for the wifi provided by the sensor.available wifis and lists them on screen.
+CrowdSensorConfig first looks for the wifi provided by the sensor.
 
 <img src="images/Screenshot_20200228-100153.png"  width="230" height="360">
 
-If there are several sensors available the sensors are shown in alist. The user selects his sensor by clicking on the appropriate list entry.
+If there are several sensors available the sensors are shown in a list. The user selects his sensor by clicking on the appropriate list entry.
 
 <img src="images/Screenshot_20200228-100205.png"  width="230" height="360">
 
-Next step the sensor looks for available wifis and shows the result in a list. The user selects his wifi by clicking on the appropriate list entry.
+Next step the app looks for available wifis and shows the result in a list. The user selects his wifi by clicking on the appropriate list entry.
 
 <img src="images/Screenshot_20200228-100219.png"  width="230" height="360">
 
-The user shall then enter the password for the selected wifi and then click on continue.
+The user shall then enter the password for the selected wifi and click on continue.
 
 <img src="images/Screenshot_20200228-100249.png"  width="230" height="360">
 
-After that the application does several succesive steps. First it tries to connect to the sensor's wifi and send the wifi credentials to the sensor via HTTP, which is then restarted.
-It then reconnects to the user's wifi and starts to look for he sensor in the user's wifi by it's mDNS adress "NodeID.local". If the sensor is found,the app starts an external browser 
-which shows the sensors webpage.
+After that the application does several successive steps. First it tries to connect to the sensor's wifi and send the wifi credentials to the sensor via HTTP, which is then restarted.
+It then reconnects to the user's wifi and starts to look for the sensor in the user's wifi by it's mDNS adress "NodeID.local". If the sensor is found the app starts an external browser, which shows the sensors webpage.
 
 What can go wrong?
 
