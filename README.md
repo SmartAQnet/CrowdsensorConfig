@@ -2,26 +2,35 @@
 
 CrowdsensorConfig is an android app used to configure a stationary crowdsensor of SmartAQNet in a users wifi. 
 
-CrowdSensorConfig first looks for available wifis and lists them on screen.
+CrowdSensorConfig first looks for the wifi provided by the sensor.available wifis and lists them on screen.
 
 <img src="images/Screenshot_20200228-100153.png"  width="230" height="360">
 
-The user selects his wifi by clicking on the appropriate list entry.
+If there are several sensors available the sensors are shown in alist. The user selects his sensor by clicking on the appropriate list entry.
 
 <img src="images/Screenshot_20200228-100205.png"  width="230" height="360">
 
-He then has to enter the credentials of the selected wifi.
+Next step the sensor looks for available wifis and shows the result in a list. The user selects his wifi by clicking on the appropriate list entry.
 
 <img src="images/Screenshot_20200228-100219.png"  width="230" height="360">
 
-After that the application connects to the wifi of the user. The crowdsensor opens it's own wifi with his id as ssid. When CrowdsensorConfig is connected to the wifi, he asks the user to enter the id of the sensor, or to scan the QR code on the sensorsscreen.
+The user shall then enter the password for the selected wifi and then click on continue.
 
 <img src="images/Screenshot_20200228-100249.png"  width="230" height="360">
 
-The application then tries to connect to the sensors wifi.
+After that the application does several succesive steps. First it tries to connect to the sensor's wifi and send the wifi credentials to the sensor via HTTP, which is then restarted.
+It then reconnects to the user's wifi and starts to look for he sensor in the user's wifi by it's mDNS adress "NodeID.local". If the sensor is found,the app starts an external browser 
+which shows the sensors webpage.
 
-By successful connection the app sends the wifi credentials to the sensor, which then reboots to connect to the users wifi.
+What can go wrong?
 
-When the sensor is restarted, the app tries to find the sensor in the user's wifi by it's mDNS adress "NodeID.local"
+If the user provided the wrong password for his wifi, the app asks him to reenter his password and continues again from there.
 
-When the app is able to find the senor, it opens up the sensors configuration page in an external browser window.
+It may happen that the app doesn't find the sensor in the user's wifi although he is available. 
+In that case it asks the user to look on the sensor's screen for the IP-adress given to the sensor by the router and enter it.
+The app checks the IP-adress and then continues by starting an external browser, which shows the sensors webpage.
+
+Known issues:
+
+Looking for wifis and sensors is not very reliable. It may sometimes happen that the app doesn't find any wifi or sensor. 
+In most cases it helps to just wait for some seconds and then hit retry. If that doesn't help just restart the app.
