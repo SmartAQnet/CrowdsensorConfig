@@ -24,7 +24,7 @@ click on continue.
 
 <img src="images/4.png"  width="230" height="360">
 
-After that the application does several succesive steps. First it tries
+After that the application does several successive steps. First it tries
 to connect to the sensor's wifi and send the wifi credentials to the
 sensor via HTTP, which is then restarted. It then reconnects to the
 user's wifi and starts to look for he sensor in the user's wifi by it's
@@ -40,7 +40,7 @@ to reenter his password and continues again from there.
 
 It may happen that the app doesn't find the sensor in the user's wifi
 although he is available. In that case it asks the user to look on the
-sensor's screen for the IP-adress given to the sensor by the router and
+sensor's screen for the IP-address given to the sensor by the router and
 enter it.
 
 <img src="images/5.png"  width="230" height="360">
