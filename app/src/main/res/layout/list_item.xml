@@ -11,5 +11,5 @@
         android:layout_margin="@dimen/text_margin"
         android:background="@color/colorWifiItem"
         android:textAppearance="?attr/textAppearanceListItem"
-        android:inputType="none"/>
+        android:editable="false"/>
 </LinearLayout>

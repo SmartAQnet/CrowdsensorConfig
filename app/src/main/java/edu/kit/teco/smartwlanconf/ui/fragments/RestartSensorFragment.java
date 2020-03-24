@@ -26,24 +26,24 @@ import java.util.HashMap;
 import edu.kit.teco.smartwlanconf.R;
 import edu.kit.teco.smartwlanconf.ui.Config;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
-import edu.kit.teco.smartwlanconf.ui.utils.HttpNodePost;
+import edu.kit.teco.smartwlanconf.ui.utils.HttpSensorPost;
 
 import static android.content.Context.WIFI_SERVICE;
 
 /**
  * A simple {@link Fragment} subclass.
- * When this fragment is calles the Users phone is now connected to the nodes wifi.
+ * When this fragment is calles the Users phone is now connected to the sensors wifi.
  *
- * This fragment sends the wifi credentials of the user wifi to the node
+ * This fragment sends the wifi credentials of the user wifi to the sensor
  * which is then restarted. The users phone is then reconnected to the
- * users wifi, after successful reconnection ShowNodeWebsiteFragment is called.
+ * users wifi, after successful reconnection ShowSensorWebsiteFragment is called.
  */
-public class RestartNodeFragment extends WifiFragment {
+public class RestartSensorFragment extends WifiFragment {
 
-    private OnNodeRestartedListener mListener;
+    private OnSensorRestartedListener mListener;
     private Snackbar snackbar;
 
-    public RestartNodeFragment() {
+    public RestartSensorFragment() {
         // Required empty public constructor
     }
 
@@ -51,7 +51,7 @@ public class RestartNodeFragment extends WifiFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.restart_node_fragment, container, false);
+        return inflater.inflate(R.layout.restart_sensor_fragment, container, false);
     }
 
 
@@ -65,8 +65,8 @@ public class RestartNodeFragment extends WifiFragment {
         super.onStart();
         getActivity().setTitle(Config.APP_TITLE);
         //Connect to sensor wifi
-        connectToWifi(((SmartWlanConfActivity)getActivity()).getmNodeSSID(),
-                Config.NODE_PWD,
+        connectToWifi(((SmartWlanConfActivity)getActivity()).getmSensorSSID(),
+                Config.SENSOR_PWD,
                 this);
     }
 
@@ -81,8 +81,8 @@ public class RestartNodeFragment extends WifiFragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if (context instanceof OnNodeRestartedListener) {
-            mListener = (OnNodeRestartedListener) context;
+        if (context instanceof OnSensorRestartedListener) {
+            mListener = (OnSensorRestartedListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -100,14 +100,14 @@ public class RestartNodeFragment extends WifiFragment {
             return;
         }
         if (success) {
-            //Send wifi credentials to sensor node and restart it
-            connectNodeWithUserWifi();
+            //Send wifi credentials to sensor and restart it
+            connectSensorWithUserWifi();
         } else {
             snackbar = Snackbar
                     .make(view, "Verbindung zu Sensor fehlgeschlagen", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Nochmal versuchen!", (View v)->{
-                        connectToWifi(((SmartWlanConfActivity)getActivity()).getmNodeSSID(),
-                                Config.NODE_PWD,
+                        connectToWifi(((SmartWlanConfActivity)getActivity()).getmSensorSSID(),
+                                Config.SENSOR_PWD,
                                 this);
                     });
             int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
@@ -117,26 +117,26 @@ public class RestartNodeFragment extends WifiFragment {
     }
 
 
-    //Sending wifi credentials with http to node restarts the node
-    private void connectNodeWithUserWifi(){
+    //Sending wifi credentials with http to sensor restarts it
+    private void connectSensorWithUserWifi(){
 
         Activity activity = getActivity();
-        //As the user's phone is connected to the wifi of the node
+        //As the user's phone is connected to the wifi of the sensor
         //it's IP is the gateway IP, so you have to look for it
         String gatewayIP;
         try {
             gatewayIP = lookupGateway(activity);
         } catch (NullPointerException e) {
-            Log.d(RestartNodeFragment.class.toString(), "lookupGateway() returned null");
+            Log.d(RestartSensorFragment.class.toString(), "lookupGateway() returned null");
             return;
         }
 
-        HttpNodePost request = new HttpNodePost(activity.getApplicationContext());
+        HttpSensorPost request = new HttpSensorPost(activity.getApplicationContext());
         try {
             //URL to send wifi credentials
             final String wlanUrl = "http://" + gatewayIP + "/_ac/connect";
             //Set credentials
-            HashMap<String, String> credentials = getNodeWifiCredentials(activity);
+            HashMap<String, String> credentials = getSensorWifiCredentials(activity);
             //Send Data via http
             boolean result = request.execute(wlanUrl,
                     credentials.get("SSID"),
@@ -146,18 +146,18 @@ public class RestartNodeFragment extends WifiFragment {
                 int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
 
                 snackbar = Snackbar.make(getView(), "Wifi Daten konnten nicht an Knoten geschickt werden!", Snackbar.LENGTH_INDEFINITE);
-                snackbar.setAction("Nochmal versuchen!", (View v) -> this.connectNodeWithUserWifi())
+                snackbar.setAction("Nochmal versuchen!", (View v) -> this.connectSensorWithUserWifi())
                         .setActionTextColor(colorSnackRetry)
                         .show();
             } else {
-                mListener.onNodeRestartedSuccess();
+                mListener.onSensorRestartedSuccess();
             }
         } catch(Exception e) {
             e.printStackTrace();
         }
     }
 
-    //Gets Gateway IP, which is the ip adress of the node
+    //Gets Gateway IP, which is the ip adress of the sensor
     private String lookupGateway(Activity activity) throws NullPointerException {
         final WifiManager manager = (WifiManager) activity.getApplicationContext().getSystemService(WIFI_SERVICE);
         final DhcpInfo dhcp = manager.getDhcpInfo();
@@ -178,7 +178,7 @@ public class RestartNodeFragment extends WifiFragment {
     }
 
     //Put wifi credentials in a Hashmap
-    private HashMap<String, String> getNodeWifiCredentials(Activity activity){
+    private HashMap<String, String> getSensorWifiCredentials(Activity activity){
         HashMap<String, String> credentials = new HashMap<>();
         credentials.put("SSID", ((SmartWlanConfActivity) activity).getmWlanSSID());
         credentials.put("PWD",((SmartWlanConfActivity) activity).getmWlanPwd());
@@ -195,7 +195,7 @@ public class RestartNodeFragment extends WifiFragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnNodeRestartedListener {
-        void onNodeRestartedSuccess();
+    public interface OnSensorRestartedListener {
+        void onSensorRestartedSuccess();
     }
 }

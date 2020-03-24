@@ -2,14 +2,13 @@
     <string name="app_name">SmartWlanConf</string>
     <string name="wlanssid">Wifi SSID</string>
 
-    <string name="node_id">Node ID</string>
-    <string name="node_ip">Node IP</string>
-    <string name="btn_open_check_node_wifi_fragment">Weiter</string>
+    <string name="sensor_id">Sensor ID</string>
+    <string name="sensor_ip">Sensor IP</string>
+    <string name="btn_open_check_sensor_wifi_fragment">Weiter</string>
 
-    <string name="btn_check_node">Prüfe Sensorverbindung</string>
     <string name="btn_check_ip">Prüfe IP-Adresse</string>
-    <string name="node_not_found">
-            Der Sensor konnte nicht automatisch im Wlan gefunden werden.
+    <string name="sensor_not_found">
+            Der Sensor konnte nicht im Wlan gefunden werden.
             Geben Sie bitte die 12-stellige IP Adresse ein, die auf dem Display des Sensors
             angezeigt wird.
     </string>

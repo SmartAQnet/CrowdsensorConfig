@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragments.ShowNodeWebsiteFragment">
+    tools:context=".ui.fragments.RestartSensorFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -11,7 +11,6 @@
         android:orientation="vertical"
         android:gravity="center">
         <ProgressBar
-            android:id="@+id/progress_show_website"
             style="@style/Widget.AppCompat.ProgressBar"
             android:layout_width="150dp"
             android:layout_height="150dp"
@@ -22,8 +21,8 @@
             android:layout_weight="0"
             android:background="@null"
             android:gravity="center"
-            android:inputType="none"
-            android:text="Lade Webseite des Sensors" />
+            android:editable="false"
+            android:text="Sende Daten an Sensor" />
     </LinearLayout>
 
 

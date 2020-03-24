@@ -3,7 +3,6 @@ package edu.kit.teco.smartwlanconf.ui;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
 
@@ -14,14 +13,12 @@ import com.google.zxing.integration.android.IntentIntegrator;
 
 
 import edu.kit.teco.smartwlanconf.R;
-import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.fragments.GetUserWifiCredentialsFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.ListOfSensorsFragment;
 import edu.kit.teco.smartwlanconf.ui.fragments.ListOfWifisFragment;
-import edu.kit.teco.smartwlanconf.ui.fragments.NodeNotFound;
-import edu.kit.teco.smartwlanconf.ui.fragments.RestartNodeFragment;
-import edu.kit.teco.smartwlanconf.ui.fragments.ShowNodeWebsiteFragment;
-import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
+import edu.kit.teco.smartwlanconf.ui.fragments.SensorNotFoundFragment;
+import edu.kit.teco.smartwlanconf.ui.fragments.RestartSensorFragment;
+import edu.kit.teco.smartwlanconf.ui.fragments.ShowSensorWebsiteFragment;
 
 
 // This is the Main activity of the application
@@ -30,24 +27,24 @@ import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
 public class SmartWlanConfActivity extends AppCompatActivity implements
         ListOfWifisFragment.OnWifiListFragmentInteractionListener,
         GetUserWifiCredentialsFragment.OnGetUserWifiCredentialsListener,
-        RestartNodeFragment.OnNodeRestartedListener,
-        ShowNodeWebsiteFragment.OnShowNodeSiteListener,
-        NodeNotFound.OnAfterNodeNotFound,
+        RestartSensorFragment.OnSensorRestartedListener,
+        ShowSensorWebsiteFragment.OnShowSensorSiteListener,
+        SensorNotFoundFragment.OnAfterSensorNotFound,
         ListOfSensorsFragment.OnSensorListInteractionListener{
 
 
 
-    //Data to connect with wifi network of node
-    private String mNodeSSID = "";
+    //Data to connect with wifi network of sensor
+    private String mSensorSSID = "";
     //Data to connect with wifi network of user
     private String mWlanSSID = "";
     private String mWlanPwd = "";
     private ListOfSensorsFragment listOfSensorsFragment;
     private ListOfWifisFragment listOfWifisFragment;
     private GetUserWifiCredentialsFragment getUserWifiCredentialsFragment;
-    private RestartNodeFragment restartNodeFragment;
-    private NodeNotFound nodeNotFound;
-    private ShowNodeWebsiteFragment showNodeWebsiteFragment;
+    private RestartSensorFragment restartSensorFragment;
+    private SensorNotFoundFragment sensorNotFound;
+    private ShowSensorWebsiteFragment showSensorWebsiteFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +90,7 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
     //This shows ListOfWifisFragment
     public void onSensorListInteraction(ScanResult scanResult){
-        mNodeSSID = scanResult.SSID;
+        mSensorSSID = scanResult.SSID;
         if(listOfWifisFragment == null) {
             listOfWifisFragment = ListOfWifisFragment.newInstance(1);
         }
@@ -109,46 +106,46 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
         replaceFragment(getUserWifiCredentialsFragment);
     }
 
-    //This shows the fragment that tries to connect to node wifi
+    //This shows the fragment that tries to connect to sensor wifi
     public void onGotUserWifiCredentials(){
-        if(restartNodeFragment == null) {
-            restartNodeFragment = new RestartNodeFragment();
+        if(restartSensorFragment == null) {
+            restartSensorFragment = new RestartSensorFragment();
         }
-        replaceFragment(restartNodeFragment );
+        replaceFragment(restartSensorFragment );
     }
 
-    //This starts the ShowNodeWebsiteFragment that opens an external Browser with website of the node
-    public void onNodeRestartedSuccess(){
+    //This starts the ShowSensorWebsiteFragment that opens an external Browser with website of the sensor
+    public void onSensorRestartedSuccess(){
 
-        if(showNodeWebsiteFragment == null){
-            showNodeWebsiteFragment = new ShowNodeWebsiteFragment();
+        if(showSensorWebsiteFragment == null){
+            showSensorWebsiteFragment = new ShowSensorWebsiteFragment();
         }
-        replaceFragment(showNodeWebsiteFragment);
+        replaceFragment(showSensorWebsiteFragment);
     }
 
-    // This is what should be done after trying to open the nodes website
+    // This is what should be done after trying to open the sensors website
     // At the moment the application just starts all over again
-    public void onAfterShowNodeSuccess(boolean success){
+    public void onAfterShowSensorSuccess(boolean success){
         Fragment newFragment;
         if(success) {
             //On success just restart app
-            if(listOfWifisFragment == null) {
-                listOfWifisFragment = ListOfWifisFragment.newInstance(1);
+            if(listOfSensorsFragment == null) {
+                listOfSensorsFragment = ListOfSensorsFragment.newInstance(1);
             }
-            newFragment = listOfWifisFragment;
+            newFragment = listOfSensorsFragment;
         } else {
-            //Node not found, try to to find error
-            if(nodeNotFound== null) {
-                nodeNotFound = NodeNotFound.newInstance();
+            //Sensor not found, try to to find error
+            if(sensorNotFound== null) {
+                sensorNotFound = SensorNotFoundFragment.newInstance();
             }
-            newFragment = nodeNotFound;
+            newFragment = sensorNotFound;
         }
         replaceFragment(newFragment);
     }
 
-    // This is what should be done after trying to open the nodes website
+    // This is what should be done after trying to open the sensors website
     // At the moment the application just starts all over again
-    public void onAfterNodeNotFound(boolean wrongPassword){
+    public void onAfterSensorNotFound(boolean wrongPassword){
         Fragment newFragment;
         if(!wrongPassword) {
             //On success just restart app
@@ -192,16 +189,12 @@ public class SmartWlanConfActivity extends AppCompatActivity implements
 
 
     //Setter, Getter
-    public void setmWlanSSID (String ssid){
-        mWlanSSID  = ssid;
-    }
-
     public void setmWlanPwd(String pwd){
         mWlanPwd = pwd;
     }
 
-    public String getmNodeSSID(){
-        return mNodeSSID;
+    public String getmSensorSSID(){
+        return mSensorSSID;
     }
     public String getmWlanSSID (){
         return mWlanSSID;

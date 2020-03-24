@@ -31,26 +31,26 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link //ShowNodeWebsiteFragment.OnFragmentInteractionListener} interface
+ * {@link //ShowSensorWebsiteFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
  *
- * This is just a landing page, wifi credentials have been sent to the node.
- * When the node is connected to the users wifi it can be located via mDNS
- * If the node can be found, his website is opened in external browser
+ * This is just a landing page, wifi credentials have been sent to the sensor.
+ * When the sensor is connected to the users wifi it can be located via mDNS
+ * If the sensor can be found, his website is opened in external browser
  * otherwise the app returns to CheckUserWifiCredentialsFragment
  */
-public class ShowNodeWebsiteFragment extends WifiFragment {
+public class ShowSensorWebsiteFragment extends WifiFragment {
 
-    private OnShowNodeSiteListener mListener;
+    private OnShowSensorSiteListener mListener;
 
-    //the node's ip adress in user wifi network
-    private String mNodeIP;
+    //the sensor's ip adress in user wifi network
+    private String mSensorIP;
 
     //Necessary for stoping discovery of Bonjour services
     private Disposable mDisposable;
 
     // Required empty public constructor
-    public ShowNodeWebsiteFragment() {}
+    public ShowSensorWebsiteFragment() {}
 
     private Snackbar snackbar;
 
@@ -63,7 +63,7 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return inflater.inflate(R.layout.show_node_website_fragment, container, false);
+        return inflater.inflate(R.layout.show_sensor_website_fragment, container, false);
     }
 
     @Override
@@ -85,8 +85,8 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if (context instanceof OnShowNodeSiteListener) {
-            mListener = (OnShowNodeSiteListener) context;
+        if (context instanceof OnShowSensorSiteListener) {
+            mListener = (OnShowSensorSiteListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -104,11 +104,11 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
             return;
         }
         if (success) {
-            //Start looking for node with bonjour service (mDNS)
+            //Start looking for sensor with bonjour service (mDNS)
             startDiscovery();
         } else {
             snackbar = Snackbar
-                    .make(view, "Verbindung zu" + ((SmartWlanConfActivity) getActivity()).getmWlanSSID()+ " fehlgeschlagen.", Snackbar.LENGTH_INDEFINITE)
+                    .make(view, "Verbindung zu " + ((SmartWlanConfActivity) getActivity()).getmWlanSSID()+ " fehlgeschlagen.", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Nochmal versuchen!", (View v)->{
                         connectToWifi(((SmartWlanConfActivity)getActivity()).getmWlanSSID(),
                                 ((SmartWlanConfActivity)getActivity()).getmWlanPwd(),
@@ -124,12 +124,12 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
     //Start searching for sensor with mDNS
     private void startDiscovery() {
         try {
-            //SSID of node is the same as it's ID, which is his service name
-            String mNodeServiceName = ((SmartWlanConfActivity) getActivity()).getmNodeSSID();
+            //SSID of sensor is the same as it's ID, which is his service name
+            String mSensorServiceName = ((SmartWlanConfActivity) getActivity()).getmSensorSSID();
             Rx2DnssdBindable mRxDnssd = (Rx2DnssdBindable) SmartWlanConfApplication.getRxDnssd(getActivity());
 
             //Searching for Bounjour Services from https://github.com/andriydruk/RxDNSSD
-            mDisposable = mRxDnssd.browse(Config.NODE_REQ_TYPE, Config.NODE_DOMAIN)
+            mDisposable = mRxDnssd.browse(Config.SENSOR_REQ_TYPE, Config.SENSOR_DOMAIN)
                     .compose(mRxDnssd.resolve())
                     .compose(mRxDnssd.queryIPRecords())
                     .subscribeOn(Schedulers.io())
@@ -137,37 +137,37 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
                     .timeout(Config.TIMEOUT_FOR_MDNSSCAN, TimeUnit.SECONDS)
                     .onExceptionResumeNext(
                             throwable -> {
-                                showNodeDiscoveryError();}
+                                showSensorDiscoveryError();}
                     )
                     .doOnError(throwable -> {
-                            showNodeDiscoveryError();
+                            showSensorDiscoveryError();
                     })
                     .subscribe(mDNSService -> {
-                        if(mDNSService.getServiceName().equals(mNodeServiceName)){
+                        if(mDNSService.getServiceName().equals(mSensorServiceName)){
                             Inet4Address ip4 = mDNSService.getInet4Address();
                             try {
                                 if (ip4 == null) {
                                     throw new NullPointerException();
                                 }
-                                mNodeIP = mDNSService.getInet4Address().toString();
+                                mSensorIP = mDNSService.getInet4Address().toString();
                             } catch (NullPointerException e){
-                                Log.e("ShowNodeWebSiteFragment", "ip4 null in startDiscovery");
+                                Log.e("ShowSensorWebSite", "ip4 null in startDiscovery");
                                 continueAfterDiscovery(false);
                             }
                             continueAfterDiscovery(true);
                         }
                     }, throwable -> {
-                        Log.e("ShowNodeWebSiteFragment", "DNSSDError: ", throwable);
-                        showNodeDiscoveryError();
+                        Log.e("ShowSensorWebSite", "DNSSDError: ", throwable);
+                        showSensorDiscoveryError();
                     });
         } catch (Exception e) {
             //Activity no longer active, do nothing
-            Log.e("ShowNodeWebSiteFragment", "Activity null in startDiscovery");
+            Log.e("ShowSensorWebSite", "Activity null in startDiscovery");
         }
     }
 
-    //Show error if node cannot be found
-    private void showNodeDiscoveryError(){
+    //Show error if sensor cannot be found
+    private void showSensorDiscoveryError(){
         View view = getView();
         if(view != null) {
             int colorSnackRetry = ResourcesCompat.getColor(getResources(), R.color.colorSnackRetry, null);
@@ -176,24 +176,24 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
                     .setActionTextColor(colorSnackRetry)
                     .show();
         } else {
-            Log.d(ShowNodeWebsiteFragment.class.toString(), "View is null");
+            Log.d(ShowSensorWebsiteFragment.class.toString(), "View is null");
             continueAfterDiscovery(false);
         }
     }
 
-    //Continue after looking for node
+    //Continue after looking for sensor
     private void continueAfterDiscovery(boolean success){
         stopDiscovery();
-        //Open website of node to continue installation of node
+        //Open website of sensor to continue installation of sensor
         if (success) {
-            //open webview with node ip
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://" + mNodeIP));
+            //open webview with sensor ip
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://" + mSensorIP));
             startActivity(browserIntent);
         }
-        mListener.onAfterShowNodeSuccess(success);
+        mListener.onAfterShowSensorSuccess(success);
     }
 
-    //Stop looking for node
+    //Stop looking for sensor
     private void stopDiscovery() {
         if (mDisposable != null) {
             mDisposable.dispose();
@@ -211,7 +211,7 @@ public class ShowNodeWebsiteFragment extends WifiFragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnShowNodeSiteListener {
-        void onAfterShowNodeSuccess(boolean success);
+    public interface OnShowSensorSiteListener {
+        void onAfterShowSensorSuccess(boolean success);
     }
 }

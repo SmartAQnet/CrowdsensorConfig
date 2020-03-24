@@ -7,7 +7,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -26,33 +25,29 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.kit.teco.smartwlanconf.R;
-import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
 import edu.kit.teco.smartwlanconf.ui.Config;
 import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
-import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
-import edu.kit.teco.smartwlanconf.ui.utils.WifiScanRunnable;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link NodeNotFound.OnAfterNodeNotFound} interface
+ * {@link SensorNotFoundFragment.OnAfterSensorNotFound} interface
  * to handle interaction events.
- * Use the {@link NodeNotFound#newInstance} factory method to
+ * Use the {@link SensorNotFoundFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class NodeNotFound extends WifiFragment{
+public class SensorNotFoundFragment extends WifiFragment{
 
-    private OnAfterNodeNotFound mListener;
+    private OnAfterSensorNotFound mListener;
     private Snackbar snackbar;
 
-    public NodeNotFound() {
+    public SensorNotFoundFragment() {
         // Required empty public constructor
     }
 
@@ -60,15 +55,15 @@ public class NodeNotFound extends WifiFragment{
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
 
-     * @return A new instance of fragment NodeNotFound.
+     * @return A new instance of fragment SensorNotFound.
      *
-     * When this fragment is opened node could not be found in user's wifi
+     * When this fragment is opened, sensor could not be found in user's wifi
      *
-     * Check if node has reopened his own wifi, by trying to connect to it => Password for user wifi was wrong
-     * Otherwise mDNS lookup was not successful, user has to look for IP-adress of node on it's display
+     * Check if sensor has reopened his own wifi, by trying to connect to it => Password for user wifi was wrong
+     * Otherwise mDNS lookup was not successful, user has to look for IP-adress of sensor on it's display
      */
-    public static NodeNotFound newInstance() {
-        NodeNotFound fragment = new NodeNotFound();
+    public static SensorNotFoundFragment newInstance() {
+        SensorNotFoundFragment fragment = new SensorNotFoundFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -82,7 +77,7 @@ public class NodeNotFound extends WifiFragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_node_not_found, container, false);
+        return inflater.inflate(R.layout.sensor_not_found_fragment, container, false);
     }
 
     @Override
@@ -93,17 +88,17 @@ public class NodeNotFound extends WifiFragment{
     @Override
     public void onStart() {
         super.onStart();
-        setCheckNodeIPButtonListener(getView());
-        getView().findViewById(R.id.progress_check_node_wifi_after_failed_connection).setVisibility(View.VISIBLE);
-        getView().findViewById(R.id.look_for_node_ip).setVisibility(View.GONE);
+        setCheckSensorIPButtonListener(getView());
+        getView().findViewById(R.id.progress_check_sensor_wifi_after_failed_connection).setVisibility(View.VISIBLE);
+        getView().findViewById(R.id.look_for_sensor_ip).setVisibility(View.GONE);
         startScanning(this);
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnAfterNodeNotFound) {
-            mListener = (OnAfterNodeNotFound) context;
+        if (context instanceof OnAfterSensorNotFound) {
+            mListener = (OnAfterSensorNotFound) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -127,7 +122,7 @@ public class NodeNotFound extends WifiFragment{
 
 
     /**
-     * If scan for sensor is not successful then mDNS lookup failed => ask user for IP-address of node
+     * If scan for sensor is not successful then mDNS lookup failed => ask user for IP-address of sensor
      * If scan for sensor is successful then wifi password was wrong => open GetUserWifiCredentialsFragment
      */
     @Override
@@ -148,8 +143,8 @@ public class NodeNotFound extends WifiFragment{
             int colorSnackRetry = ResourcesCompat.getColor(activity.getResources(), R.color.colorSnackRetry, null);
             snackbar = Snackbar.make(view, "Keine Wifi gefunden. Wifi aktiv?", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Neue Suche!", (View v)->{
-                        getView().findViewById(R.id.progress_check_node_wifi_after_failed_connection).setVisibility(View.VISIBLE);
-                        getView().findViewById(R.id.look_for_node_ip).setVisibility(View.GONE);
+                        getView().findViewById(R.id.progress_check_sensor_wifi_after_failed_connection).setVisibility(View.VISIBLE);
+                        getView().findViewById(R.id.look_for_sensor_ip).setVisibility(View.GONE);
                         startScanning(this);
                     });
             snackbar.setActionTextColor(colorSnackRetry);
@@ -159,26 +154,26 @@ public class NodeNotFound extends WifiFragment{
         List<ScanResult> wifiList = new ArrayList<>();
         wifiList.clear();
 
-        // Look for SSID of Node
+        // Look for SSID of sensor
         for(int i = 0; i < results.size(); i++){
             ScanResult result = results.get(i);
             if (!result.SSID.isEmpty()
                     && result.frequency <= Config.WIFI_BANDWIDTH
-                    && result.SSID == ((SmartWlanConfActivity)getActivity()).getmNodeSSID()) {
+                    && result.SSID.equals(((SmartWlanConfActivity)getActivity()).getmSensorSSID())) {
                 //Open GetUserWifiCredentialsFragment
-                mListener.onAfterNodeNotFound(true);
+                mListener.onAfterSensorNotFound(true);
             }
         }
-        getView().findViewById(R.id.progress_check_node_wifi_after_failed_connection).setVisibility(View.GONE);
-        getView().findViewById(R.id.look_for_node_ip).setVisibility(View.VISIBLE);
+        getView().findViewById(R.id.progress_check_sensor_wifi_after_failed_connection).setVisibility(View.GONE);
+        getView().findViewById(R.id.look_for_sensor_ip).setVisibility(View.VISIBLE);
     }
 
-    //Button to get Node id/ssid and connect to node wifi
-    private void setCheckNodeIPButtonListener(View view){
-        //Read node id/ssid from input
+    //Button to get Sensor id/ssid
+    private void setCheckSensorIPButtonListener(View view){
+        //Read sensor id/ssid from input
         view.findViewById(R.id.btn_check_ip).setOnClickListener((View v)-> {
             IPTest ipTest = new IPTest();
-            String uri = "http://" + ((EditText) getView().findViewById(R.id.node_ip)).getText().toString();
+            String uri = "http://" + ((EditText) getView().findViewById(R.id.sensor_ip)).getText().toString();
             try {
                 URL url = new URL(uri);
                 boolean isIPReachable = ipTest.execute(url).get();
@@ -186,7 +181,7 @@ public class NodeNotFound extends WifiFragment{
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
                     startActivity(browserIntent);
                     //Open first page of app
-                    mListener.onAfterNodeNotFound(false);
+                    mListener.onAfterSensorNotFound(false);
                 } else {
                     int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
                     snackbar = Snackbar.make(view, "IP-Adresse nicht erreichbar. Bitte prüfen?", Snackbar.LENGTH_LONG);
@@ -237,7 +232,7 @@ public class NodeNotFound extends WifiFragment{
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnAfterNodeNotFound {
-        void onAfterNodeNotFound(boolean wrongPassword);
+    public interface OnAfterSensorNotFound {
+        void onAfterSensorNotFound(boolean wrongPassword);
     }
 }

@@ -27,7 +27,6 @@ public class SmartWlanConfApplication extends Application {
 
     private Rx2Dnssd mRxDnssd;
     private WifiConnectionUtils mWifi;
-    private boolean nodeIDError;
     private IntentFilter wifiscanIntentFilter;
 
     @Override
@@ -36,18 +35,9 @@ public class SmartWlanConfApplication extends Application {
 
         mRxDnssd = createDnssd();
         mWifi = WifiConnectionUtils.getInstance();
-        nodeIDError = false;
         //This is the intent that reports scan results
         wifiscanIntentFilter = new IntentFilter();
         wifiscanIntentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-    }
-
-    public static boolean getnodeIDError(@NonNull Context context){
-        return ((SmartWlanConfApplication)context.getApplicationContext()).nodeIDError;
-    }
-
-    public static void setnodeIDError(Context context, boolean error){
-        ((SmartWlanConfApplication)context.getApplicationContext()).nodeIDError = error;
     }
 
     public static Rx2Dnssd getRxDnssd(@NonNull Context context){

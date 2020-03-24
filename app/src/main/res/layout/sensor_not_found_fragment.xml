@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.fragments.NodeNotFound">
+    tools:context=".ui.fragments.SensorNotFoundFragment">
 
     <LinearLayout
-        android:id="@+id/look_for_node_ip"
+        android:id="@+id/look_for_sensor_ip"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -18,17 +18,17 @@
             android:layout_width="match_parent"
             android:layout_height="120dp"
             android:ems="10"
-            android:inputType="none"
+            android:editable="false"
             android:gravity="center_horizontal"
-            android:text="@string/node_not_found" />
+            android:text="@string/sensor_not_found" />
 
         <EditText
-            android:id="@+id/node_ip"
+            android:id="@+id/sensor_ip"
             android:layout_width="match_parent"
             android:layout_height="70dp"
             android:ems="10"
             android:inputType="text"
-            android:hint="@string/node_ip" />
+            android:hint="@string/sensor_ip" />
         <Button
             android:id="@+id/btn_check_ip"
             android:layout_width="match_parent"
@@ -39,7 +39,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/progress_check_node_wifi_after_failed_connection"
+        android:id="@+id/progress_check_sensor_wifi_after_failed_connection"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -56,7 +56,7 @@
             android:layout_height="match_parent"
             android:background="@null"
             android:gravity="center"
-            android:inputType="none"
+            android:editable="false"
             android:text="Suche Wifi des Sensors" />
     </LinearLayout>
 

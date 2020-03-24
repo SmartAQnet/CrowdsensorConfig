@@ -23,7 +23,7 @@
             android:layout_weight="0"
             android:background="@null"
             android:gravity="center"
-            android:inputType="none"
+            android:editable="false"
             android:text="Suche verfügbare Wifi-Netze" />
     </LinearLayout>
 
@@ -37,6 +37,6 @@
         android:visibility="gone"
         app:layoutManager="LinearLayoutManager"
         tools:context=".ui.fragments.ListOfWifisFragment"
-        tools:listitem="@layout/wifi_list_item" />
+        tools:listitem="@layout/list_item" />
 
 </FrameLayout>

@@ -51,7 +51,7 @@ public class GetUserWifiCredentialsFragment extends WifiFragment {
      * @return A new instance of fragment CheckUserWifiCredentialsFragment.
      *
      *
-     * If it's not the first time a new fragment is created, reason is that the node has not been found in user wifi
+     * If it's not the first time a new fragment is created, reason is that the sensor has not been found in user wifi
      * Most likely the user has given wrong password for wifi
      */
     public static GetUserWifiCredentialsFragment newInstance(boolean firstTime) {

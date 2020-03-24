@@ -17,12 +17,12 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-//Just used to send wifi credentials of user wifi asynchronously to node
-public class HttpNodePost extends AsyncTask<String, Void, Boolean> {
+//Just used to send wifi credentials of user wifi asynchronously to sensor
+public class HttpSensorPost extends AsyncTask<String, Void, Boolean> {
 
     private ConnectivityManager connectivityManager;
 
-    public HttpNodePost(Context context){
+    public HttpSensorPost(Context context){
         connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
@@ -31,8 +31,8 @@ public class HttpNodePost extends AsyncTask<String, Void, Boolean> {
         super.onPreExecute();
     }
 
-    //Async send of wifi credentials to node
-    //The params used here are the URL of the node, the SSID and the password of the user wifi
+    //Async send of wifi credentials to sensor
+    //The params used here are the URL of the sensor, the SSID and the password of the user wifi
     @Override
     protected Boolean doInBackground(String... params){
         try {
@@ -48,16 +48,16 @@ public class HttpNodePost extends AsyncTask<String, Void, Boolean> {
     protected void onPostExecute(Boolean s) {
     }
 
-    //This is the method that actually sends the credentials to node by using the OKHTTP Library
+    //This is the method that actually sends the credentials to sensor by using the OKHTTP Library
     private Boolean sendData(String... params) throws Exception{
-        Network node_network = null;
+        Network sensor_network = null;
         try{
             for (Network network : connectivityManager.getAllNetworks()){
                 NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
                 if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
                     LinkProperties prop = connectivityManager.getLinkProperties(network);
                     if(prop.getInterfaceName().equals(Config.NETWORK_INTERFACE_TYPE)){
-                        node_network = network;
+                        sensor_network = network;
                         break;
                     }
                 }
@@ -70,7 +70,7 @@ public class HttpNodePost extends AsyncTask<String, Void, Boolean> {
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         try {
-            builder.socketFactory(node_network.getSocketFactory());
+            builder.socketFactory(sensor_network.getSocketFactory());
         } catch (NullPointerException e){
             e.printStackTrace();
         }
