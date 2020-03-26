@@ -3,8 +3,10 @@ package edu.kit.teco.smartwlanconf.ui.fragments;
 import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import androidx.annotation.RequiresPermission;
@@ -12,11 +14,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.kit.teco.smartwlanconf.SmartWlanConfApplication;
-import edu.kit.teco.smartwlanconf.ui.SmartWlanConfActivity;
-import edu.kit.teco.smartwlanconf.ui.utils.WifiConnectionUtils;
 import edu.kit.teco.smartwlanconf.ui.utils.WifiScanRunnable;
 
 //This class is the superclass of ListOfWifisFragment
@@ -26,15 +27,23 @@ public class WifiFragment extends Fragment {
     private BroadcastReceiver wifiScanBroadcastreceiver;
     private WifiScanRunnable wifiScanRunnable;
     private Thread wifiScanThread;
+    private IntentFilter wifiscanIntentFilter;
+
+    public WifiFragment(){
+        //This is the intent that reports scan results
+        wifiscanIntentFilter = new IntentFilter();
+        wifiscanIntentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+    }
 
     //Callback method to wait for a wifi connection
     public void onWaitForWifiConnection(boolean success){}
+
     //Callback method to wait for wifi scan
     public void onWaitForWifiScan(List<ScanResult> wifiList){}
 
     public void startScanning(WifiFragment fragment) {
         // Create wifiscanner
-        wifiScanRunnable = new WifiScanRunnable(fragment, SmartWlanConfApplication.getWifi(getContext()));
+        wifiScanRunnable = new WifiScanRunnable(fragment, SmartWlanConfApplication.getWifi(getContext()), wifiscanIntentFilter);
         //remember wifiscanner to be able to stop scanning
         wifiScanThread = new Thread(wifiScanRunnable);
         wifiScanThread.start();

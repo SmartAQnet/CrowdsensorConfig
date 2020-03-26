@@ -6,7 +6,7 @@
     tools:context=".ui.fragments.SensorNotFoundFragment">
 
     <LinearLayout
-        android:id="@+id/look_for_sensor_ip"
+        android:id="@+id/ask_for_sensor_ip"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

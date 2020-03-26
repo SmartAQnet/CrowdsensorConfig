@@ -3,6 +3,7 @@ package edu.kit.teco.smartwlanconf.ui.utils;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSuggestion;
@@ -102,7 +103,7 @@ public class WifiConnectionUtils {
 
 
     //Scans for available wifis, result of scan is received through broadcast
-    void scanWifi(WifiFragment wifiFragment){
+    void scanWifi(WifiFragment wifiFragment, IntentFilter wifiScanIntentFilter){
         Context context;
         try {
             context = wifiFragment.getActivity().getApplicationContext();
@@ -124,7 +125,7 @@ public class WifiConnectionUtils {
         });
 
         try {
-            context.registerReceiver(wifiFragment.getWifiScanBroadcastreceiver(), SmartWlanConfApplication.getWifiscanIntentfilter(context));
+            context.registerReceiver(wifiFragment.getWifiScanBroadcastreceiver(), wifiScanIntentFilter);
         } catch (Exception e) {
             e.printStackTrace();
         }

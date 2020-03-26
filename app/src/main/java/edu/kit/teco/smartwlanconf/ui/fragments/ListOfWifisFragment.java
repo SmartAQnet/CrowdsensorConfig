@@ -146,6 +146,7 @@ public class ListOfWifisFragment extends WifiFragment {
     //Callback method, when wifi scan returns it's results
     @Override
     public void onWaitForWifiScan(List<ScanResult> results){
+        stopScanning(this);
         View view = getView();
         if(view == null){
             Log.d(ListOfWifisFragment.class.toString(), "view is null in onWaitForWifiScan()");

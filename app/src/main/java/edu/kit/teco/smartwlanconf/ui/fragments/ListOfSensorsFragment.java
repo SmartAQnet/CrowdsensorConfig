@@ -151,6 +151,9 @@ public class ListOfSensorsFragment extends WifiFragment{
     //Callback method, when wifi scan returns it's results
     @Override
     public void onWaitForWifiScan(List<ScanResult> results){
+
+        stopScanning(this);
+
         View view = getView();
         if(view == null){
             Log.d(ListOfSensorsFragment.class.toString(), "view is null in onWaitForWifiScan()");
@@ -181,9 +184,7 @@ public class ListOfSensorsFragment extends WifiFragment{
                 sensorsAdapter.notifyDataSetChanged();
             }
         }
-        if(sensorList.isEmpty()){
-            noSensorFound();
-        }
+        if(sensorList.isEmpty()) noSensorFound();
     }
 
     private void noSensorFound(){

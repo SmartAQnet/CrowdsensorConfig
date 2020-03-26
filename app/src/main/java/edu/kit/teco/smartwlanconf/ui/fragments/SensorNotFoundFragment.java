@@ -90,7 +90,7 @@ public class SensorNotFoundFragment extends WifiFragment{
         super.onStart();
         setCheckSensorIPButtonListener(getView());
         getView().findViewById(R.id.progress_check_sensor_wifi_after_failed_connection).setVisibility(View.VISIBLE);
-        getView().findViewById(R.id.look_for_sensor_ip).setVisibility(View.GONE);
+        getView().findViewById(R.id.ask_for_sensor_ip).setVisibility(View.GONE);
         startScanning(this);
     }
 
@@ -127,6 +127,9 @@ public class SensorNotFoundFragment extends WifiFragment{
      */
     @Override
     public void onWaitForWifiScan(List<ScanResult> results){
+
+        stopScanning(this);
+
         View view = getView();
         if(view == null){
             Log.d(ListOfWifisFragment.class.toString(), "view is null in onWaitForWifiScan()");
@@ -144,7 +147,7 @@ public class SensorNotFoundFragment extends WifiFragment{
             snackbar = Snackbar.make(view, "Keine Wifi gefunden. Wifi aktiv?", Snackbar.LENGTH_INDEFINITE)
                     .setAction("Neue Suche!", (View v)->{
                         getView().findViewById(R.id.progress_check_sensor_wifi_after_failed_connection).setVisibility(View.VISIBLE);
-                        getView().findViewById(R.id.look_for_sensor_ip).setVisibility(View.GONE);
+                        getView().findViewById(R.id.ask_for_sensor_ip).setVisibility(View.GONE);
                         startScanning(this);
                     });
             snackbar.setActionTextColor(colorSnackRetry);
@@ -154,18 +157,23 @@ public class SensorNotFoundFragment extends WifiFragment{
         List<ScanResult> wifiList = new ArrayList<>();
         wifiList.clear();
 
+        boolean wrongPassword = false;
+
         // Look for SSID of sensor
         for(int i = 0; i < results.size(); i++){
             ScanResult result = results.get(i);
             if (!result.SSID.isEmpty()
                     && result.frequency <= Config.WIFI_BANDWIDTH
                     && result.SSID.equals(((SmartWlanConfActivity)getActivity()).getmSensorSSID())) {
+                wrongPassword = true;
                 //Open GetUserWifiCredentialsFragment
                 mListener.onAfterSensorNotFound(true);
             }
         }
-        getView().findViewById(R.id.progress_check_sensor_wifi_after_failed_connection).setVisibility(View.GONE);
-        getView().findViewById(R.id.look_for_sensor_ip).setVisibility(View.VISIBLE);
+        if(!wrongPassword) {
+            getView().findViewById(R.id.progress_check_sensor_wifi_after_failed_connection).setVisibility(View.GONE);
+            getView().findViewById(R.id.ask_for_sensor_ip).setVisibility(View.VISIBLE);
+        }
     }
 
     //Button to get Sensor id/ssid

@@ -12,8 +12,6 @@ package edu.kit.teco.smartwlanconf;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.IntentFilter;
-import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -27,7 +25,6 @@ public class SmartWlanConfApplication extends Application {
 
     private Rx2Dnssd mRxDnssd;
     private WifiConnectionUtils mWifi;
-    private IntentFilter wifiscanIntentFilter;
 
     @Override
     public void onCreate() {
@@ -35,17 +32,10 @@ public class SmartWlanConfApplication extends Application {
 
         mRxDnssd = createDnssd();
         mWifi = WifiConnectionUtils.getInstance();
-        //This is the intent that reports scan results
-        wifiscanIntentFilter = new IntentFilter();
-        wifiscanIntentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
     }
 
     public static Rx2Dnssd getRxDnssd(@NonNull Context context){
         return ((SmartWlanConfApplication)context.getApplicationContext()).mRxDnssd;
-    }
-
-    public static IntentFilter getWifiscanIntentfilter(@NonNull Context context){
-        return((SmartWlanConfApplication)context.getApplicationContext()).wifiscanIntentFilter;
     }
 
     public static WifiConnectionUtils getWifi(@NonNull Context context){
