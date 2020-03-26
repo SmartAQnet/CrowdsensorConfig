@@ -95,7 +95,7 @@ public class GetUserWifiCredentialsFragment extends WifiFragment {
             int colorSnackRetry = ResourcesCompat.getColor(getActivity().getResources(), R.color.colorSnackRetry, null);
             snackbar.setActionTextColor(colorSnackRetry);
             snackbar.show();
-            EditText sensorpwd = getView().findViewById(R.id.pwd);
+            TextInputLayout sensorpwd = getView().findViewById(R.id.etPasswordLayout);
             sensorpwd.setError(Config.PWD_ERROR);
         }
         ((EditText) getView().findViewById(R.id.ssid)).setText(((SmartWlanConfActivity)getActivity()).getmWlanSSID());

@@ -26,8 +26,6 @@ import edu.kit.teco.smartwlanconf.ui.utils.WifiScanRunnable;
 public class WifiFragment extends Fragment {
 
     private BroadcastReceiver wifiScanBroadcastreceiver;
-    private WifiScanRunnable wifiScanRunnable;
-    private Thread wifiScanThread;
     private IntentFilter wifiscanIntentFilter;
     private List<ScanResult> wifiList = new ArrayList<>();
 
@@ -48,11 +46,11 @@ public class WifiFragment extends Fragment {
     }
 
     public void startScanning(WifiFragment fragment) {
+        WifiScanRunnable wifiScanRunnable;
         // Create wifiscanner
         wifiScanRunnable = new WifiScanRunnable(fragment, SmartWlanConfApplication.getWifi(getContext()), wifiscanIntentFilter);
         //remember wifiscanner to be able to stop scanning
-        wifiScanThread = new Thread(wifiScanRunnable);
-        wifiScanThread.start();
+        (new Thread(wifiScanRunnable)).start();
     }
 
     public void stopScanning(WifiFragment wifiFragment){
