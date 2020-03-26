@@ -45,7 +45,6 @@ public class ListOfSensorsFragment extends WifiFragment{
     private static final String ARG_COLUMN_COUNT = "Verfügbare Sensoren";
     private int mColumnCount = 1;
     private OnSensorListInteractionListener mListener;
-    private List<ScanResult> sensorList = new ArrayList<>();
     private SensorListItemRecyclerViewAdapter sensorsAdapter;
     private Snackbar snackbar;
 
@@ -144,23 +143,23 @@ public class ListOfSensorsFragment extends WifiFragment{
         DividerItemDecoration dividerItemDecoration= new DividerItemDecoration(context,
                 LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
-        sensorsAdapter = new SensorListItemRecyclerViewAdapter(sensorList, mListener);
+        sensorsAdapter = new SensorListItemRecyclerViewAdapter(getWifiList(), mListener);
         recyclerView.setAdapter(sensorsAdapter);
     }
 
     //Callback method, when wifi scan returns it's results
     @Override
-    public void onWaitForWifiScan(List<ScanResult> results){
+    public void onWaitForWifiScan(@Nullable List<ScanResult> results) {
 
-        stopScanning(this);
+        super.onWaitForWifiScan(results);
 
         View view = getView();
-        if(view == null){
+        if (view == null) {
             Log.d(ListOfSensorsFragment.class.toString(), "view is null in onWaitForWifiScan()");
             return;
         }
         Activity activity = getActivity();
-        if(activity == null){
+        if (activity == null) {
             Log.d(ListOfSensorsFragment.class.toString(), "activity is null in onWaitForWifiScan()");
             return;
         }
@@ -169,22 +168,27 @@ public class ListOfSensorsFragment extends WifiFragment{
             noSensorFound();
             return;
         }
+
+        showResults(results);
+    }
+
+    private void showResults(List<ScanResult>results){
         //Scan results if not empty show list
-        LinearLayout splash = view.findViewById(R.id.splash);
-        RecyclerView list = view.findViewById(R.id.wifilist);
+        LinearLayout splash = getView().findViewById(R.id.splash);
+        RecyclerView list = getView().findViewById(R.id.wifilist);
         splash.setVisibility(View.GONE);
         list.setVisibility(View.VISIBLE);
-        sensorList.clear();
+        getWifiList().clear();
 
         // Add results to list of wifis
         for(int i = 0; i < results.size(); i++){
             ScanResult result = results.get(i);
             if (!result.SSID.isEmpty() && result.frequency <= Config.WIFI_BANDWIDTH && result.SSID.startsWith(Config.SENSOR_PREFIX)) {
-                sensorList.add(result);
+                getWifiList().add(result);
                 sensorsAdapter.notifyDataSetChanged();
             }
         }
-        if(sensorList.isEmpty()) noSensorFound();
+        if(getWifiList().isEmpty()) noSensorFound();
     }
 
     private void noSensorFound(){

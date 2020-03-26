@@ -44,7 +44,6 @@ public class ListOfWifisFragment extends WifiFragment {
     private static final String ARG_COLUMN_COUNT = "Verfügbare Wlan";
     private int mColumnCount = 1;
     private OnWifiListFragmentInteractionListener mListener;
-    private List<ScanResult> wifiList = new ArrayList<>();
     private WifiListItemRecyclerViewAdapter wifiAdapter;
     private Snackbar snackbar;
 
@@ -137,7 +136,7 @@ public class ListOfWifisFragment extends WifiFragment {
         DividerItemDecoration dividerItemDecoration= new DividerItemDecoration(context,
                 LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
-        wifiAdapter = new WifiListItemRecyclerViewAdapter(wifiList, mListener);
+        wifiAdapter = new WifiListItemRecyclerViewAdapter(getWifiList(), mListener);
         recyclerView.setAdapter(wifiAdapter);
         view.findViewById(R.id.wifiprogress).setVisibility(View.VISIBLE);
         view.findViewById(R.id.wifilist).setVisibility(View.GONE);
@@ -145,15 +144,17 @@ public class ListOfWifisFragment extends WifiFragment {
 
     //Callback method, when wifi scan returns it's results
     @Override
-    public void onWaitForWifiScan(List<ScanResult> results){
-        stopScanning(this);
+    public void onWaitForWifiScan(@Nullable List<ScanResult> results) {
+
+        super.onWaitForWifiScan(results);
+
         View view = getView();
-        if(view == null){
+        if (view == null) {
             Log.d(ListOfWifisFragment.class.toString(), "view is null in onWaitForWifiScan()");
             return;
         }
         Activity activity = getActivity();
-        if(activity == null){
+        if (activity == null) {
             Log.d(ListOfWifisFragment.class.toString(), "activity is null in onWaitForWifiScan()");
             return;
         }
@@ -162,22 +163,27 @@ public class ListOfWifisFragment extends WifiFragment {
             noWifiFound();
             return;
         }
+
+        showResults(results);
+    }
+
+    private void showResults(List<ScanResult> results){
         //Scan results if not empty show list
-        wifiList.clear();
+        getWifiList().clear();
 
         // Add results to list of wifis
         for(int i = 0; i < results.size(); i++){
             ScanResult result = results.get(i);
             if (!result.SSID.isEmpty() && result.frequency <= Config.WIFI_BANDWIDTH && !result.SSID.startsWith(Config.SENSOR_PREFIX)) {
-                wifiList.add(result);
+                getWifiList().add(result);
                 wifiAdapter.notifyDataSetChanged();
             }
         }
-        if(wifiList.isEmpty()){
+        if(getWifiList().isEmpty()){
             noWifiFound();
         } else {
-            view.findViewById(R.id.wifiprogress).setVisibility(View.GONE);
-            view.findViewById(R.id.wifilist).setVisibility(View.VISIBLE);
+            getView().findViewById(R.id.wifiprogress).setVisibility(View.GONE);
+            getView().findViewById(R.id.wifilist).setVisibility(View.VISIBLE);
         }
     }
 

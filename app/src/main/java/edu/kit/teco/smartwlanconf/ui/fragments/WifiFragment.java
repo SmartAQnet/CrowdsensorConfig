@@ -9,6 +9,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
@@ -28,6 +29,7 @@ public class WifiFragment extends Fragment {
     private WifiScanRunnable wifiScanRunnable;
     private Thread wifiScanThread;
     private IntentFilter wifiscanIntentFilter;
+    private List<ScanResult> wifiList = new ArrayList<>();
 
     public WifiFragment(){
         //This is the intent that reports scan results
@@ -36,10 +38,14 @@ public class WifiFragment extends Fragment {
     }
 
     //Callback method to wait for a wifi connection
-    public void onWaitForWifiConnection(boolean success){}
+    public void onWaitForWifiConnection(boolean success){
+        Log.d(WifiFragment.class.toString(), "Just a stub, no need to call!");
+    }
 
     //Callback method to wait for wifi scan
-    public void onWaitForWifiScan(List<ScanResult> wifiList){}
+    public void onWaitForWifiScan(@Nullable List<ScanResult> wifiList) {
+        stopScanning(this);
+    }
 
     public void startScanning(WifiFragment fragment) {
         // Create wifiscanner
@@ -93,4 +99,7 @@ public class WifiFragment extends Fragment {
         wifiScanBroadcastreceiver = br;
     }
 
+    public List<ScanResult> getWifiList(){
+        return wifiList;
+    }
 }

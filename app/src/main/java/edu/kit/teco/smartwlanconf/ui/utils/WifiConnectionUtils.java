@@ -120,7 +120,7 @@ public class WifiConnectionUtils {
             public void onReceive(Context c, Intent intent) {
                 boolean success = intent.getBooleanExtra(
                         WifiManager.EXTRA_RESULTS_UPDATED, false);
-                scanSuccess(success, wifiFragment);
+                wifiFragment.onWaitForWifiScan(wifiManager.getScanResults());
             }
         });
 
@@ -134,16 +134,7 @@ public class WifiConnectionUtils {
         boolean success = wifiManager.startScan();
         if (!success) {
             // scan failure handling
-            scanSuccess(success, wifiFragment);
-        }
-    }
-
-    //Report scanresults back to calling fragment
-    private void scanSuccess(boolean success, WifiFragment wifiFragment) {
-        if (success) {
-                wifiFragment.onWaitForWifiScan(wifiManager.getScanResults());
-        } else {
-            wifiFragment.onWaitForWifiScan(null);
+            wifiFragment.onWaitForWifiScan(wifiManager.getScanResults());
         }
     }
 }
